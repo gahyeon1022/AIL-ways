@@ -1,0 +1,18 @@
+server:
+  port: 8080   # 로컬 실행 포트
+
+spring:
+  application:
+    name: ailways-backend
+
+  # 지금은 DB 설정을 안 쓸 거라 DataSource 자동구성 제외
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+kakao: #유출 금지!!
+  clientId: 7e8ed3bafed88daf71e6001352a95d44
+  redirectUri: http://localhost:8080/auth/login/kakao
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
