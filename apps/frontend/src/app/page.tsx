@@ -11,7 +11,7 @@ export default function HomePage() {
 
       <div className="mt-8">
         <Link
-          href="/login"
+          href="/signin"
           className="inline-block rounded-full px-10 py-4 text-lg font-semibold 
                      bg-white/90 text-gray-900 shadow-lg 
                      hover:bg-white transition 
