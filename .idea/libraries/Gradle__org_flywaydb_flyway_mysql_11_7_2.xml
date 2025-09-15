@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: org.flywaydb:flyway-mysql:11.7.2" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="org.flywaydb" artifactId="flyway-mysql" version="11.7.2" baseVersion="11.7.2" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.flywaydb/flyway-mysql/11.7.2/8d2884d56785b6f70b105991db72f885015decb/flyway-mysql-11.7.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
