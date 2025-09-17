@@ -1,6 +1,7 @@
 package auth.local.controller;
 
 import auth.local.service.*;
+import auth.local.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
