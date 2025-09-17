@@ -1,18 +1,48 @@
 server:
-  port: 8080   # 로컬 실행 포트
+  port: 8080
+  servlet:
+    context-path: /auth/kakao
 
 spring:
   application:
     name: ailways-backend
 
-  # 지금은 DB 설정을 안 쓸 거라 DataSource 자동구성 제외
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/alpha
 
-kakao: #유출 금지!!
-  clientId: 7e8ed3bafed88daf71e6001352a95d44
-  redirectUri: http://localhost:8080/auth/login/kakao
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: ${MAIL_TRAP_USER}
+    password: ${MAIL_TRAP_PASS}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: 7e8ed3bafed88daf71e6001352a95d44 #유출 금지
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"  # 스프링 기본 콜백
+            authorization-grant-type: authorization_code
+            client-name: Kakao
+            scope:
+              - profile_nickname
+#              - account_email #카카오 - 비즈앱 등록시 사용 가능함
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri:         https://kauth.kakao.com/oauth/token
+            user-info-uri:     https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id  # Kakao 응답의 루트 id
+
 logging:
   level:
-    root: INFO
-    org.springframework.web: DEBUG
+    org.springframework.security: INFO
+    org.springframework.web: INFO
