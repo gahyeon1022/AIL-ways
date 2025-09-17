@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e8b395f2-f94b-470b-9b8d-84c7e503bdf3" name="변경" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_eclipse_angus_jakarta_mail_2_0_4.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_mongodb_bson_5_5_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_mongodb_bson_record_codec_5_5_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_mongodb_mongodb_driver_core_5_5_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_mongodb_mongodb_driver_sync_5_5_1.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_springframework_boot_spring_boot_starter_data_mongodb_3_5_5.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_springframework_boot_spring_boot_starter_mail_3_5_5.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_springframework_data_spring_data_mongodb_4_5_3.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_springframework_spring_context_support_6_2_10.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules/backend.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/ai/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/.gradle/8.14.3/fileHashes/fileHashes.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/controller/AuthController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/controller/GlobalExceptionHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/controller/UserController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/domain/EmailCode.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/domain/EmailVerification.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/domain/LocalCredentials.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/dto/SignUpRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/dto/SignUpResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/exception/EmailSendFailedException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/exception/EmailTakenException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/exception/InvalidCodeException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/exception/InvalidEmailDomainException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/exception/InvalidVerificationTokenException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/exception/UserIdTakenException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/exception/WeakPasswordException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/repository/EmailCodeRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/repository/EmailVerificationRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/repository/LocalCredentialsRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/service/EmailService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/service/EmailVerificationService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/service/SignUpService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/resources/application.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/backend/src/test/java/com/ailways/alpha/AlphaApplicationTests.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/.gitkeep" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_fasterxml_jackson_core_jackson_core_2_19_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/backend.test.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/.gitattributes" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/gradlew" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/gradlew.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/app/BackendApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/app/BackendApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/common/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/common/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/user/domain/ConsentType.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/user/domain/ConsentType.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$/apps/backend">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AIL-ways" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/gahyeon1022/AIL-ways.git",
+    "accountId": "9c861fca-65e2-47c5-a1f8-1355b82f9103"
+  }
+}]]></component>
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "git-widget-placeholder": "feat/auth/backend/login-integration 병합 중",
+    "node.js.selected.package.tslint": "(autodetect)"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="backend" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="backend" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="com.ailways.backend.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="app.BackendApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+</project>

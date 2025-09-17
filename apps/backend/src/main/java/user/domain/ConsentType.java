@@ -1,6 +1,5 @@
 package user.domain;
 
-
 public enum ConsentType {
     TOS,        // 이용약관
     PRIVACY,    // 개인정보
