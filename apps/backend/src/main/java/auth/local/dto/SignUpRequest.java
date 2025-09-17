@@ -9,12 +9,13 @@ import java.util.List;
 @Setter
 @Getter
 public class SignUpRequest {
-    // getter/setter
     private String email;
     private String userName;
     private String userId;
     private String userPw;
     private Instant createdAt;
-    private List<ConsentDTO> consents;
 
+    private String code; // ✅ 사용자가 입력한 이메일 인증번호
+
+    private List<ConsentDTO> consents;
 }

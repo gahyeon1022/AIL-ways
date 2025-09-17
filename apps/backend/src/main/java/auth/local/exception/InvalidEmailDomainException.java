@@ -1,4 +1,4 @@
-package auth.local.service;
+package auth.local.exception;
 
 public class InvalidEmailDomainException extends RuntimeException {
     public InvalidEmailDomainException(String message) {

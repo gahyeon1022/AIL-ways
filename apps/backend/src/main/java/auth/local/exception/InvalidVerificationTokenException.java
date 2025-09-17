@@ -1,4 +1,4 @@
-package auth.local.service;
+package auth.local.exception;
 
 public class InvalidVerificationTokenException extends RuntimeException {
     public InvalidVerificationTokenException() {

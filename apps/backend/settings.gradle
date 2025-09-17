@@ -1,1 +1,3 @@
-rootProject.name = 'alpha'
+// AIL-ways/settings.gradle
+rootProject.name = "AIL-ways"
+include("apps:backend")

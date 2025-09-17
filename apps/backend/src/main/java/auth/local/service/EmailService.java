@@ -1,6 +1,7 @@
 package auth.local.service;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import auth.local.exception.EmailSendFailedException;
 import org.springframework.stereotype.Service;
 
 @Service

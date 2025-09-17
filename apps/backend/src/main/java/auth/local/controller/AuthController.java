@@ -1,4 +1,5 @@
-package auth.local.controller;// package com.ailways.alpha.controller;
+package auth.local.controller;
+
 import auth.local.dto.SignUpRequest;
 import auth.local.dto.SignUpResponse;
 import auth.local.service.EmailVerificationService;
@@ -8,42 +9,33 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final EmailVerificationService emailVerService;
-    private final SignUpService signUpService;
+    private final EmailVerificationService emailVerifSvc;
+    private final SignUpService signUpSvc;
 
-    public AuthController(EmailVerificationService emailVerService, SignUpService signUpService) {
-        this.emailVerService = emailVerService;
-        this.signUpService = signUpService;
+    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc) {
+        this.emailVerifSvc = emailVerifSvc;
+        this.signUpSvc = signUpSvc;
     }
 
-    // 1) 코드 발송
-    @PostMapping("/email/send-code")
-    public ResponseEntity<Void> sendCode(@RequestParam @Email String email) {
-        emailVerService.sendCode(email);
-        return ResponseEntity.ok().build();
+    // 1) 이메일로 인증코드 보내기
+    @PostMapping("/email/code")
+    public ResponseEntity<Map<String, Object>> sendCode(@RequestBody SendCodeReq req) {
+        emailVerifSvc.sendCode(req.email());
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
-    // 2) 코드 검증 → 토큰 발급
-    @PostMapping("/email/verify")
-    public ResponseEntity<String> verify(@RequestParam @Email String email,
-                                         @RequestParam @NotBlank String code) {
-        String token = emailVerService.verifyAndIssueToken(email, code);
-        return ResponseEntity.ok(token); // 클라이언트가 이 토큰을 회원가입 때 같이 보냄
-    }
-
-    // 3) 회원가입 (토큰 필요)
+    // 2) 회원가입 (코드 직접 검증)
     @PostMapping("/signup")
-    public ResponseEntity<SignUpResponse> signUp(@RequestBody SignUpRequest req,
-                                                 @RequestParam("verificationToken") String token) {
-        // 토큰으로 이메일 검증/소유 확인
-        String verifiedEmail = emailVerService.ensureVerifiedEmail(token);
-        if (!verifiedEmail.equalsIgnoreCase(req.getEmail())) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(signUpService.signUp(req));
+    public ResponseEntity<SignUpResponse> signup(@RequestBody SignUpRequest req) {
+        return ResponseEntity.ok(signUpSvc.signUp(req));
     }
+
+    // DTO (record)
+    public record SendCodeReq(@NotBlank @Email String email) {}
 }

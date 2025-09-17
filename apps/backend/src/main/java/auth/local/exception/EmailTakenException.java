@@ -1,4 +1,4 @@
-package auth.local.service;
+package auth.local.exception;
 
 public class EmailTakenException extends RuntimeException {
     public EmailTakenException() {
