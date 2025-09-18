@@ -22,22 +22,26 @@ public class SecurityConfig {
     // private final JwtTokenProvider jwtTokenProvider; // [ADD - JWT 사용 시]
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // ⬅️ OAuth2 state 저장
+                // OAuth2 state 저장을 위해 최소 IF_REQUIRED (STATLESS면 콜백 실패 뜰 수 있음)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/",                           // 루트 허용
-                                "/**.html",                  // 정적 테스트 html 허용(있다면)
-                                "/api/auth/**",
-                                "/oauth2/**", "/login/oauth2/**"
-                        ).permitAll()
+                        .requestMatchers("/", "/login-integration.html").permitAll()          // ⬅️ 루트 허용
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                // 인증 안 된 요청은 리다이렉트 말고 JSON 401로 (API 개발에 유리)
+                .exceptionHandling(e -> e.authenticationEntryPoint((req,res,ex) -> {
+                    res.setStatus(401);
+                    res.setContentType("application/json;charset=UTF-8");
+                    res.getWriter().write("{\"error\":\"unauthorized\"}");
+                }))
                 .oauth2Login(o -> o
-                        .successHandler((req,res,auth) -> res.sendRedirect("/me"))   // 프론트 없이 확인용
+                        .successHandler((req,res,auth) -> res.sendRedirect("/me"))
                         .failureHandler((req,res,ex) -> {
                             res.setStatus(401);
                             res.setContentType("application/json;charset=UTF-8");
@@ -46,21 +50,8 @@ public class SecurityConfig {
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
-                // [ADD - 선택] 소셜 성공 시 JWT 발급/리다이렉트 연결 지점
-                // .oauth2Login(oauth -> oauth
-                //     .userInfoEndpoint(ue -> ue.userService(kakaoService))
-                //     .successHandler((req, res, auth) -> {
-                //         // String jwt = jwtTokenProvider.createAccessToken(...);
-                //         // res.addHeader("Authorization","Bearer " + jwt);
-                //     })
-                // )
-        // [ADD - 선택] JWT 필터가 있다면 위치 고정
-        // http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-        //         UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
-    }
-
+        }
     // [ADD] 공통 PasswordEncoder
     @Bean
     public PasswordEncoder passwordEncoder() {
