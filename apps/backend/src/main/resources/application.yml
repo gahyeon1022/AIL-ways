@@ -1,8 +1,5 @@
 server:
   port: 8080
-#  servlet:
-#    context-path: /auth/kakao
-
 spring:
   application:
     name: ailways-backend

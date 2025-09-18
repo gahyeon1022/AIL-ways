@@ -23,31 +23,29 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
-                .csrf(AbstractHttpConfigurer::disable)                 // [KEEP]
-                .cors(Customizer.withDefaults())                       // [ADD] CORS 기본
-                .sessionManagement(sm ->
-                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // [ADD] JWT 전제: 세션 미사용
-                )
-
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // ⬅️ OAuth2 state 저장
                 .authorizeHttpRequests(auth -> auth
-                        // [KEEP/MOD] 공개해도 되는 최소 경로만 허용
                         .requestMatchers(
-                                "/api/auth/**",              // 로컬 로그인/회원가입/재발급 등
-                                "/oauth2/**", "/login/oauth2/**" // 소셜 콜백
+                                "/",                           // 루트 허용
+                                "/**.html",                  // 정적 테스트 html 허용(있다면)
+                                "/api/auth/**",
+                                "/oauth2/**", "/login/oauth2/**"
                         ).permitAll()
-
-                        // [ADD] API 문서(선택). 운영에선 꺼도 됨
-                        .requestMatchers("/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html").permitAll()
-
-                        // [ADD] CORS preflight
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // [MOD] 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
-
+                .oauth2Login(o -> o
+                        .successHandler((req,res,auth) -> res.sendRedirect("/me"))   // 프론트 없이 확인용
+                        .failureHandler((req,res,ex) -> {
+                            res.setStatus(401);
+                            res.setContentType("application/json;charset=UTF-8");
+                            res.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+                        })
+                )
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable);
                 // [ADD - 선택] 소셜 성공 시 JWT 발급/리다이렉트 연결 지점
                 // .oauth2Login(oauth -> oauth
                 //     .userInfoEndpoint(ue -> ue.userService(kakaoService))
@@ -56,11 +54,6 @@ public class SecurityConfig {
                 //         // res.addHeader("Authorization","Bearer " + jwt);
                 //     })
                 // )
-
-                // [ADD] 폼 로그인/HTTP Basic 비활성 (REST만 사용)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable);
-
         // [ADD - 선택] JWT 필터가 있다면 위치 고정
         // http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
         //         UsernamePasswordAuthenticationFilter.class);
