@@ -1,0 +1,45 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: ailways-backend
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/alpha
+
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: ${MAIL_TRAP_USER}
+    password: ${MAIL_TRAP_PASS}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: 7e8ed3bafed88daf71e6001352a95d44 #유출 금지
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"  # 스프링 기본 콜백
+            authorization-grant-type: authorization_code
+            client-name: Kakao
+            scope:
+              - profile_nickname
+#              - account_email #카카오 - 비즈앱 등록시 사용 가능함
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri:         https://kauth.kakao.com/oauth/token
+            user-info-uri:     https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id  # Kakao 응답의 루트 id
+
+logging:
+  level:
+    org.springframework.security: INFO
+    org.springframework.web: INFO

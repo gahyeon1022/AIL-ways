@@ -25,4 +25,6 @@ public class EmailCode {
     // ✅ expireAfterSeconds=0 → expireAt 시간이 되면 MongoDB가 자동 삭제
     @Indexed(name = "expireAtIndex", expireAfterSeconds = 0)
     private Instant expireAt;
+
+    private Instant createdAt;
 }

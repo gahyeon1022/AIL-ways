@@ -35,3 +35,14 @@ out/
 
 ### VS Code ###
 .vscode/
+cat >> .gitignore <<'EOF'
+# macOS & IDE
+.DS_Store
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+out/
+EOF

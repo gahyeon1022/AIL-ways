@@ -2,6 +2,7 @@ package auth.local.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import user.dto.ConsentDTO;
 
 import java.time.Instant;
 import java.util.List;
