@@ -1,4 +1,4 @@
-package auth.local.domain;
+package user.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,8 +7,8 @@ import java.time.Instant;
 
 @Setter
 @Getter
-public class Consent {
-    private ConsentType type;
+public class ConsentDTO {
+    private String type;
     private boolean agreed;
     private Instant agreedAt;
 

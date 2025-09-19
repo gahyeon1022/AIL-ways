@@ -1,4 +1,4 @@
-package auth.local.domain;
+package user.domain;
 
 public enum ConsentType {
     TOS,        // 이용약관
