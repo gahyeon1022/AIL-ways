@@ -1,7 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
+import LocalLoginModal from "@/components/LocalLoginModal"; // 경로는 프로젝트 구조에 맞게
+
 
 export default function LoginPage() {
+  const [open, setOpen] = useState(false);
   return (
     <div className="bg-white/70 p-8 rounded-2xl shadow-lg text-center w-full max-w-sm">
       <div className="grid gap-3">
@@ -19,12 +25,13 @@ export default function LoginPage() {
           <span className="leading-none">구글로 로그인</span>
         </Link>
 
-        <Link
-          href="/login" // ← 이메일 회원가입 경로로 변경해야함.
+        <button
+          onClick={() => setOpen(true)}
           className="relative flex item-center justify-center w-full rounded-xl px-4 py-3 font-medium bg-indigo-500 text-white hover:bg-indigo-500 transition inline-block">
           <Image src="/letter.png" alt="letter" width={23} height={23} className="absolute left-5 top-3"/>
           이메일로 로그인
-        </Link>
+        </button>
+        
 
         <div className="h-[1px] bg-gray-300"/>
         <div className="relative">
@@ -36,6 +43,7 @@ export default function LoginPage() {
           </span>
         </div>
       </div>
+      <LocalLoginModal open={open} onClose={() => setOpen(false)} />
     </div>
   );
 }
