@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-export default function HomeAfterLogin() {
+export default function SelectAfterLogin() {
     const [open, setOpen] = useState(false);
     const [role, setRole] = useState<'mentor' | 'mentee' | null>(null);
     const [interests, setInterests] = useState<string[]>([]);
+    const [loading, setLoading] = useState(false);
     const interestOptions = ['Python', 'C++', 'JAVA', 'React'];
     
     useEffect(() => {
@@ -19,12 +20,37 @@ export default function HomeAfterLogin() {
     const toggleInterest = (t: string) =>
       setInterests(prev => (prev.includes(t) ? prev.filter(i => i !== t) : [...prev, t]));
     
-    const handleSave = () => {
+    const handleSave = async () => {
       if (!role) return;
-      localStorage.setItem('selectedRole', role);
-      localStorage.setItem('selectedInterests', JSON.stringify(interests));
-      setOpen(false);
+      setLoading(true);
+
+      try {
+        const payload = {
+          role,
+          interests,
+        };
+
+    const res = await fetch("http://localhost:8080/api/user/profile", { //실제 url로 수정해주세요.
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // 세션,쿠키 인증 쓴다면 필요
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      throw new Error("서버 저장 실패");
+    }
+        alert("역할/관심분야 저장 완료!");
+        setOpen(false);
+      } catch (err: any) {
+        alert(err.message ?? "에러가 발생했습니다.");
+      } finally {
+        setLoading(false);
+      }
     };
+
   return (
     <div className="relative">
       <h1 className="text-2xl font-bold">로그인 후 첫 화면</h1>
@@ -32,8 +58,8 @@ export default function HomeAfterLogin() {
       {open && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white rounded-2xl shadow-xl w-[520px] p-8">
-  <div className="bg-gray-100 rounded-2xl p-8">
-    <h2 className="text-2xl font-semibold text-center mb-8">역할 선택</h2>
+            <div className="bg-gray-100 rounded-2xl p-8">
+              <h2 className="text-2xl font-semibold text-center mb-8">역할 선택</h2>
 
     <div className="flex items-center justify-around mb-12">
       <button
@@ -82,16 +108,16 @@ export default function HomeAfterLogin() {
         );
       })}
     </div>
-    <button
-      type="button"
-      onClick={handleSave}
-      disabled={!role}
-      className="w-full py-3 rounded-xl bg-gray-900 text-white disabled:opacity-40 disabled:cursor-not-allowed"
-    >
-      저장하고 시작하기
-         </button>
-        </div>
-    </div>
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={!role || loading} 
+        className="w-full py-3 rounded-xl bg-gray-900 text-white disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {loading ? "저장 중..." : "저장하고 시작하기"} 
+      </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
