@@ -10,6 +10,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 import java.util.List;
 
+import user.domain.Interest;
+import user.domain.Role;
+
 @Getter
 @Setter
 @Builder
@@ -38,6 +41,8 @@ public class User {
 
     // 권한(멘토/멘티/관리자 등)
     private Role role;
+
+    private List<Interest> interests;
 
     // 소셜 전용 메타
     private Provider provider;          // LOCAL, KAKAO, GOOGLE ...

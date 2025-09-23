@@ -15,7 +15,6 @@ public class SignUpRequest {
     private String userId;
     private String userPw;
     private Instant createdAt;
-
     private String code; // ✅ 사용자가 입력한 이메일 인증번호
 
     private List<ConsentDTO> consents;
