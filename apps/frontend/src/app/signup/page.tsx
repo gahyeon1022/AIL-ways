@@ -38,7 +38,6 @@ export default function SignupPage() {
           이메일로 회원가입
         </button>
       </div>
-
        <LocalSignupModal open={open} onClose={() => setOpen(false)} />
     </div>
   );

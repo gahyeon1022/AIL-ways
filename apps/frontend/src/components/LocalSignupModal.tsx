@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Props = {
+type Props = { //부모 컴포넌트에서 전달 받음. 모달 열렸는지
   open: boolean;
   onClose: () => void;
 };
 
-function formatNow(): string {
+function formatNow(): string { //현재 시간을 문자열로 변환하는
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
@@ -16,7 +16,7 @@ function formatNow(): string {
   )}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 }
 
-export default function EmailSignupModal({ open, onClose }: Props) {
+export default function LocalSignupModal({ open, onClose }: Props) { //회원가입 입력값 관리
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
@@ -26,15 +26,14 @@ export default function EmailSignupModal({ open, onClose }: Props) {
   const [createdAt, setCreatedAt] = useState<string>(""); // 성공 시점에 채움
 
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function onSubmit(e: React.FormEvent) { //폼 제출될때 호출되는 이벤트 핸들러
+  e.preventDefault(); //새로고침 방지
     if (!tos) {
       alert("약관(TOS)에 동의해 주세요.");
       return;
     }
-    setLoading(true);
+    setLoading(true);  //서버로 보낼 요청 생성
     try {
-      //  비밀번호는 서버에서 해시하세요 (BCrypt 등)
       const payload = {
         email,
         userName,
@@ -43,8 +42,8 @@ export default function EmailSignupModal({ open, onClose }: Props) {
         creadtedAt: createdAt, // 요청하신 키 철자 그대로 사용
         consents: tos ? ["TOS"] : [],
       };
-
-      const res = await fetch("http://localhost:8080/api/auth/signup", {
+      {/* api 요청 */}
+      const res = await fetch("http://localhost:8080/api/auth/signup", { //api경로로 수정해주세요
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
