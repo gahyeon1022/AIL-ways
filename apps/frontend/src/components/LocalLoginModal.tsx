@@ -23,7 +23,7 @@ export default function LocalSignupModal({ open, onClose }: Props) { //회원가
     setLoading(true);  //서버로 보낼 요청 생성
     try {
       {/* api 요청 */}
-      const res = await fetch("http://localhost:8080/api/auth/signup", { //api경로로 수정해주세요
+      const res = await fetch("http://localhost:8080/api/auth/local/signup", { //api경로로 수정해주세요
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
