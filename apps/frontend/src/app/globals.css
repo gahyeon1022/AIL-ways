@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+  --color-rose-quartz-500: #F7CAC9;
+  --color-serenity-500:   #92A8D1;
+}

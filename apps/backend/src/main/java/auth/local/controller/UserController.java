@@ -53,6 +53,7 @@ public class UserController {
         User u = new User();
         u.setEmail("test@example.com");
         u.setUserId("test123");
+        u.setPassword("test123");
         u.setUserName("홍길동");
         u.setCreatedAt(Instant.now());
         return userRepository.save(u);

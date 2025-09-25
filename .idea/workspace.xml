@@ -5,13 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a9561966-c41a-422e-a484-996b87fa1829" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/apps/backend/src/main/java/match/domain/Match.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/controller/AuthController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/dto/SignUpRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/auth/local/dto/SignUpRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/user/domain/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/user/domain/Role.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/user/domain/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/user/domain/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/user/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/user/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/common/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/common/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/.gitkeep" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,6 +99,7 @@
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
     "settings.editor.selected.configurable": "configurable.group.build",
+    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -168,7 +169,19 @@
       <workItem from="1758618589025" duration="169000" />
       <workItem from="1758618928369" duration="5496000" />
       <workItem from="1758628044083" duration="870000" />
-      <workItem from="1758628920161" duration="2235000" />
+      <workItem from="1758628920161" duration="2669000" />
+      <workItem from="1758633993378" duration="95000" />
+      <workItem from="1758694069156" duration="41000" />
+      <workItem from="1758775442856" duration="648000" />
+      <workItem from="1758776626126" duration="412000" />
+      <workItem from="1758777430117" duration="59000" />
+      <workItem from="1758778399332" duration="349000" />
+      <workItem from="1758781336539" duration="45000" />
+      <workItem from="1758781403937" duration="54000" />
+      <workItem from="1758781460607" duration="465000" />
+      <workItem from="1758781964552" duration="36000" />
+      <workItem from="1758782002641" duration="21000" />
+      <workItem from="1758786436041" duration="4270000" />
     </task>
     <servers />
   </component>

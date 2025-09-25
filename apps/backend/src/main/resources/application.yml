@@ -1,5 +1,11 @@
 server:
   port: 8080
+  servlet: #한글 깨짐 오류 수`
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
+
 spring:
   application:
     name: ailways-backend
@@ -31,14 +37,21 @@ spring:
             client-name: Kakao
             scope:
               - profile_nickname
-#              - account_email #카카오 - 비즈앱 등록시 사용 가능함
+        #              - account_email #카카오 - 비즈앱 등록시 사용 가능함
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
             token-uri:         https://kauth.kakao.com/oauth/token
             user-info-uri:     https://kapi.kakao.com/v2/user/me
             user-name-attribute: id  # Kakao 응답의 루트 id
-
+app:
+  cors:
+    allowed-origins:
+      - "http://localhost:3000"
+      - "http://127.0.0.1:3000"
+    allowed-methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
+    allowed-headers: "*"
+    allow-credentials: true
 logging:
   level:
     org.springframework.security: INFO
