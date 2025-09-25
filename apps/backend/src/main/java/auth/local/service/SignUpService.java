@@ -1,5 +1,6 @@
 package auth.local.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import user.domain.ConsentType;
 import auth.local.domain.LocalCredentials;
 import auth.local.dto.SignUpRequest;
@@ -25,8 +26,7 @@ public class SignUpService {
     private final UserRepository userRepo;
     private final LocalCredentialsRepository credRepo;
     private final EmailVerificationService emailVerService;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
+    private final PasswordEncoder encoder;
     public SignUpResponse signUp(SignUpRequest req) {
         // 0) 이메일 형식/정규화
         if (req.getEmail() == null) throw new InvalidEmailDomainException("이메일이 필요합니다.");

@@ -37,7 +37,7 @@ public class User {
     private String userName;
 
     // 로컬 전용(소셜은 null) — 저장 전 반드시 인코딩된 값으로
-    private String password;
+    private String userPw;
 
     // 권한(멘토/멘티/관리자 등)
     private Role role;
@@ -54,6 +54,7 @@ public class User {
 
     @CreatedDate
     private Instant createdAt;
+
     @LastModifiedDate
     private Instant updatedAt;
     private Instant lastLoginAt;

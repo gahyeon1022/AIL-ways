@@ -65,6 +65,8 @@ public class SecurityConfig {
                                 .requestMatchers("/actuator/health").permitAll()
 
                                 .requestMatchers("/api/**").authenticated() // 그 외 API는 인증 필요
+                                .requestMatchers("/users/**").permitAll()  // ✅ 공개
+
 
                                 .anyRequest().denyAll() // 화면은 3000이 담당
 

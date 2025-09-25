@@ -1,5 +1,7 @@
 package auth.local.service;
 
+import auth.local.domain.LocalCredentials;
+import auth.local.repository.LocalCredentialsRepository;
 import user.domain.User;
 import user.repository.UserRepository;
 import auth.local.dto.LoginRequest;
@@ -14,16 +16,20 @@ import org.springframework.stereotype.Service;
 public class LoginService {
 
     private final UserRepository userRepository;
+    private final LocalCredentialsRepository credRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
     public LoginResponse login(LoginRequest req) {
-        // userId를 이메일로 간주하고 데이터베이스에서 사용자를 찾습니다.
-        User user = userRepository.findByEmail(req.userId()) // <<< 여기를 req.userId()로 변경
+        User user = userRepository.findByUserId(req.userId())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 계정입니다."));
 
+
         // 비밀번호를 비교합니다.
-        if (!passwordEncoder.matches(req.userPw(), user.getPassword())) { // <<< 여기를 req.userPw()로 변경
+        LocalCredentials cred = credRepo.findByUserId(req.userId())
+                .orElseThrow(() -> new RuntimeException("자격 증명 없음"));
+
+        if (!passwordEncoder.matches(req.userPw(), cred.getPwHash())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 

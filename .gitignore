@@ -6,7 +6,7 @@
 *.ear
 
 ### Gradle ###
-.gradle/
+apps/backend/.gradle/
 build/
 out/
 !**/src/main/**/build/
@@ -42,3 +42,6 @@ bin/
 
 ### macOS ###
 .DS_Store
+
+node_modules/
+

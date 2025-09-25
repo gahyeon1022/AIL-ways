@@ -1,7 +1,11 @@
 package auth.local.controller;
 
+import auth.local.domain.LocalCredentials;
+import auth.local.repository.LocalCredentialsRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import user.domain.User;
 import user.dto.UpdateProfileRequest;
@@ -47,15 +51,30 @@ public class UserController {
         }
     }
 
-    // (옵션) 더미 생성: POST /users/test
+    @Autowired
+    private UserRepository userRepo;
+    @Autowired
+    private LocalCredentialsRepository credRepo;
+    @Autowired
+    private PasswordEncoder encoder;
+
     @PostMapping("/test")
     public User insertTestUser() {
         User u = new User();
         u.setEmail("test@example.com");
         u.setUserId("test123");
-        u.setPassword("test123");
         u.setUserName("홍길동");
+        u.setEmailVerified(true);
         u.setCreatedAt(Instant.now());
-        return userRepository.save(u);
+        u = userRepo.save(u);
+
+        LocalCredentials cred = new LocalCredentials();
+        cred.setEmailForLogin(u.getEmail());
+        cred.setUserId(u.getUserId());
+        cred.setPwHash(encoder.encode("test123"));
+        cred.setUserRef(u.getId());
+        credRepo.save(cred);
+
+        return u;
     }
 }

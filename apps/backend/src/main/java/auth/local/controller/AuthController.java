@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -53,15 +54,16 @@ public class AuthController {
     /** 이메일 로그인 */
     @PostMapping("/local/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
-        // 이제 정상적으로 loginSvc를 사용할 수 있습니다.
         LoginResponse result = loginSvc.login(req);
 
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "data", result,
-                "error", null
-        ));
+        Map<String, Object> body = new HashMap<>();
+        body.put("success", true);
+        body.put("data", result);
+        body.put("error", null); // ✅ HashMap 은 null 허용
+
+        return ResponseEntity.ok(body);
     }
+
 
     // DTO (record)
     public record SendCodeReq(@NotBlank @Email String email) {}

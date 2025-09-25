@@ -3,6 +3,11 @@ import auth.local.domain.LocalCredentials;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.Optional;
 
+
 public interface LocalCredentialsRepository extends MongoRepository<LocalCredentials, String> {
     Optional<LocalCredentials> findByEmailForLogin(String emailForLogin);
+
+    // ✅ userId 로 자격증명 조회
+    Optional<LocalCredentials> findByUserId(String userId);
 }
+
