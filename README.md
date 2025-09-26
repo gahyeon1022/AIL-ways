@@ -17,7 +17,7 @@ brew install mongodb-community
 
  실행 명령어 : 
   >> 프로젝트 루트 디렉토리에서 실행
-./gradlew bootRun 
+>  >  ./gradlew bootRun 
 
 
 
