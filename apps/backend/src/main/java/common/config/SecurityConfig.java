@@ -44,6 +44,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/**").permitAll() // 회원가입/로그인
                                 .requestMatchers("/actuator/health").permitAll() //이거 뭐에요?
                                 .requestMatchers("/api/**").authenticated() // 그 외 API는 인증 필요
+                                .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll() //swagger문서 확인용
                                 .requestMatchers("/users/**").permitAll()  // ✅ 공개
 
                                 .anyRequest().denyAll() // 화면은 3000이 담당
