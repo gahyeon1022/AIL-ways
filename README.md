@@ -20,6 +20,11 @@ brew install mongodb-community
 >  >  ./gradlew bootRun 
 
 
+### Swagger(API 문서화 자동화
+백엔드 서버 실행 후(./gradlew bootRun or /Users/seungzun/Desktop/AIL-ways/apps/backend/src/main/java/app/BackendApplication.java 실행)
+
+http://localhost:8080/swagger-ui/index.html 접속
+- 09.26: 스웨거 기본 작동 가능, 세부 설명 포함x, 09.28까지 세부 설명 추가 예정--
 
 ### 로컬(이메일)로 회원가입에 대한 api명세서 입니당
 
