@@ -1,13 +1,21 @@
 # AIL-ways
 여러분 안녕
 
-java : 21
-빌드 도구 : gradle
-데이터베이스 : mogoDB 
+# java : 21
+# 빌드 도구 : gradle
+# 데이터베이스 : mogoDB 
 
 실행 명령어 : 
-  # 프로젝트 루트 디렉토리에서 실행
+  >> 프로젝트 루트 디렉토리에서 실행
 ./gradlew bootRun
+
+
+
+
+
+
+
+
 
 #프로필 정보(역할/흥미)
 PATCH /users/{userId}/profile
