@@ -6,7 +6,9 @@
 ## 데이터베이스 : mogoDB 
 
 >> brew tap mongodb/brew
+
 >> brew install mongodb-community
+
 >> brew services start mongodb-community
 
 
