@@ -5,9 +5,18 @@
 ## 빌드 도구 : gradle
 ## 데이터베이스 : mogoDB 
 
-** 실행 명령어 : 
+>> brew tap mongodb/brew
+>> brew install mongodb-community
+>> brew services start mongodb-community
+
+
+# MongoDB Community Edition 설치
+brew install mongodb-community
+
+ 실행 명령어 : 
   >> 프로젝트 루트 디렉토리에서 실행
-./gradlew bootRun **
+./gradlew bootRun 
+
 
 
 ### 로컬(이메일)로 회원가입에 대한 api명세서 입니당
