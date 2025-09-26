@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/auth") //url 프리픽스, 해당 어노테이션(RequestMapping)이 적용된 것들은 기본적으로 앞에 이 url이 붙음
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AuthController {
 
@@ -33,18 +33,18 @@ public class AuthController {
     public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc) {
         this.emailVerifSvc = emailVerifSvc;
         this.signUpSvc = signUpSvc;
-        this.loginSvc = loginSvc; // <<< 3. 주입받은 loginSvc를 필드에 할당
+        this.loginSvc = loginSvc; // <<< 3. 주입받은 loginSvc를 필드에 할당.
     }
 
     // 1) 이메일로 인증코드 보내기
-    @PostMapping("/email/code")
+    @PostMapping("/email/code") // /api/auth/email/code
     public ResponseEntity<Map<String, Object>> sendCode(@RequestBody @Valid SendCodeReq req) {
         emailVerifSvc.sendCode(req.email());
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
     // 2) 회원가입 (코드 직접 검증 -> SignUpService에서 수행)
-    @PostMapping("/local/signup")
+    @PostMapping("/local/signup") // /api/auth/local/signup
     public ResponseEntity<SignUpResponse> signup(@RequestBody @Valid SignUpRequest req) {
         SignUpResponse res = signUpSvc.signUp(req);
         URI location = URI.create("/api/users/" + res.getUserId());
@@ -52,7 +52,7 @@ public class AuthController {
     }
 
     /** 이메일 로그인 */
-    @PostMapping("/local/login")
+    @PostMapping("/local/login") // /api/auth/local/login
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
         LoginResponse result = loginSvc.login(req);
 

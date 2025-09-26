@@ -51,7 +51,7 @@ public class UserController {
         }
     }
 
-    @Autowired
+    @Autowired //자동 DI주입, 스프링부트가 객체 생성함
     private UserRepository userRepo;
     @Autowired
     private LocalCredentialsRepository credRepo;

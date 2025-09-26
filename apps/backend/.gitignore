@@ -1,0 +1,50 @@
+### OS ###
+.DS_Store
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+shelf/
+workspace.xml
+
+### VS Code ###
+.vscode/
+
+### Gradle ###
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS (Spring Tool Suite) ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### HTTP client (IDEA) ###
+/httpRequests/
+
+### DataSources (IDEA) ###
+/dataSources/
+/dataSources.local.xml
+
+### Maven home (IDEA) ###
+/mavenHomeManager.xml
