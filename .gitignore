@@ -5,6 +5,9 @@
 *.war
 *.ear
 
+# gradle-wrapper.jar 은 예외
+!gradle/wrapper/gradle-wrapper.jar
+
 ### Gradle ###
 apps/backend/.gradle/
 build/
@@ -44,3 +47,8 @@ bin/
 .DS_Store
 
 **/node_modules/
+
+### Gradle Wrapper ###
+!gradlew
+!gradlew.bat
+!gradle/wrapper/gradle-wrapper.properties
