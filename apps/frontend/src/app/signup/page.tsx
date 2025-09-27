@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import LocalSignupModal from "@/components/LocalSignupModal";
+import LocalSignupModal from "@/components/modal/LocalSignupModal";
 
 export default function SignupPage() {
     const [open, setOpen] = useState(false);
@@ -37,6 +37,13 @@ export default function SignupPage() {
           />
           이메일로 회원가입
         </button>
+
+        <div className= "h-[1px] bg-gray-300"/>
+        <div className= "relative">
+          <Link href="/login" className="text-blue-500 hover:underline">
+            로그인으로 돌아가기
+          </Link>
+        </div>
       </div>
        <LocalSignupModal open={open} onClose={() => setOpen(false)} />
     </div>
