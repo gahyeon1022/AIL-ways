@@ -30,7 +30,11 @@ export default function SelectAfterLogin() {
           interests,
         };
 
+<<<<<<< HEAD
     const res = await fetch("api/user/profile", { //실제 url로 수정해주세요.
+=======
+    const res = await fetch("http://localhost:8080/api/user/profile", { //실제 url로 수정해주세요.
+>>>>>>> front/prototype-without-profile+backendSwagger
       method: "POST",
       headers: {
         "Content-Type": "application/json",
