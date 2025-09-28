@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 export default function HomePage() {
   return (
     <div className="text-center">
-      <h1 className="relative top-[-10px] text-[12rem] md:text-12xl font-extrabold tracking-tight text-white drop-shadow -mt-[40px]">
+      <h1 className="relative top-[-10px] text-[15rem] font-extrabold tracking-tight text-white drop-shadow -mt-[40px]">
         AIL-ways
       </h1>
 
