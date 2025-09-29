@@ -3,12 +3,19 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Props = { //부모 컴포넌트에서 전달 받음. 모달 열렸는지
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
+const BTN =
+  "inline-flex items-center justify-center shrink-0 min-w-[64px] " +
+  "rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 " +
+  "disabled:cursor-not-allowed disabled:opacity-60";
+
+type Props = {
   open: boolean;
   onClose: () => void;
 };
 
-function formatNow(): string { //현재 시간을 문자열로 변환하는
+function formatNow(): string {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(
@@ -16,34 +23,82 @@ function formatNow(): string { //현재 시간을 문자열로 변환하는
   )}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 }
 
-export default function LocalSignupModal({ open, onClose }: Props) { //회원가입 입력값 관리
+export default function LocalSignupModal({ open, onClose }: Props) {
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [userPw, setUserPw] = useState("");
   const [tos, setTos] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [createdAt, setCreatedAt] = useState<string>(""); // 성공 시점에 채움
 
+  const [loading, setLoading] = useState(false);        // 회원가입 버튼 로딩
+  const [emailSending, setEmailSending] = useState(false); // 인증메일 버튼 로딩
 
-  async function onSubmit(e: React.FormEvent) { //폼 제출될때 호출되는 이벤트 핸들러
-  e.preventDefault(); //새로고침 방지
+  const [createdAt, setCreatedAt] = useState<string>("");
+
+  // 가벼운 이메일 형식 검증
+  const isValidEmail = (v: string) => /\S+@\S+\.\S+/.test(v);
+
+  // 인증번호 발송
+  async function sendEmailCode() {
+    if (emailSending) return; // 중복 클릭 방지
+    if (!isValidEmail(email)) {
+      alert("올바른 이메일 주소를 입력해 주세요.");
+      return;
+    }
+    setEmailSending(true);
+    try {
+      const endpoint = API_BASE
+        ? `${API_BASE}/api/auth/email/code`
+        : "/api/auth/email/code";
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        let msg = "인증번호 발송에 실패했습니다.";
+        try {
+          const problem = await res.json();
+          if (problem?.message) msg = problem.message;
+          if (problem?.code) msg += `\n(code: ${problem.code})`;
+        } catch {
+        }
+        throw new Error(msg);
+      }
+      alert("인증번호를 이메일로 보냈습니다. 메일함을 확인해 주세요.");
+    } catch (err: any) {
+      alert(err?.message ?? "문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setEmailSending(false);
+    }
+  }
+
+  // 회원가입 제출
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
     if (!tos) {
       alert("약관(TOS)에 동의해 주세요.");
       return;
     }
-    setLoading(true);  //서버로 보낼 요청 생성
+    setLoading(true);
     try {
       const payload = {
         email,
         userName,
         userId,
-        userPw,        // 서버에서 해시 처리
-        creadtedAt: createdAt, // 요청하신 키 철자 그대로 사용
+        userPw,                 // 서버에서 해시 처리
+        creadtedAt: createdAt,  
         consents: tos ? ["TOS"] : [],
       };
-      {/* api 요청 */}
-      const res = await fetch("http://localhost:8080/api/auth/signup", { //api경로로 수정해주세요
+
+      const endpoint = API_BASE
+        ? `${API_BASE}/api/auth/signup`
+        : "/api/auth/signup";
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -51,12 +106,13 @@ export default function LocalSignupModal({ open, onClose }: Props) { //회원가
       });
 
       if (!res.ok) throw new Error("회원가입 실패");
+
       const now = formatNow();
       setCreatedAt(now);
       alert(`회원가입 성공!\n생성 시각: ${now}`);
       onClose();
     } catch (err: any) {
-      alert(err.message ?? "문제가 발생했습니다.");
+      alert(err?.message ?? "문제가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -72,10 +128,7 @@ export default function LocalSignupModal({ open, onClose }: Props) { //회원가
           exit={{ opacity: 0 }}
         >
           {/* Backdrop */}
-          <button
-            onClick={onClose}
-            className="absolute inset-0 bg-black/40"
-          />
+          <button onClick={onClose} className="absolute inset-0 bg-black/40" />
 
           {/* Panel */}
           <motion.div
@@ -83,8 +136,7 @@ export default function LocalSignupModal({ open, onClose }: Props) { //회원가
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -24, opacity: 0 }}
             transition={{ type: "spring", stiffness: 280, damping: 24 }}
-            className="absolute left-1/2 top-10 w-[92vw] max-w-md -translate-x-1/2
-                       rounded-2xl bg-white/90 backdrop-blur p-6 shadow-2xl"
+            className="absolute left-1/2 top-10 w-[92vw] max-w-md -translate-x-1/2 rounded-2xl bg-white/90 backdrop-blur p-6 shadow-2xl"
             role="dialog"
             aria-modal="true"
           >
@@ -138,7 +190,7 @@ export default function LocalSignupModal({ open, onClose }: Props) { //회원가
                 />
               </label>
 
-              {/* email */}
+              {/* email + 인증코드 발송 */}
               <label className="text-left text-sm font-medium text-gray-700">
                 이메일
                 <div className="mt-1 flex gap-2">
@@ -152,12 +204,16 @@ export default function LocalSignupModal({ open, onClose }: Props) { //회원가
                   />
                   <button
                     type="button"
-                    className="shrink-0 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+                    onClick={sendEmailCode}
+                    disabled={emailSending || !email}
+                    className={BTN}
                   >
-                    인증번호 받기
+                    {emailSending ? "전송 중..." : "인증번호 받기"}
                   </button>
                 </div>
-                <div className="mt-1 flex gap-3">
+
+                {/* 인증코드 입력 + 인증하기 */}
+                <div className="mt-1 flex items-center gap-3">
                   <input
                     type="number"
                     min="0"
@@ -165,16 +221,19 @@ export default function LocalSignupModal({ open, onClose }: Props) { //회원가
                     step="1"
                     required
                     placeholder="인증코드"
-                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500
-                    [&::-webkit-outer-spin-button]:appearance-none
-                     [&::-webkit-inner-spin-button]:appearance-none"
-                   />
-                   <button
-                    type="button"
-                    className="shrink-0 rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
-                  >
+                    // flex 영향 완전 차단 + 고정 너비 강제 + 중앙 정렬
+                    className="
+                      flex-none grow-0 shrink-0
+                      !w-24 md:!w-28
+                      text-center rounded-lg border border-gray-300 px-3 py-2
+                      outline-none focus:ring-2 focus:ring-indigo-500
+                      [&::-webkit-outer-spin-button]:appearance-none
+                      [&::-webkit-inner-spin-button]:appearance-none
+                    "
+                  />
+                  <button type="button" className={BTN}>
                     인증하기
-                   </button>
+                  </button>
                 </div>
               </label>
 

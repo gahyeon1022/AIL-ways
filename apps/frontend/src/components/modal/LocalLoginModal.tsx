@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE 
 
 type Props = { //부모 컴포넌트에서 전달 받음. 모달 열렸는지
   open: boolean;
@@ -24,7 +24,7 @@ export default function LocalLoginModal({ open, onClose }: Props) { //회원가�
     setLoading(true);  //서버로 보낼 요청 생성
     try {
       {/* api 요청 */}
-      const res = await fetch(`${API_BASE}/api/auth/local/login`, { //api경로로 수정해주세요
+      const res = await fetch(`${API_BASE}/api/auth/local/login`, { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
