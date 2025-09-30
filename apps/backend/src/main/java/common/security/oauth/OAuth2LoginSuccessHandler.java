@@ -13,6 +13,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+    //카카오 소셜로그인 성공시를 다루기 위한 핸들러
 
     private final JwtUtil jwtUtil;
 
