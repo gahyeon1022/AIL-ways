@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import LocalLoginModal from "@/components/modal/LocalLoginModal"; // 경로는 프로젝트 구조에 맞게
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080";
 
 export default function LoginPage() {
   const [open, setOpen] = useState(false);
@@ -11,7 +12,7 @@ export default function LoginPage() {
     <div className="bg-white/70 p-8 rounded-2xl shadow-lg text-center w-full max-w-sm">
       <div className="grid gap-3">
         <Link
-          href="/auth/kakao" // /api/auth/signin/kakao, 직접 구현이면 백엔드 시작점으로 변경
+          href={`${API_BASE}/oauth2/authorization/kakao`} // /api/auth/signin/kakao, 직접 구현이면 백엔드 시작점으로 변경
           className="relative item-center w-full justify-center rounded-xl px-4 py-3 font-medium bg-[#FEE500] text-black hover:brightness-95 transition inline-block">
           <Image src="/kakao_logo.png" alt="Kakao" width={23} height={23} className="absolute left-5 top-3.5"/>
           <span className="leading-none">카카오로 로그인</span>
