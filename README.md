@@ -35,6 +35,7 @@ http://localhost:8080/swagger-ui/index.html 접속
 
 ### 🔹 JWT 인증 사용 방법
 1. 먼저 **로그인 API**(`/api/auth/local/login`) 호출해서 JWT 토큰을 발급받습니다.
+   **현재 공용DB 연결이 되어 있지 않기 때문에, 로컬에서 본인이 회원가입을 한 아이디로만 가능합니다!!**
     - 요청 예시:
       ```json
       {
@@ -50,8 +51,8 @@ http://localhost:8080/swagger-ui/index.html 접속
       }
       ```
 
-2. Swagger UI 상단의 **Authorize 🔒 버튼** 클릭
-3. 입력창에 **토큰 문자열만** 붙여넣기
+3. Swagger UI 상단의 **Authorize 🔒 버튼** 클릭
+4. 입력창에 **토큰 문자열만** 붙여넣기
 
 ### 로컬(이메일)로 회원가입에 대한 api명세서
 
