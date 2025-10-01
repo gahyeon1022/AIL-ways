@@ -30,6 +30,11 @@ brew install mongodb-community
 http://localhost:8080/swagger-ui/index.html 접속
 ### 🔹 주요 기능
 - 컨트롤러/엔드포인트 자동 문서화 (`@Tag`, `@Operation` 적용)
+	•	@Tag → 컨트롤러 단위 그룹 설명 (API 묶음이 어떤 역할인지 서술)
+	•	@Operation → 엔드포인트 단위 설명 (각 URL이 하는 동작을 서술)
+<img width="794" height="406" alt="2060f4c0b42d968374b6c310a9ea92fdbea2d8a05847c61d179bb261a68c843f 복사본" src="https://github.com/user-attachments/assets/d73b57cf-71c1-4c61-ad36-839563d47163" />
+
+
 - 요청/응답 DTO 구조 자동 표시
 - `Try it out` 버튼으로 API 직접 호출 가능
 
