@@ -12,6 +12,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import user.domain.Consent;
+import user.domain.Provider;
 import user.domain.User;
 import user.dto.ConsentDTO;
 import user.repository.UserRepository;
@@ -52,6 +53,7 @@ public class SignUpService {
         user.setEmail(email);
         user.setUserId(req.getUserId());
         user.setUserName(req.getUserName());
+        user.setProvider(Provider.LOCAL); //로컬회원가입 전용 로직 -> Provider = LOCAL로 지정 및 저장
         user.setEmailVerified(true); // <<< 핵심
         user.setCreatedAt(req.getCreatedAt() != null ? req.getCreatedAt() : Instant.now());
         user.setUpdatedAt(Instant.now());
