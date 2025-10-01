@@ -56,8 +56,8 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).location(location).body(res);
     }
 
-    /** 이메일 로그인 */
-    @Operation(summary = "로그인", description = "이메일 + 비밀번호 기반 로그인 후 JWT 발급")
+    /** 로컬 로그인 */
+    @Operation(summary = "로컬 로그인", description = "이메일 + 비밀번호 기반 로그인 후 JWT 발급")
     @PostMapping("/local/login") // /api/auth/local/login
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
         LoginResponse result = loginSvc.login(req);
