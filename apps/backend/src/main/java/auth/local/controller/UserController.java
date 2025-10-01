@@ -28,12 +28,14 @@ public class UserController {
     private final UserService userService;
 
     // 전체 조회: GET /users
+    @Operation(summary = "전체 유저 조희", description = "등록된 전체 유저 조희")
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     // GET /users/{userId}
+    @Operation(summary = "내 정보 조희", description = "등록된 전체 유저 조희")
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserByUserId(@PathVariable String userId) {
         return userRepository.findByUserId(userId)
@@ -53,32 +55,5 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    @Autowired //자동 DI주입, 스프링부트가 객체 생성함
-    private UserRepository userRepo;
-    @Autowired
-    private LocalCredentialsRepository credRepo;
-    @Autowired
-    private PasswordEncoder encoder;
-
-    @PostMapping("/test")
-    public User insertTestUser() {
-        User u = new User();
-        u.setEmail("test@example.com");
-        u.setUserId("test123");
-        u.setUserName("홍길동");
-        u.setEmailVerified(true);
-        u.setCreatedAt(Instant.now());
-        u = userRepo.save(u);
-
-        LocalCredentials cred = new LocalCredentials();
-        cred.setEmailForLogin(u.getEmail());
-        cred.setUserId(u.getUserId());
-        cred.setPwHash(encoder.encode("test123"));
-        cred.setUserRef(u.getId());
-        credRepo.save(cred);
-
-        return u;
     }
 }
