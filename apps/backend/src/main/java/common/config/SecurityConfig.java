@@ -3,6 +3,7 @@ package common.config; //social + local integration
 
 
 import auth.social.kakao.service.KakaoService;
+import common.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy; // [ADD]
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // [ADD]
 import org.springframework.security.crypto.password.PasswordEncoder; // [ADD]
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 //import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // [ADD - JWT 필터 쓸 때]
@@ -24,7 +26,7 @@ public class SecurityConfig {
 
     private final KakaoService kakaoService; // [ADD - 소셜 성공 처리 연결 시]
 // private final JwtTokenProvider jwtTokenProvider; // [ADD - JWT 사용 시]
-
+    private final JwtUtil jwtUtil;
 
 
     @Bean
@@ -44,10 +46,11 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/**").permitAll() // 회원가입/로그인
                                 .requestMatchers("/actuator/health").permitAll() //이거 뭐에요?
                                 .requestMatchers("/api/**").authenticated() // 그 외 API는 인증 필요
+                                .requestMatchers("/api/user/**").authenticated()
                                 .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll() //swagger문서 확인용
-                                .requestMatchers("/users/**").permitAll()
-                                .requestMatchers("/select").permitAll()
 
+                                //.requestMatchers("/select").permitAll()
+                                .requestMatchers("/users/**").permitAll()  // ✅ 공개
                                 .anyRequest().denyAll() // 화면은 3000이 담당
 
 // .anyRequest().authenticated()
@@ -66,6 +69,7 @@ public class SecurityConfig {
 
                 }))
 
+<<<<<<< HEAD
                 .oauth2Login(o -> o
 
                         .successHandler((req,res,auth) -> res.sendRedirect("/select"))
@@ -77,9 +81,22 @@ public class SecurityConfig {
                             res.setContentType("application/json;charset=UTF-8");
 
                             res.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
+=======
+                .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(userInfo -> //카카오 로그인시, db저장 위함
+                                // 🔑 KakaoService.loadUser() → upsertUser() 실행되도록 연결
+                                userInfo.userService(kakaoService)
+                        )
+                        .successHandler((req,res,auth) -> {
+                            DefaultOAuth2User oAuth2User = (DefaultOAuth2User) auth.getPrincipal();
+                            //  DB에 저장/업데이트 보장
+                            kakaoService.upsertUser(oAuth2User);
+                            String kakaoId = String.valueOf(oAuth2User.getAttributes().get("id"));
+                            String token = jwtUtil.generateToken(kakaoId);
+>>>>>>> e1f9cc5947adebfdd637730d8aafc264e72668b3
 
+                            res.sendRedirect("http://localhost:3000/select?token=" + token);
                         })
-
                 )
 
                 .formLogin(AbstractHttpConfigurer::disable)

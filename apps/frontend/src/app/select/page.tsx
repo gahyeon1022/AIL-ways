@@ -8,15 +8,23 @@ export default function SelectAfterLogin() {
     const [interests, setInterests] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const interestOptions = ['Python', 'C++', 'JAVA', 'React'];
-    
+
     useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+        if (token) {
+            localStorage.setItem("accessToken", token);
+            // 토큰 저장 후 URL 깨끗하게 (옵션)
+            window.history.replaceState({}, document.title, "/select");
+        }
+
         const hasSeenModal = localStorage.getItem("welcomeModalSeen");
         if (!hasSeenModal) {
             setOpen(true);
             localStorage.setItem("welcomeModalSeen", "true");
         }
     }, []);
-    
+
     const toggleInterest = (t: string) =>
       setInterests(prev => (prev.includes(t) ? prev.filter(i => i !== t) : [...prev, t]));
     

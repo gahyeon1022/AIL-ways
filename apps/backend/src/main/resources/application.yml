@@ -18,7 +18,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: ailways714@gmail.com     # ✅ Gmail 계정
-    password: fiob bliv enod hrya        # ✅ 앱 비밀번호 (16자리)
+    password: fiob bliv enod hrya        # ✅ 앱 비밀번호 (16자리) 유출, gpt 금지!!
     properties:
       mail:
         smtp:
