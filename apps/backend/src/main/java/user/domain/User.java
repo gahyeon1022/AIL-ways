@@ -29,14 +29,14 @@ public class User {
     @Indexed(unique = true, sparse = true)
     private String email;
 
-    // 로컬 로그인 전용 ID(닉네임/아이디). 소셜은 null 허용
+    //로컬은 회원가입시 등록한 id, 소셜은 providerId가 userId에 그대로 복사됨
     @Indexed(unique = true, sparse = true)
     private String userId;
 
     // 표시명(로컬: 가입 시 입력, 소셜: 프로필 닉네임)
     private String userName;
 
-    // 로컬 전용(소셜은 null) — 저장 전 반드시 인코딩된 값으로
+    // 로컬 전용(소셜은 null) — 저장 전 반드시 인코딩된 값으로 //근데 지금 소셜/로컬 둘다 null인디?
     private String userPw;
 
     // 권한(멘토/멘티/관리자 등)

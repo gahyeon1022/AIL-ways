@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/**").permitAll() // 회원가입/로그인
                                 .requestMatchers("/actuator/health").permitAll() //이거 뭐에요?
                                 .requestMatchers("/api/**").authenticated() // 그 외 API는 인증 필요
+                                .requestMatchers("/api/user/**").authenticated()
                                 .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll() //swagger문서 확인용
                                 .requestMatchers("/users/**").permitAll()  // ✅ 공개
                                 .anyRequest().denyAll() // 화면은 3000이 담당
@@ -67,8 +68,14 @@ public class SecurityConfig {
                 }))
 
                 .oauth2Login(oauth -> oauth
+                        .userInfoEndpoint(userInfo -> //카카오 로그인시, db저장 위함
+                                // 🔑 KakaoService.loadUser() → upsertUser() 실행되도록 연결
+                                userInfo.userService(kakaoService)
+                        )
                         .successHandler((req,res,auth) -> {
                             DefaultOAuth2User oAuth2User = (DefaultOAuth2User) auth.getPrincipal();
+                            //  DB에 저장/업데이트 보장
+                            kakaoService.upsertUser(oAuth2User);
                             String kakaoId = String.valueOf(oAuth2User.getAttributes().get("id"));
                             String token = jwtUtil.generateToken(kakaoId);
 

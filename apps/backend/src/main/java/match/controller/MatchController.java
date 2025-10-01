@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/matches")
+@RequestMapping("/matches") // /api prefix 삭제
 @RequiredArgsConstructor
 public class MatchController {
 
