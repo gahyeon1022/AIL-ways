@@ -2,6 +2,8 @@ package auth.local.controller;
 
 import auth.local.domain.LocalCredentials;
 import auth.local.repository.LocalCredentialsRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import user.service.UserService;
 import java.time.Instant;
 import java.util.List;
 
+@Tag(name = "User API", description = "회원 관리 API (프로필 조회/수정, 유저 정보 관리)")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -38,6 +41,7 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "유저 프로필 수정", description = "JWT 인증 필요. 본인 프로필 정보 업데이트")
     @PatchMapping("/{userId}/profile")
     public ResponseEntity<User> updateUserProfile(
             @PathVariable String userId,

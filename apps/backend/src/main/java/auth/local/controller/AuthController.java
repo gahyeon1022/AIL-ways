@@ -8,6 +8,8 @@ import auth.local.service.EmailVerificationService;
 import auth.local.service.LoginService;
 import auth.local.service.SignUpService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +22,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(name = "Auth API", description = "회원가입 / 로그인 / 이메일 인증 등 인증 관련 API")
 @RestController
 @RequestMapping("/api/auth") //url 프리픽스, 해당 어노테이션(RequestMapping)이 적용된 것들은 기본적으로 앞에 이 url이 붙음
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
@@ -37,6 +40,7 @@ public class AuthController {
     }
 
     // 1) 이메일로 인증코드 보내기
+    @Operation(summary = "이메일 인증", description = "입력한 이메일에 대해 인증코드 발송")
     @PostMapping("/email/code") // /api/auth/email/code
     public ResponseEntity<Map<String, Object>> sendCode(@RequestBody @Valid SendCodeReq req) {
         emailVerifSvc.sendCode(req.email());
@@ -44,6 +48,7 @@ public class AuthController {
     }
 
     // 2) 회원가입 (코드 직접 검증 -> SignUpService에서 수행)
+    @Operation(summary = "회원가입", description = "로컬 계정 회원가입 (이메일 인증 코드 포함)")
     @PostMapping("/local/signup") // /api/auth/local/signup
     public ResponseEntity<SignUpResponse> signup(@RequestBody @Valid SignUpRequest req) {
         SignUpResponse res = signUpSvc.signUp(req);
@@ -52,6 +57,7 @@ public class AuthController {
     }
 
     /** 이메일 로그인 */
+    @Operation(summary = "로그인", description = "이메일 + 비밀번호 기반 로그인 후 JWT 발급")
     @PostMapping("/local/login") // /api/auth/local/login
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
         LoginResponse result = loginSvc.login(req);
