@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 .requestMatchers("/actuator/health").permitAll() //이거 뭐에요?
                                 .requestMatchers("/api/**").authenticated() // 그 외 API는 인증 필요
                                 .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll() //swagger문서 확인용
-                                .requestMatchers("/users/**").permitAll()  // ✅ 공개
+                                .requestMatchers("/users/**").permitAll()
+                                .requestMatchers("/select").permitAll()
 
                                 .anyRequest().denyAll() // 화면은 3000이 담당
 
@@ -67,7 +68,7 @@ public class SecurityConfig {
 
                 .oauth2Login(o -> o
 
-                        .successHandler((req,res,auth) -> res.sendRedirect("/me"))
+                        .successHandler((req,res,auth) -> res.sendRedirect("/select"))
 
                         .failureHandler((req,res,ex) -> {
 

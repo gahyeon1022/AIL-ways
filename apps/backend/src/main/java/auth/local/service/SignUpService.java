@@ -83,7 +83,7 @@ public class SignUpService {
 
     private boolean isStrong(String pw) {
         if (pw == null) return false;
-        return pw.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$");
+        return pw.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$"); //대문자+소문자+숫자+8자이상+특수기호
     }
 
     private List<Consent> mapConsents(List<ConsentDTO> in) {
