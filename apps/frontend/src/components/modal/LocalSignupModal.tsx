@@ -45,15 +45,29 @@ export default function LocalSignupModal({ open, onClose }: Props) {
     try {
       const endpoint = `/api/auth/check-userid?userId=${encodeURIComponent(userId)}`;
       const res = await fetch(endpoint, { method: "GET", credentials: "include" });
-      if (res.status === 200) alert("성공");
-      else if (res.status === 400) alert("잘못된 요청입니다");
-      else alert("요청 처리 중 오류가 발생했습니다.");
-    } catch {
-      alert("네트워크 오류가 발생했습니다.");
-    } finally {
-      setIdChecking(false);
-    }
+
+      let res_data;
+      try { 
+        res_data = await res.json();
+      } catch {
+      }
+      if (res.ok) {
+        if (res_data?.isAvailable) alert("사용 가능한 아이디입니다.");
+        else alert("이미 사용 중인 아이디입니다.");
+      }
+  //     if (res.status === 200) alert("성공");
+  //     else if (res.status === 400) alert("잘못된 요청입니다");
+  //     else alert("요청 처리 중 오류가 발생했습니다.");
+  //   } catch {
+  //     alert("네트워크 오류가 발생했습니다.");
+  //   } finally {
+  //     setIdChecking(false);
+  //   }
+  } finally {
+    setIdChecking(false);
   }
+}
+
 
   async function sendEmailCode() {
     if (emailSending) return;
@@ -113,9 +127,9 @@ export default function LocalSignupModal({ open, onClose }: Props) {
         }),
       });
 
-      if (res.status === 200) { alert("인증 성공"); return; }
-      if (res.status === 409) { alert("이미 사용된 이메일입니다"); return; }
-      if (res.status === 400) { alert("이메일 누락입니다"); return; }
+      if (res.status === 200) { alert("인증 성공."); return; }
+      if (res.status === 409) { alert("이미 사용된 이메일입니다."); return; }
+      if (res.status === 400) { alert("인증번호가 일치하지 않습니다."); return; }
 
       alert("요청 처리 중 오류가 발생했습니다.");
     } catch {
@@ -140,7 +154,7 @@ export default function LocalSignupModal({ open, onClose }: Props) {
         userId,
         userPw,     
         code,            // 서버에서 해시 처리
-        creadtedAt: createdAt,  // (원본 키 유지)
+        createdAt: createdAt,  // (원본 키 유지)
         consents: [
           { type: "TOS",          agreed: true },
           { type: "PRIVACY",      agreed: true },
