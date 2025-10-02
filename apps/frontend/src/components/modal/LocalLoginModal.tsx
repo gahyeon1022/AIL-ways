@@ -24,7 +24,7 @@ export default function LocalLoginModal({ open, onClose }: Props) { //회원가�
     setLoading(true);  //서버로 보낼 요청 생성
     try {
       {/* api 요청 */}
-      const res = await fetch(`${API_BASE}/api/auth/local/login`, { 
+      const res = await fetch(`/api/auth/local/login`, { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
