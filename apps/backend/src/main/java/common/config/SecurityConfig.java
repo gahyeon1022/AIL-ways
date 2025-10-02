@@ -67,21 +67,21 @@ public class SecurityConfig {
 
                     res.getWriter().write("{\"error\":\"unauthorized\"}");
 
-                }))
+               }))
+//
+//<<<<<<< HEAD
+//                .oauth2Login(o -> o
+//
+//                        .successHandler((req,res,auth) -> res.sendRedirect("/select"))
+//
+//                        .failureHandler((req,res,ex) -> {
+//
+//                            res.setStatus(401);
+//
+//                            res.setContentType("application/json;charset=UTF-8");
+//
+//                            res.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
 
-<<<<<<< HEAD
-                .oauth2Login(o -> o
-
-                        .successHandler((req,res,auth) -> res.sendRedirect("/select"))
-
-                        .failureHandler((req,res,ex) -> {
-
-                            res.setStatus(401);
-
-                            res.setContentType("application/json;charset=UTF-8");
-
-                            res.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
-=======
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> //카카오 로그인시, db저장 위함
                                 // 🔑 KakaoService.loadUser() → upsertUser() 실행되도록 연결
@@ -93,7 +93,6 @@ public class SecurityConfig {
                             kakaoService.upsertUser(oAuth2User);
                             String kakaoId = String.valueOf(oAuth2User.getAttributes().get("id"));
                             String token = jwtUtil.generateToken(kakaoId);
->>>>>>> e1f9cc5947adebfdd637730d8aafc264e72668b3
 
                             res.sendRedirect("http://localhost:3000/select?token=" + token);
                         })

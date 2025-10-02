@@ -4,6 +4,7 @@ import auth.local.service.*;
 import auth.local.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -52,4 +53,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("code","INVALID_EMAIL_DOMAIN","message", ex.getMessage()));
     }
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Map<String, String>> handleMissingParams(MissingServletRequestParameterException ex) {
+        String name = ex.getParameterName();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("code", "PARAM_MISSING", "message", String.format("필수 파라미터 '%s'가 누락되었습니다.", name)));
+    }
 }
+

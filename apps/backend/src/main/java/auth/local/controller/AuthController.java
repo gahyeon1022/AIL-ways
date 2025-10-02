@@ -47,6 +47,19 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
+    @Operation(summary = "이메일 인증코드 확인", description = "이메일과 코드가 유효한지 확인")
+    @PostMapping("/email/verify-code")
+    public ResponseEntity<Map<String, Object>> verifyCode(@RequestBody @Valid VerifyCodeReq req) {
+        boolean isVerified = emailVerifSvc.verifyCode(req.email(), req.code());
+        if (isVerified) {
+            return ResponseEntity.ok(Map.of("verified", true, "message", "인증에 성공했습니다."));
+        } else {
+            // 명시적으로 실패 응답을 보낼 수 있습니다. (GlobalExceptionHandler와 연동)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("verified", false, "message", "인증코드가 일치하지 않거나 만료되었습니다."));
+        }
+    }
+
     // 2) 회원가입 (코드 직접 검증 -> SignUpService에서 수행)
     @Operation(summary = "회원가입", description = "로컬 계정 회원가입 (이메일 인증 코드 포함)")
     @PostMapping("/local/signup") // /api/auth/local/signup
@@ -55,6 +68,7 @@ public class AuthController {
         URI location = URI.create("/api/users/" + res.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).location(location).body(res);
     }
+
 
     /** 로컬 로그인 */
     @Operation(summary = "로컬 로그인", description = "이메일 + 비밀번호 기반 로그인 후 JWT 발급")
@@ -69,8 +83,17 @@ public class AuthController {
 
         return ResponseEntity.ok(body);
     }
+    @Operation(summary = "아이디 중복 체크", description = "입력한 userId가 사용 가능한지 확인")
+    @GetMapping("/check-userid")
+    public ResponseEntity<Map<String, Boolean>> checkUserId(@RequestParam("userId") String userId) {
+        boolean isAvailable = signUpSvc.isUserIdAvailable(userId);
+        return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
+    }
+
 
 
     // DTO (record)
     public record SendCodeReq(@NotBlank @Email String email) {}
+    public record VerifyCodeReq(@NotBlank @Email String email, @NotBlank String code) {}
+
 }
