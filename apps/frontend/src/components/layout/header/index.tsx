@@ -13,16 +13,16 @@ export default function Header() {
 
   return (
     <header className="w-full bg-gradient-to-r from-rose-quartz-500 to-serenity-500 px-6 py-3 shadow-sm">
-      <div className="max-w-7xl mx-auto relative h-14">
+      <div className="mx-auto grid grid-cols-3 items-center h-14">
         {/* Logo */}
-        <div className="absolute left-0 inset-y-0 flex items-center">
+        <div className="flex items-center">
           <h1 className="text-white text-2xl font-semibold tracking-tight">
             AIL-Ways
           </h1>
         </div>
 
         {/* Navigation */}
-        <nav className="hidden md:flex items-center justify-center h-full space-x-8">
+        <nav className="flex items-center justify-center h-full space-x-8">
           <Link href="/mentoring-current">
             <Button variant="ghost">멘토링 현황</Button>
           </Link>
@@ -33,20 +33,17 @@ export default function Header() {
         </nav>
 
         {/* Right side actions */}
-        <div className="absolute right-0 inset-y-0 flex items-center gap-4">
-          <div className="relative">
-            <Button
-              variant="ghost"
-              aria-haspopup="dialog"
-              aria-expanded={open}
-              onClick={() => setOpen(v => !v)}
-            >
-              <Bell className="h-6 w-6" />
-            </Button>
-
-            <NotificationDropdown open={open} onClose={() => setOpen(false)} count={3} />
-          </div>
-          <UserMenu />
+        <div className="flex items-center justify-self-end gap-3">
+        <div className="relative">
+           <Button
+             variant="ghost"
+             onClick={() => setOpen((v) => !v)}
+           >
+             <Bell className="h-6 w-6" />
+           </Button>
+           <NotificationDropdown open={open} onClose={() => setOpen(false)} count={3} />
+         </div>
+         <UserMenu />
         </div>
       </div>
     </header>
