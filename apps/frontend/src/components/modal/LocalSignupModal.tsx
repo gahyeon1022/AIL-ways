@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+// const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 
 const BTN =
   "inline-flex items-center justify-center shrink-0 min-w-[64px] " +
@@ -28,55 +28,104 @@ export default function LocalSignupModal({ open, onClose }: Props) {
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [userPw, setUserPw] = useState("");
-  const [tos, setTos] = useState(false);
+  const [tos, setTos] = useState(false); //약관동의
 
-  const [loading, setLoading] = useState(false);        // 회원가입 버튼 로딩
-  const [emailSending, setEmailSending] = useState(false); // 인증메일 버튼 로딩
-
+  const [loading, setLoading] = useState(false);           
+  const [emailSending, setEmailSending] = useState(false); 
   const [createdAt, setCreatedAt] = useState<string>("");
+  const [idChecking, setIdChecking] = useState(false); //아이디 중복 확인 로딩 상태
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
-  // 가벼운 이메일 형식 검증
-  const isValidEmail = (v: string) => /\S+@\S+\.\S+/.test(v);
 
-  // 인증번호 발송
-  async function sendEmailCode() {
-    if (emailSending) return; // 중복 클릭 방지
-    if (!isValidEmail(email)) {
-      alert("올바른 이메일 주소를 입력해 주세요.");
-      return;
+  //아이디 중복 확인 요청
+   async function checkUserId() {
+    if (idChecking) return;
+    setIdChecking(true);
+    try {
+      const endpoint = `/api/auth/check-userid?userId=${encodeURIComponent(userId)}`;
+      const res = await fetch(endpoint, { method: "GET", credentials: "include" });
+      if (res.status === 200) alert("성공");
+      else if (res.status === 400) alert("잘못된 요청입니다");
+      else alert("요청 처리 중 오류가 발생했습니다.");
+    } catch {
+      alert("네트워크 오류가 발생했습니다.");
+    } finally {
+      setIdChecking(false);
     }
+  }
+
+  async function sendEmailCode() {
+    if (emailSending) return;
     setEmailSending(true);
     try {
-      const endpoint = API_BASE
-        ? `${API_BASE}/api/auth/email/code`
-        : "/api/auth/email/code";
+      const endpoint = `/api/auth/email/code`;
 
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
         credentials: "include",
+        body: JSON.stringify({ email }),
       });
 
-      if (!res.ok) {
-        let msg = "인증번호 발송에 실패했습니다.";
-        try {
-          const problem = await res.json();
-          if (problem?.message) msg = problem.message;
-          if (problem?.code) msg += `\n(code: ${problem.code})`;
-        } catch {
-        }
-        throw new Error(msg);
+        let data: { message?: string; verified?: boolean } | null = null;
+    try {
+      data = await res.json();
+    } catch {
+    }
+
+    // 상태코드별 처리
+    if (res.status === 400) {
+      alert("인증코드가 일치하지 않습니다");
+      return;
+    }
+    if (res.status === 404) {
+      alert("인증 요청을 찾을 수 없습니다");
+      return;
+    }
+
+    if (res.ok) {
+      if (data?.message) alert(data.message);
+      else alert("요청이 처리되었습니다.");
+      if (typeof data?.verified === "boolean") {
+        console.log("[email verified]:", data.verified);
       }
-      alert("인증번호를 이메일로 보냈습니다. 메일함을 확인해 주세요.");
-    } catch (err: any) {
-      alert(err?.message ?? "문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
+    alert(data?.message ?? "요청 처리 중 오류가 발생했습니다.");
+  } finally {
+    setEmailSending(false);
+  }
+}
+// 인증번호 확인
+  async function verifyEmailCode() {
+    if (verifying) return;             // 중복 클릭 방지
+    setVerifying(true);
+    try {
+      const res = await fetch(`/api/auth/email/verify-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email, 
+          code,  
+        }),
+      });
+
+      if (res.status === 200) { alert("인증 성공"); return; }
+      if (res.status === 409) { alert("이미 사용된 이메일입니다"); return; }
+      if (res.status === 400) { alert("이메일 누락입니다"); return; }
+
+      alert("요청 처리 중 오류가 발생했습니다.");
+    } catch {
+      alert("네트워크 오류가 발생했습니다.");
     } finally {
-      setEmailSending(false);
+      setVerifying(false);
     }
   }
 
-  // 회원가입 제출
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!tos) {
@@ -89,15 +138,18 @@ export default function LocalSignupModal({ open, onClose }: Props) {
         email,
         userName,
         userId,
-        userPw,                 // 서버에서 해시 처리
-        creadtedAt: createdAt,  
-        consents: tos ? ["TOS"] : [],
+        userPw,     
+        code,            // 서버에서 해시 처리
+        creadtedAt: createdAt,  // (원본 키 유지)
+        consents: [
+          { type: "TOS",          agreed: true },
+          { type: "PRIVACY",      agreed: true },
+          { type: "VIDEO_CAPTURE",agreed: true },
+        ],
       };
 
-      const endpoint = API_BASE
-        ? `${API_BASE}/api/auth/signup`
-        : "/api/auth/signup";
-
+      const endpoint = `/api/auth/local/signup`;
+      console.log("[SIGNUP] POST /api/auth/local/signup", payload);
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -164,22 +216,31 @@ export default function LocalSignupModal({ open, onClose }: Props) {
                 />
               </label>
 
-              {/* userId */}
               <label className="text-left text-sm font-medium text-gray-700">
                 아이디
-                <input
-                  type="text"
-                  required
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  placeholder="아이디를 입력해주세요."
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-                />
+                <div className="mt-1 flex gap-2">
+                  <input
+                    type="text"
+                    required
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    placeholder="아이디를 입력해주세요."
+                    className="flex-1 rounded-lg border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={checkUserId}
+                    disabled={idChecking}
+                    className={BTN}
+                  >
+                    {idChecking ? "확인 중..." : "중복 확인"}
+                  </button>
+                </div>
               </label>
 
               {/* userPw */}
               <label className="text-left text-sm font-medium text-gray-700">
-                비밀번호
+                비밀번호 (영어 대소문자+숫자+특수문자 조합)
                 <input
                   type="password"
                   required
@@ -190,7 +251,7 @@ export default function LocalSignupModal({ open, onClose }: Props) {
                 />
               </label>
 
-              {/* email + 인증코드 발송 */}
+              {/* email + 인증코드 요청 버튼 */}
               <label className="text-left text-sm font-medium text-gray-700">
                 이메일
                 <div className="mt-1 flex gap-2">
@@ -205,32 +266,36 @@ export default function LocalSignupModal({ open, onClose }: Props) {
                   <button
                     type="button"
                     onClick={sendEmailCode}
-                    disabled={emailSending || !email}
+                    disabled={emailSending}
                     className={BTN}
                   >
                     {emailSending ? "전송 중..." : "인증번호 받기"}
                   </button>
                 </div>
 
-                {/* 인증코드 입력 + 인증하기 */}
                 <div className="mt-1 flex items-center gap-3">
                   <input
-                    type="number"
-                    min="0"
-                    max="999999"
-                    step="1"
+                    type="text"
+                    inputMode="numeric"
                     required
-                    placeholder="인증코드"
-                    // flex 영향 완전 차단 + 고정 너비 강제 + 중앙 정렬
+                    placeholder="인증번호"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     className="
                       flex-none grow-0 shrink-0
                       !w-24 md:!w-28
                       text-center rounded-lg border border-gray-300 px-3 py-2
                       outline-none focus:ring-2 focus:ring-indigo-500
-                      [&::-webkit-outer-spin-button]:appearance-none
-                      [&::-webkit-inner-spin-button]:appearance-none
                     "
                   />
+                      <button
+                        type="button"
+                        onClick={verifyEmailCode}
+                        disabled={verifying}
+                        className={BTN}
+                      >
+                        {verifying ? "확인 중..." : "인증번호 확인"}
+                      </button>
                 </div>
               </label>
 
