@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080";
 
 export default function SelectAfterLogin() {
     const [open, setOpen] = useState(false);
@@ -30,11 +31,7 @@ export default function SelectAfterLogin() {
           interests,
         };
 
-<<<<<<< HEAD
-    const res = await fetch("api/user/profile", { //실제 url로 수정해주세요.
-=======
-    const res = await fetch("http://localhost:8080/api/user/profile", { //실제 url로 수정해주세요.
->>>>>>> front/prototype-without-profile+backendSwagger
+    const res = await fetch(`${API_BASE}/users/{userId}/profile`, { //실제 url로 수정해주세요.
       method: "POST",
       headers: {
         "Content-Type": "application/json",
