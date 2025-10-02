@@ -105,18 +105,18 @@ export default function MentoringCurrent() {
             onClick={() => setActiveMentor(null)}
             className="absolute inset-0 z-10 bg-transparent"
           />
-          <div className="absolute left-0 top-0 z-40 h-full w-64 rounded-r-2xl bg-white p-5 shadow-xl">
+          <div className="absolute left-0 top-0 z-40 h-40 w-64 rounded-2xl bg-white p-5 shadow-xl">
             <div className="mb-4 font-semibold">{activeMentor.name}</div>
             <div className="grid gap-2">
               <button
                 onClick={() => goReport("weekly")}
-                className="rounded-lg bg-gray-900 px-4 py-3 text-white"
+                className="rounded-lg bg-gray-100 px-4 py-2"
               >
                 주간 리포트
               </button>
               <button
                 onClick={() => goReport("study")}
-                className="rounded-lg bg-gray-100 px-4 py-3"
+                className="rounded-lg bg-gray-100 px-4 py-2"
               >
                 학습 리포트
               </button>
