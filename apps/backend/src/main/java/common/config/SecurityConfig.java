@@ -68,19 +68,6 @@ public class SecurityConfig {
                     res.getWriter().write("{\"error\":\"unauthorized\"}");
 
                }))
-//
-//<<<<<<< HEAD
-//                .oauth2Login(o -> o
-//
-//                        .successHandler((req,res,auth) -> res.sendRedirect("/select"))
-//
-//                        .failureHandler((req,res,ex) -> {
-//
-//                            res.setStatus(401);
-//
-//                            res.setContentType("application/json;charset=UTF-8");
-//
-//                            res.getWriter().write("{\"error\":\""+ex.getMessage()+"\"}");
 
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> //카카오 로그인시, db저장 위함
