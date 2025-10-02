@@ -1,0 +1,23 @@
+on:
+  push:
+    branches: [main, develop]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Push Message
+        run: |
+          curl -H "Content-Type: application/json" \
+          -d '{
+                "embeds": [{
+                  "title": "🚀 새로운 코드가 푸시되었습니다!",
+                  "color": 65280,
+                  "fields": [
+                    {"name": "레포지토리", "value": "${{ github.repository }}"},
+                    {"name": "브랜치", "value": "${{ github.ref }}"},
+                    {"name": "푸시한 사람", "value": "${{ github.actor }}"}
+                  ]
+                }]
+              }' \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
