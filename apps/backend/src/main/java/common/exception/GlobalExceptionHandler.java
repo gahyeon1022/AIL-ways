@@ -1,6 +1,5 @@
-package auth.local.controller;
+package common.exception;
 
-import auth.local.service.*;
 import auth.local.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
