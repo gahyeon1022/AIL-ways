@@ -27,4 +27,7 @@ public class EmailCode {
     private Instant expireAt;
 
     private Instant createdAt;
+
+    private boolean verified; // 코드가 유효하다고 확인되었는지 여부
+    private Instant verifiedAt; // 인증이 성공한 시각
 }

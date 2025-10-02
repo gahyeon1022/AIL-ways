@@ -67,7 +67,7 @@ public class SecurityConfig {
 
                     res.getWriter().write("{\"error\":\"unauthorized\"}");
 
-                }))
+               }))
 
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> //카카오 로그인시, db저장 위함
