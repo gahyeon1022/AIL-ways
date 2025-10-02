@@ -95,9 +95,10 @@ public class KakaoService extends DefaultOAuth2UserService {
         User newUser = User.builder()
                 .provider(Provider.KAKAO)
                 .providerUserId(kakaoId)
+                .userId(kakaoId)
                 .email(email)
                 .userName(nickname)
-                .role(Role.USER)                 // 기본 권한
+                .role(null)                 // 기본 권한
                 .emailVerified(Boolean.TRUE.equals(emailVerified))
                 .lastLoginAt(Instant.now())
                 .build();

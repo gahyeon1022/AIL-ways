@@ -20,13 +20,46 @@ brew install mongodb-community
 >  >  ./gradlew bootRun 
 
 
-### Swagger(API 문서화 자동화
-백엔드 서버 실행 후(./gradlew bootRun or /Users/seungzun/Desktop/AIL-ways/apps/backend/src/main/java/app/BackendApplication.java 실행)
+## 📖 API 문서 (Swagger)
 
+우리 프로젝트는 [springdoc-openapi](https://springdoc.org/) 기반 Swagger UI를 제공합니다.  
+개발 환경에서 서버를 실행하면, Swagger에서 API 명세와 테스트를 바로 할 수 있습니다.
+루트에서 ./gradlew bootRun 또는 apps/backend/src/main/app/BackendApplication.java 실행
+### 🔹 Swagger 접속
+서버 실행 후 브라우저에서 접속:
 http://localhost:8080/swagger-ui/index.html 접속
-- 09.26: 스웨거 기본 작동 가능, 세부 설명 포함x, 09.28까지 세부 설명 추가 예정--
+### 🔹 주요 기능
+- 컨트롤러/엔드포인트 자동 문서화 (`@Tag`, `@Operation` 적용)
+	•	@Tag → 컨트롤러 단위 그룹 설명 (API 묶음이 어떤 역할인지 서술)
+	•	@Operation → 엔드포인트 단위 설명 (각 URL이 하는 동작을 서술)
+<img width="794" height="406" alt="2060f4c0b42d968374b6c310a9ea92fdbea2d8a05847c61d179bb261a68c843f 복사본" src="https://github.com/user-attachments/assets/d73b57cf-71c1-4c61-ad36-839563d47163" />
 
-### 로컬(이메일)로 회원가입에 대한 api명세서 입니당
+
+- 요청/응답 DTO 구조 자동 표시
+- `Try it out` 버튼으로 API 직접 호출 가능
+
+### 🔹 JWT 인증 사용 방법
+1. 먼저 **로그인 API**(`/api/auth/local/login`) 호출해서 JWT 토큰을 발급받습니다.
+   **현재 공용DB 연결이 되어 있지 않기 때문에, 로컬에서 본인이 회원가입을 한 아이디로만 가능합니다!!**
+    - 요청 예시:
+      ```json
+      {
+        "userId": "testuser",
+        "userPw": "StrongPassw0rd!"
+      }
+      ```
+    - 응답 예시:
+      ```json
+      {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "type": "Bearer"
+      }
+      ```
+
+3. Swagger UI 상단의 **Authorize 🔒 버튼** 클릭
+4. 입력창에 **토큰 문자열만** 붙여넣기
+
+### 로컬(이메일)로 회원가입에 대한 api명세서
 
 인증 (Authentication) - /api/auth
 

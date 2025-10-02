@@ -231,9 +231,6 @@ export default function LocalSignupModal({ open, onClose }: Props) {
                       [&::-webkit-inner-spin-button]:appearance-none
                     "
                   />
-                  <button type="button" className={BTN}>
-                    인증하기
-                  </button>
                 </div>
               </label>
 

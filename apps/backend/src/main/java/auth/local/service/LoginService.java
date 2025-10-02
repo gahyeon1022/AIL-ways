@@ -21,20 +21,22 @@ public class LoginService {
     private final JwtUtil jwtUtil;
 
     public LoginResponse login(LoginRequest req) {
-        User user = userRepository.findByUserId(req.userId())
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 계정입니다."));
-
-
-        // 비밀번호를 비교합니다.
+        // 1) 자격 증명 먼저 조회
         LocalCredentials cred = credRepo.findByUserId(req.userId())
                 .orElseThrow(() -> new RuntimeException("자격 증명 없음"));
 
+        // 2) User는 cred.userRef 로 조회
+        User user = userRepository.findById(cred.getUserRef())
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 계정입니다."));
+
+        // 3) 비밀번호 검증
         if (!passwordEncoder.matches(req.userPw(), cred.getPwHash())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        // JWT 토큰을 생성합니다.
+        // 4) JWT 발급 (email 기반)
         String token = jwtUtil.generateToken(user.getEmail());
+
         return new LoginResponse(token, "Bearer");
     }
 }
