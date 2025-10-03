@@ -5,6 +5,7 @@ import board.repository.BoardRepository;
 import match.domain.Match;
 import match.domain.MatchStatus;
 import match.dto.MenteeInfoDTO;
+import match.dto.MentorInfoDTO;
 import match.repository.MatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -140,6 +141,37 @@ public class MatchService {
                     );
                 })
                 .filter(Objects::nonNull) // null로 반환된 경우를 최종적으로 걸러냅니다.
+                .toList();
+    }
+    public List<MentorInfoDTO> getMentorsForMentee(String menteeUserId) { //멘티가 매칭 중인 멘토 목록 조회를 위해 필요
+        List<Match> matches = matchRepo.findByMenteeUserId(menteeUserId).stream()
+                .filter(match -> match.getStatus() == MatchStatus.ACCEPTED)
+                .toList();
+
+        if (matches.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> mentorUserIds = matches.stream()
+                .map(Match::getMentorUserId)
+                .toList();
+
+        Map<String, User> mentorMap = userRepo.findAllByUserIdIn(mentorUserIds).stream()
+                .collect(Collectors.toMap(User::getUserId, user -> user));
+
+        return matches.stream()
+                .map(match -> {
+                    User mentor = mentorMap.get(match.getMentorUserId());
+                    if (mentor == null) {
+                        return null;
+                    }
+                    return new MentorInfoDTO(
+                            mentor.getUserId(),
+                            mentor.getUserName(),
+                            match.getId()
+                    );
+                })
+                .filter(Objects::nonNull)
                 .toList();
     }
 }

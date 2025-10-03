@@ -3,6 +3,8 @@ package match.controller;
 import common.dto.ApiResponse;
 import common.dto.ApiError;
 import common.dto.ErrorCode;
+import match.dto.MentorInfoDTO;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,7 +57,9 @@ public class MatchController {
         matchService.reject(matchId, userId);
         return ApiResponse.ok(null);
     }
+
     /** 특정 멘토의 모든 멘티 목록 조회 */
+    @Operation(summary = "멘티 목록 조회", description = "본인(멘토)과 매칭 중인 멘티 목록을 조회합니다.")
     @GetMapping("/myMentees")
     public ApiResponse<List<MenteeInfoDTO>> getMentees(Authentication auth) {
         String userId = auth.getName();
@@ -69,6 +73,22 @@ public class MatchController {
         List<MenteeInfoDTO> mentees = matchService.getMenteesForMentor(userId);
         return ApiResponse.ok(mentees);
 
+    }
+
+    /** 특정 멘티의 모든 멘토 목록 조회 */
+    @Operation(summary = "멘토 목록 조회", description = "본인(멘티)과 매칭 중인 멘토 목록을 조회합니다.")
+    @GetMapping("/myMentors")
+    public ApiResponse<List<MentorInfoDTO>> getMyMentors(Authentication auth) {
+        String userId = auth.getName();
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        if (user.getRole() != Role.MENTEE) {
+            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "멘티만 접근할 수 있습니다."));
+        }
+
+        List<MentorInfoDTO> mentors = matchService.getMentorsForMentee(userId);
+        return ApiResponse.ok(mentors);
     }
 
     /** 요청 바디 DTO */
