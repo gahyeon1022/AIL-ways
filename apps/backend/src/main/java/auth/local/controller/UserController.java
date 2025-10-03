@@ -33,7 +33,8 @@ public class UserController {
     // GET /users/me
     @Operation(summary = "내 정보 조희", description = "등록된 전체 유저 조희")
     @GetMapping("/me")
-    public ResponseEntity<User> getUserByUserId(@PathVariable String userId) {
+    public ResponseEntity<User> getUserByUserId(Authentication auth) { //토큰 기반
+        String userId = auth.getName();
         return userRepository.findByUserId(userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

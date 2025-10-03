@@ -1,6 +1,9 @@
 package match.controller;
 
 import common.dto.ApiResponse;
+import common.dto.ApiError;
+import common.dto.ErrorCode;
+import org.springframework.security.core.Authentication;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,11 @@ public class MatchController {
     /** 멘티가 멘토 userId를 입력해서 매칭 요청 */
     @Operation(summary = "매칭 요청", description = "멘티가 멘토에게 매칭 요청을 보냅니다")
     @PostMapping("/request")
-    public ApiResponse<Match> request(@RequestBody MatchRequest req) {
+    public ApiResponse<Match> request(@RequestBody MatchRequest req, Authentication auth) {
+        String userId = auth.getName();
+        if (!userId.equals(req.menteeUserId())) {
+            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "접근 권한이 없습니다."));
+        }
         return ApiResponse.ok(
                 matchService.requestMatch(req.menteeUserId(), req.mentorUserId())
         );
@@ -30,26 +37,27 @@ public class MatchController {
     /** 멘토가 수락 */
     @Operation(summary = "매칭 수락", description = "멘토가 멘티의 매칭 요청을 수락합니다")
     @PostMapping("/{matchId}/accept")
-    public ApiResponse<Void> accept(@PathVariable String matchId,
-                                   @RequestParam String actingUserId) {
-        matchService.accept(matchId, actingUserId);
+    public ApiResponse<Void> accept(@PathVariable String matchId, Authentication auth) {
+        String userId = auth.getName();
+        matchService.accept(matchId, userId);
         return ApiResponse.ok(null);
     }
-
-
 
     /** 멘토가 거절 */
     @Operation(summary = "매칭 거절", description = "멘토가 멘티의 매칭 요청을 거절합니다")
     @PostMapping("/{matchId}/reject")
-    public ApiResponse<Void> reject(@PathVariable String matchId,
-                                   @RequestParam String actingUserId) {
-        matchService.reject(matchId, actingUserId);
+    public ApiResponse<Void> reject(@PathVariable String matchId, Authentication auth) {
+        String userId = auth.getName();
+        matchService.reject(matchId, userId);
         return ApiResponse.ok(null);
     }
-
     /** 특정 멘토의 모든 멘티 목록 조회 */
     @GetMapping("/{mentorId}/mentees")
-    public ApiResponse<List<MenteeInfoDTO>> getMentees(@PathVariable String mentorId) {
+    public ApiResponse<List<MenteeInfoDTO>> getMentees(@PathVariable String mentorId, Authentication auth) {
+        String userId = auth.getName();
+        if (!userId.equals(mentorId)) {
+            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "접근 권한이 없습니다."));
+        }
         List<MenteeInfoDTO> mentees = matchService.getMenteesForMentor(mentorId);
         return ApiResponse.ok(mentees);
     }

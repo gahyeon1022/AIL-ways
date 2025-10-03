@@ -8,6 +8,7 @@ import auth.local.service.EmailVerificationService;
 import auth.local.service.LoginService;
 import auth.local.service.SignUpService;
 
+import common.security.jwt.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,12 +32,14 @@ public class AuthController {
     private final EmailVerificationService emailVerifSvc;
     private final SignUpService signUpSvc;
     private final LoginService loginSvc; // <<< 1. LoginService 필드 추가
+    private final JwtUtil jwtUtil; // <<< Add jwtUtil field
 
-    // <<< 2. 생성자 파라미터에 LoginService 추가
-    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc) {
+    // <<< 2. 생성자 파라미터에 LoginService, JwtUtil 추가
+    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc, JwtUtil jwtUtil) {
         this.emailVerifSvc = emailVerifSvc;
         this.signUpSvc = signUpSvc;
         this.loginSvc = loginSvc; // <<< 3. 주입받은 loginSvc를 필드에 할당.
+        this.jwtUtil = jwtUtil; // <<< Assign jwtUtil
     }
 
     // 1) 이메일로 인증코드 보내기
@@ -78,19 +81,19 @@ public class AuthController {
 
         Map<String, Object> body = new HashMap<>();
         body.put("success", true);
-        body.put("data", result);
+        body.put("accessToken", jwtUtil.generateToken(result.getUserId()));
+        body.put("refreshToken", jwtUtil.generateRefreshToken(result.getUserId()));
         body.put("error", null); // ✅ HashMap 은 null 허용
 
         return ResponseEntity.ok(body);
     }
+
     @Operation(summary = "아이디 중복 체크", description = "입력한 userId가 사용 가능한지 확인")
     @GetMapping("/check-userid")
     public ResponseEntity<Map<String, Boolean>> checkUserId(@RequestParam("userId") String userId) {
         boolean isAvailable = signUpSvc.isUserIdAvailable(userId);
         return ResponseEntity.ok(Map.of("isAvailable", isAvailable));
     }
-
-
 
     // DTO (record)
     public record SendCodeReq(@NotBlank @Email String email) {}

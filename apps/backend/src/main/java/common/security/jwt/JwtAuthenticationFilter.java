@@ -30,9 +30,9 @@ public class JwtAuthenticationFilter extends org.springframework.web.filter.Once
         String token = resolveToken(request);
 
         if (token != null && jwtUtil.validateToken(token)) {
-            String email = jwtUtil.getEmail(token);
+            String userId = jwtUtil.getUserId(token);
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(email, null, null);
+                    new UsernamePasswordAuthenticationToken(userId, null, null);
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
