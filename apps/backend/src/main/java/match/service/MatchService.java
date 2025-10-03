@@ -137,7 +137,7 @@ public class MatchService {
                     return new MenteeInfoDTO(
                             mentee.getUserId(),
                             mentee.getUserName(),
-                            match.getId()
+                            match.getMatchId()
                     );
                 })
                 .filter(Objects::nonNull) // null로 반환된 경우를 최종적으로 걸러냅니다.
@@ -168,7 +168,7 @@ public class MatchService {
                     return new MentorInfoDTO(
                             mentor.getUserId(),
                             mentor.getUserName(),
-                            match.getId()
+                            match.getMatchId()
                     );
                 })
                 .filter(Objects::nonNull)

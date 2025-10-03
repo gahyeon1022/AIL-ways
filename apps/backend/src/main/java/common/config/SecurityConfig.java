@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 // 👇 users/matches는 의도에 맞게 정해 (본인 API면 authenticated 권장)
                                 .requestMatchers("/api/users/**").authenticated() //user
                                 .requestMatchers("/api/matches/**").authenticated() //match
+                                .requestMatchers("/api/boards/**").authenticated() //board
                                 .anyRequest().denyAll() // 화면은 3000이 담당
                 )
 

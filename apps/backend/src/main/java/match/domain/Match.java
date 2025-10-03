@@ -11,7 +11,7 @@ import java.time.Instant;
 @Document("matches")
 public class Match {
     @Id
-    private String id;
+    private String matchId; // id-> matchId로 수정
 
     @Indexed
     private String mentorUserId;   // User.userId
