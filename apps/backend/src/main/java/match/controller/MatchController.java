@@ -11,6 +11,10 @@ import match.domain.Match;
 import match.dto.MenteeInfoDTO;
 import match.service.MatchService;
 import org.springframework.web.bind.annotation.*;
+import user.domain.Role;
+import user.domain.User;
+import user.repository.UserRepository;
+
 import java.util.List;
 
 @Tag(name = "Match API", description = "멘토-멘티 매칭 요청, 수락, 거절 API")
@@ -20,7 +24,7 @@ import java.util.List;
 public class MatchController {
 
     private final MatchService matchService;
-
+    private final UserRepository userRepository;
     /** 멘티가 멘토 userId를 입력해서 매칭 요청 */
     @Operation(summary = "매칭 요청", description = "멘티가 멘토에게 매칭 요청을 보냅니다")
     @PostMapping("/request")
@@ -52,14 +56,19 @@ public class MatchController {
         return ApiResponse.ok(null);
     }
     /** 특정 멘토의 모든 멘티 목록 조회 */
-    @GetMapping("/{mentorId}/mentees")
-    public ApiResponse<List<MenteeInfoDTO>> getMentees(@PathVariable String mentorId, Authentication auth) {
+    @GetMapping("/myMentees")
+    public ApiResponse<List<MenteeInfoDTO>> getMentees(Authentication auth) {
         String userId = auth.getName();
-        if (!userId.equals(mentorId)) {
-            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "접근 권한이 없습니다."));
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        if (user.getRole() != Role.MENTOR) {
+            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "멘토만 접근할 수 있습니다."));
         }
-        List<MenteeInfoDTO> mentees = matchService.getMenteesForMentor(mentorId);
+
+        List<MenteeInfoDTO> mentees = matchService.getMenteesForMentor(userId);
         return ApiResponse.ok(mentees);
+
     }
 
     /** 요청 바디 DTO */
