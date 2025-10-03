@@ -31,7 +31,7 @@ public class UserController {
     }
 
     // GET /users/me
-    @Operation(summary = "내 정보 조희", description = "등록된 전체 유저 조희")
+    @Operation(summary = "내 정보 조희", description = "내 정보 조희")
     @GetMapping("/me")
     public ResponseEntity<User> getUserByUserId(Authentication auth) { //토큰 기반
         String userId = auth.getName();
