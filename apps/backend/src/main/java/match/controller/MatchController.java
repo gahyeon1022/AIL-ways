@@ -32,11 +32,15 @@ public class MatchController {
     @PostMapping("/request")
     public ApiResponse<Match> request(@RequestBody MatchRequest req, Authentication auth) {
         String userId = auth.getName();
-        if (!userId.equals(req.menteeUserId())) {
-            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "접근 권한이 없습니다."));
+
+        User user = userRepository.findByUserId(userId) //역할이 멘티일 경우에만 가능
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+        if (user.getRole() != Role.MENTEE) {
+            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "멘티만 매칭을 요청할 수 있습니다."));
         }
+
         return ApiResponse.ok(
-                matchService.requestMatch(req.menteeUserId(), req.mentorUserId())
+                matchService.requestMatch(userId, req.mentorUserId())
         );
     }
 
@@ -92,5 +96,5 @@ public class MatchController {
     }
 
     /** 요청 바디 DTO */
-    public record MatchRequest(String menteeUserId, String mentorUserId) {}
+    public record MatchRequest(String mentorUserId) {}
 }
