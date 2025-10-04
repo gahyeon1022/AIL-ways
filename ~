@@ -1,0 +1,43 @@
+Merge remote-tracking branch 'origin/test/local-login' into feat/match/backend/mentoring-features-swagger
+
+# Conflicts:
+#	.gitignore
+#
+# It looks like you may be committing a merge.
+# If this is not correct, please run
+#	git update-ref -d MERGE_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch feat/match/backend/mentoring-features-swagger
+# Your branch is up to date with 'origin/feat/match/backend/mentoring-features-swagger'.
+#
+# All conflicts fixed but you are still merging.
+#
+# Changes to be committed:
+#	new file:   apps/frontend/AIL-ways
+#	modified:   apps/frontend/next.config.ts
+#	modified:   apps/frontend/package-lock.json
+#	modified:   apps/frontend/package.json
+#	new file:   apps/frontend/src/app/board-list/Indiv-qna/page.tsx
+#	new file:   apps/frontend/src/app/board-list/page.tsx
+#	modified:   apps/frontend/src/app/layout.tsx
+#	modified:   apps/frontend/src/app/login/page.tsx
+#	new file:   apps/frontend/src/app/mentoring-current/page.tsx
+#	modified:   apps/frontend/src/app/page.tsx
+#	new file:   apps/frontend/src/app/profile/page.tsx
+#	modified:   apps/frontend/src/app/select/page.tsx
+#	modified:   apps/frontend/src/app/signup/page.tsx
+#	deleted:    apps/frontend/src/components/LocalSignupModal.tsx
+#	new file:   apps/frontend/src/components/layout/MentoringCurrent.tsx
+#	new file:   apps/frontend/src/components/layout/header/NotificationDropdown.tsx
+#	new file:   apps/frontend/src/components/layout/header/ProfileDropdown.tsx
+#	new file:   apps/frontend/src/components/layout/header/index.tsx
+#	renamed:    apps/frontend/src/components/LocalLoginModal.tsx -> apps/frontend/src/components/modal/LocalLoginModal.tsx
+#	new file:   apps/frontend/src/components/modal/LocalSignupModal.tsx
+#	new file:   apps/frontend/src/components/ui/Button.tsx
+#	new file:   apps/frontend/src/components/ui/Qna.tsx
+#
