@@ -13,5 +13,5 @@ public interface MatchRepository extends MongoRepository<Match, String> {
     Optional<Match> findByPairKey(String pairKey);
 
     List<Match> findByMentorUserId(String mentorUserId);
-
+    List<Match> findByMenteeUserId(String menteeUserId);
 }

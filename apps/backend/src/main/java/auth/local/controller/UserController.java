@@ -15,7 +15,7 @@ import java.util.List;
 
 @Tag(name = "User API", description = "회원 관리 API (프로필 조회/수정, 유저 정보 관리)")
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -23,17 +23,18 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserService userService;
 
-    // 전체 조회: GET /users
+    // 전체 조회: GET api/users
     @Operation(summary = "전체 유저 조희", description = "등록된 전체 유저 조희")
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // GET /users/me
-    @Operation(summary = "내 정보 조희", description = "등록된 전체 유저 조희")
+    // GET api/users/me
+    @Operation(summary = "내 정보 조희", description = "내 정보 조희")
     @GetMapping("/me")
-    public ResponseEntity<User> getUserByUserId(@PathVariable String userId) {
+    public ResponseEntity<User> getUserByUserId(Authentication auth) { //토큰 기반
+        String userId = auth.getName();
         return userRepository.findByUserId(userId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

@@ -1,5 +1,12 @@
 package common.security.jwt;
 
+import user.domain.User;
+import user.domain.Role;
+import user.repository.UserRepository;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.List;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,9 +23,11 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends org.springframework.web.filter.OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -30,9 +39,12 @@ public class JwtAuthenticationFilter extends org.springframework.web.filter.Once
         String token = resolveToken(request);
 
         if (token != null && jwtUtil.validateToken(token)) {
-            String email = jwtUtil.getEmail(token);
+            String userId = jwtUtil.getUserId(token);
+            User user = userRepository.findByUserId(userId).orElseThrow();
+            Role role = user.getRole();
+            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
             UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(email, null, null);
+                    new UsernamePasswordAuthenticationToken(userId, null, authorities);
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
