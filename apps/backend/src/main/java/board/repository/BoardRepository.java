@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends MongoRepository<Board, String> {
     Optional<Board> findByMatchId(String matchId);
+    Optional<Board> findByPairKey(String pairKey);
+
 }

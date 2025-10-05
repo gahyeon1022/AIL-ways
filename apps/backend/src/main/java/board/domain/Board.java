@@ -17,6 +17,9 @@ public class Board {
     @Indexed(unique = true)
     private String matchId;               // 매칭 하나당 게시판 하나
 
+    @Indexed(unique = true)
+    private String pairKey;               // mentorUserId::menteeId
+
     private String title;                 // "Mentor-Mentee Room" 등
     private List<String> memberUserIds;   // [mentorUserId, menteeUserId]
     private Instant createdAt;

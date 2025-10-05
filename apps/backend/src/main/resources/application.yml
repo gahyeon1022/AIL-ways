@@ -62,3 +62,7 @@ logging:
   level:
     org.springframework.security: INFO
     org.springframework.web: INFO
+
+jwt:
+  # 'secret:'은 'jwt:'보다 두 칸 들여써야 합니다.
+  secret: V29vTmVvTGVlS2FuZ0RhaG9vbkhhU2V1bmdKdU5KYWtLYW5nSmlzZW9uZw==

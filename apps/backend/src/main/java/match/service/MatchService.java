@@ -28,7 +28,6 @@ public class MatchService {
     private final MatchRepository matchRepo;
     private final BoardRepository boardRepo;
 
-    // ... requestMatch, accept, reject 메서드는 이전과 동일 ...
     @Transactional
     public Match requestMatch(String menteeUserId, String mentorUserId) {
         if (menteeUserId == null || mentorUserId == null) {
@@ -91,6 +90,7 @@ public class MatchService {
         boardRepo.findByMatchId(matchId).orElseGet(() -> {
             Board b = Board.builder()
                     .matchId(matchId)
+                    .pairKey(m.getPairKey())
                     .title("Q&A")
                     .memberUserIds(List.of(m.getMentorUserId(), m.getMenteeUserId()))
                     .createdAt(Instant.now())
