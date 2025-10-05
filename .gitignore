@@ -1,27 +1,106 @@
-### Java ###
+# ===================== Root / Monorepo =====================
+# OS
+.DS_Store
+Thumbs.db
+
+# Node workspaces (루트/하위 패키지 모두)
+node_modules/
+**/node_modules/
+
+# pnpm / yarn / pnp
+.pnpm-debug.log*
+.pnp.*
+/.pnp
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# 공통 빌드 산출물
+dist/
+**/dist/
+build/
+**/build/
+out/
+**/out/
+coverage/
+**/coverage/
+*.tsbuildinfo
+
+# 로그
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+turbo-debug.log*
+
+# Turborepo / Nx 캐시(사용 시)
+.turbo/
+**/.turbo/
+nx-out/
+**/nx-out/
+.tmp/
+**/.tmp/
+
+# Env (모든 패키지에서 실제 값은 무시, 예시만 커밋)
+**/.env*
+!**/.env.example
+
+# Vercel / Firebase / 기타 호스팅
+.vercel/
+.firebase/
+.supabase/
+
+# Docker
+**/.dockerignore
+**/docker-compose.override.yml
+
+# ===================== Apps: Next.js =====================
+# Next.js 산출물(모든 앱에 적용)
+.next/
+**/.next/
+
+# Storybook(사용 시)
+.storybook-out/
+**/.storybook-out/
+storybook-static/
+**/storybook-static/
+
+# ===================== Packages: Node/TS 라이브러리 =====================
+# 일반 라이브러리 빌드 산출물
+lib/
+**/lib/
+esm/
+**/esm/
+cjs/
+**/cjs/
+
+# ===================== Java / Gradle (apps/backend 등) =====================
+# Java 아티팩트
 *.class
 *.log
 *.jar
 *.war
 *.ear
 
-# gradle-wrapper.jar 은 예외
+# Gradle wrapper: 필수 파일만 허용
+!gradlew
+!gradlew.bat
 !gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
-### Gradle ###
-apps/backend/.gradle/
-build/
-out/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Gradle 캐시 및 산출물(백엔드/모듈별)
+.gradle/
+**/.gradle/
 
-### IntelliJ IDEA ###
+# IDE
 .idea/
 *.iws
 *.iml
 *.ipr
 
-### Eclipse / STS ###
+# Eclipse / STS
 .apt_generated
 .classpath
 .factorypath
@@ -29,66 +108,17 @@ out/
 .settings
 .springBeans
 .sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
+# 백엔드 바이너리 디렉터리(모듈 단위)
+bin/
+**/bin/
 
-### macOS ###
-.DS_Store
-
-**/node_modules/
-
-### Gradle Wrapper ###
-!gradlew
-!gradlew.bat
-!gradle/wrapper/gradle-wrapper.properties
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
+# ===================== Misc =====================
 *.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
