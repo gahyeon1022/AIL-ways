@@ -1,7 +1,11 @@
 # ===================== Root / Monorepo =====================
+
+.vscode/
+**/.vscode/
 # OS
 .DS_Store
 Thumbs.db
+
 
 # Node workspaces (루트/하위 패키지 모두)
 node_modules/
