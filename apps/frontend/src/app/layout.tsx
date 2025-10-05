@@ -3,7 +3,7 @@ import HeaderGate from "@/components/layout/HeaderGate";
 
 export const metadata = {
   icons: {
-    icon: [ { url: "/AIL-ways_fav.ico" }
+    icon: [ { url: "/AIL-ways_fav.ico" }], 
   },
 };
 
