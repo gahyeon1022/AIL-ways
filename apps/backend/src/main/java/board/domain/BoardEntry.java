@@ -2,7 +2,6 @@ package board.domain;
 
 import lombok.*;
 
-
 import java.time.Instant;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -14,4 +13,9 @@ public class BoardEntry {
     private BoardAnswer boardAnswer;
     private String title;
 
+    // ✅ 1. '질문 번호' 필드 추가 (1부터 시작)
+    private int entryNo;
+
+    // ✅ 2. '완료 여부' 상태 필드 추가
+    private EntryStatus status;
 }

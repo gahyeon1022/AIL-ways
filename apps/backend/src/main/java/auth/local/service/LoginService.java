@@ -34,9 +34,10 @@ public class LoginService {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 4) JWT 발급 (email 기반)
-        String token = jwtUtil.generateToken(user.getEmail());
+        // 4) JWT 발급 (userId 기반)
+        String accessToken = jwtUtil.generateToken(user.getUserId());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
 
-        return new LoginResponse(token, "Bearer");
+        return new LoginResponse(accessToken, refreshToken, "Bearer", user.getUserId());
     }
 }

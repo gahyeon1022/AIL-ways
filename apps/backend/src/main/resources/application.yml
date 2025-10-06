@@ -40,8 +40,7 @@ spring:
             authorization-grant-type: authorization_code
             client-name: Kakao
             scope:
-              - profile_nickname
-              # - account_email # 카카오 - 비즈앱 등록시 사용 가능
+               - account_email # 카카오 - 비즈앱 등록시 사용 가능
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -62,3 +61,7 @@ logging:
   level:
     org.springframework.security: INFO
     org.springframework.web: INFO
+
+jwt:
+  # 'secret:'은 'jwt:'보다 두 칸 들여써야 합니다.
+  secret: V29vTmVvTGVlS2FuZ0RhaG9vbkhhU2V1bmdKdU5KYWtLYW5nSmlzZW9uZw==

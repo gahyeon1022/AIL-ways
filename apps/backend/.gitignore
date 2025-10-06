@@ -48,3 +48,12 @@ bin/
 
 ### Maven home (IDEA) ###
 /mavenHomeManager.xml
+
+# Next.js build output
+.next/
+
+# Next.js lock file
+.next.lock
+
+# Next.js telemetry file
+next-telemetry.ts

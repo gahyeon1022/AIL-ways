@@ -3,6 +3,7 @@ package common.config; //social + local integration
 
 
 import auth.social.kakao.service.KakaoService;
+import common.security.jwt.JwtAuthenticationFilter;
 import common.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -15,19 +16,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // [ADD
 import org.springframework.security.crypto.password.PasswordEncoder; // [ADD]
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
-
-//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // [ADD - JWT 필터 쓸 때]
-
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final KakaoService kakaoService; // [ADD - 소셜 성공 처리 연결 시]
-// private final JwtTokenProvider jwtTokenProvider; // [ADD - JWT 사용 시]
+    private final KakaoService kakaoService; //
     private final JwtUtil jwtUtil;
-
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
 
@@ -42,19 +40,14 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
-                                .requestMatchers("/api/auth/**").permitAll() // 회원가입/로그인
-                                .requestMatchers("/actuator/health").permitAll() //이거 뭐에요?
-                                .requestMatchers("/api/**").authenticated() // 그 외 API는 인증 필요
-                                .requestMatchers("/api/user/**").authenticated()
-                                .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll() //swagger문서 확인용
-
-                                //.requestMatchers("/select").permitAll()
-                                .requestMatchers("/users/**").permitAll()  // ✅ 공개
+                                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll() //social
+                                .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll() //swagger
+                                .requestMatchers("/api/auth/**").permitAll() //local
+                                // 👇 users/matches는 의도에 맞게 정해 (본인 API면 authenticated 권장)
+                                .requestMatchers("/api/users/**").authenticated() //user
+                                .requestMatchers("/api/matches/**").authenticated() //match
+                                .requestMatchers("/api/boards/**").authenticated() //board
                                 .anyRequest().denyAll() // 화면은 3000이 담당
-
-// .anyRequest().authenticated()
-
                 )
 
 // 인증 안 된 요청은 리다이렉트 말고 JSON 401로 (API 개발에 유리)
@@ -86,8 +79,9 @@ public class SecurityConfig {
                 )
 
                 .formLogin(AbstractHttpConfigurer::disable)
-
                 .httpBasic(AbstractHttpConfigurer::disable);
+
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
 

@@ -190,3 +190,21 @@ Interest (흥미 분야) Enum
 -BACKEND
 -FRONTEND
 -ENTRY
+
+
+
+# 프론트엔드 패키지 설치방법
+스택 버전
+next: "15.4.3
+react: "19.1.0"
+tailwindcss: "4.1.11",
+typescript: "5"
+
+**반드시 터미널에서 AIL-ways/apps/frontend로 이동한 후에** npm install 하기. 그렇게 안하면 루트 디렉토리에 패키지 파일이 생겨서 버전 호환에 문제 발생할 수 있습니다.
+
+새로운 라이브러리가 이 브랜치에 추가되었을 수 있기 때문에 pull 하실 때마다 왠만하면 npm install 하는것을 권장합니다.
+
+설치방법 : apps/frontend로 이동한 후에 터미널에 npm install 입력
+
+## 프론트엔드 서버 localhost:3000 실행시키는 방법
+apps/frontend로 이동한 후에 터미널에 npm run dev 입력 
