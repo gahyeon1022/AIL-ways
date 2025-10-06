@@ -120,7 +120,7 @@ export default function LocalSignupModal({ open, onClose }: Props) {
 
               <label className="mt-2 flex items-center gap-2 text-sm text-gray-700">
                 <input type="checkbox" name="tos" checked={tos} onChange={(e)=>setTos(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                (필수) 약관 동의
+                (필수) 서비스 이용 약관
               </label>
 
               <button type="submit" disabled={loading} className="mt-3 w-full rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
