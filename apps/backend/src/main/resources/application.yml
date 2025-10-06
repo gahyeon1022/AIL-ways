@@ -40,8 +40,7 @@ spring:
             authorization-grant-type: authorization_code
             client-name: Kakao
             scope:
-              - profile_nickname
-              # - account_email # 카카오 - 비즈앱 등록시 사용 가능
+               - account_email # 카카오 - 비즈앱 등록시 사용 가능
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
