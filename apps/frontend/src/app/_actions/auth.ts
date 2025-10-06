@@ -1,5 +1,6 @@
 "use server";
 import { BE } from "@/app/lib/env"; 
+import { cookies } from "next/headers";
 
 // ── 응답 규약: { success, data, error } ─────────────────────────
 type ApiEnvelope<T = unknown> = {
@@ -43,6 +44,31 @@ async function callAPI<T>(path: string, init?: RequestInit): Promise<{ data: T }
 }
 
 // -서버액션함수들-
+
+//로그인 액션 함수
+export async function loginAction(formData: FormData) {
+  const userId = String(formData.get("userId") ?? "");
+  const userPw = String(formData.get("userPw") ?? "");
+  if (!userId || !userPw) return { ok: false, msg: "아이디/비밀번호 입력 필요" };
+
+  try {
+    const { data } = await callAPI<{ token?: string; user?: { userId: string; userName?: string } }>(
+      `/api/auth/local/login`,
+      { method: "POST", body: JSON.stringify({ userId, userPw }) }
+    );
+
+    if (data?.token) {
+      cookies().set("AUTH_TOKEN", data.token, {
+        httpOnly: true, sameSite: "lax", secure: true, path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7일
+      });
+    }
+
+    return { ok: true, msg: "로그인 성공", data }; 
+  } catch (e: any) {
+    return { ok: false, msg: String(e?.message || "로그인 실패") };
+  }
+}
 
 // 아이디 중복 확인
 export async function checkUserIdAction(userId: string) {

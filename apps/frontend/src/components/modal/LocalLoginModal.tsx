@@ -1,40 +1,27 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE 
+import { loginAction } from "@/app/_actions/auth"; // 
 
-type Props = { //부모 컴포넌트에서 전달 받음. 모달 열렸는지
-  open: boolean;
-  onClose: () => void;
-};
+type Props = { open: boolean; onClose: () => void };
 
-export default function LocalLoginModal({ open, onClose }: Props) { //회원가입 입력값 관리
+export default function LocalLoginModal({ open, onClose }: Props) {
   const router = useRouter();
   const [userId, setUserId] = useState("");
   const [userPw, setUserPw] = useState("");
   const [loading, setLoading] = useState(false);
 
-
-  async function onSubmit(e: React.FormEvent) { //폼 제출될때 호출되는 이벤트 핸들러
-  e.preventDefault(); //새로고침 방지
-   if (!userId || !userPw) return;
-
-    setLoading(true);  //서버로 보낼 요청 생성
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!userId || !userPw) return;
+    setLoading(true);
     try {
-      {/* api 요청 */}
-      const res = await fetch(`/api/auth/local/login`, { 
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-         body: JSON.stringify({
-          userId,      // string
-          userPw,      // string
-        }),
-      });
+      const fd = new FormData(e.currentTarget);
+      const r = await loginAction(fd);
+      if (!r.ok) throw new Error(r.msg || "로그인 실패");
 
-      if (!res.ok) throw new Error("로그인 실패");
       router.replace("/select");
       onClose();
     } catch (err: any) {
@@ -54,10 +41,7 @@ export default function LocalLoginModal({ open, onClose }: Props) { //회원가�
           exit={{ opacity: 0 }}
         >
           {/* Backdrop */}
-          <button
-            onClick={onClose}
-            className="absolute inset-0 bg-black/40"
-          />
+          <button onClick={onClose} className="absolute inset-0 bg-black/40" />
 
           {/* Panel */}
           <motion.div
@@ -65,26 +49,18 @@ export default function LocalLoginModal({ open, onClose }: Props) { //회원가�
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -24, opacity: 0 }}
             transition={{ type: "spring", stiffness: 280, damping: 24 }}
-            className="absolute left-1/2 top-10 w-[92vw] max-w-md -translate-x-1/2
-                       rounded-2xl bg-white/90 backdrop-blur p-6 shadow-2xl"
-            role="dialog"
-            aria-modal="true"
+            className="absolute left-1/2 top-10 w-[92vw] max-w-md -translate-x-1/2 rounded-2xl bg-white/90 backdrop-blur p-6 shadow-2xl"
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-800">이메일로 로그인</h2>
-              <button
-                onClick={onClose}
-                className="rounded p-1 text-gray-500 hover:bg-gray-100"
-              >
-                ✕
-              </button>
+              <button onClick={onClose} className="rounded p-1 text-gray-500 hover:bg-gray-100">✕</button>
             </div>
 
             <form onSubmit={onSubmit} className="grid gap-3 text-left">
-              {/* userId */}
               <label className="text-left text-sm font-medium text-gray-700">
                 아이디
                 <input
+                  name="userId" // 
                   type="text"
                   required
                   value={userId}
@@ -94,10 +70,10 @@ export default function LocalLoginModal({ open, onClose }: Props) { //회원가�
                 />
               </label>
 
-              {/* userPw */}
               <label className="text-left text-sm font-medium text-gray-700">
                 비밀번호
                 <input
+                  name="userPw" //
                   type="password"
                   required
                   value={userPw}
