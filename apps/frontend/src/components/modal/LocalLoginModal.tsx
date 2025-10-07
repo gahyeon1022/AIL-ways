@@ -20,7 +20,7 @@ export default function LocalLoginModal({ open, onClose }: Props) {
     try {
       const fd = new FormData(e.currentTarget);
       const r = await loginAction(fd);
-      if (!r.ok) throw new Error(r.msg || "로그인 실패");
+      if (!r?.ok) throw new Error(r?.msg ?? "로그인 실패");
 
       router.replace("/select");
       onClose();
