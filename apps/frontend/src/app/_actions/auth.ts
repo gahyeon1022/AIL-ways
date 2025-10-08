@@ -23,22 +23,28 @@ async function callAPI<T>(path: string, init?: RequestInit): Promise<{ data: T }
 
   // HTTP 에러 우선 처리
   if (!res.ok) {
-    const txt = await res.text().catch(() => "");
+    const text = await res.text().catch(() => "");
     try {
-      const j = JSON.parse(txt) as ApiEnvelope;
+      const j = JSON.parse(text) as ApiEnvelope;
       const msg = typeof j.error === "string" ? j.error : (j.error?.message ?? "요청 실패");
-      throw new Error(msg);
+      throw new Error(`[${res.status}] ${msg}`);
     } catch {
-      throw new Error("요청 실패");
+      const preview = text ? ` - ${text.slice(0, 120)}` : "";
+      throw new Error(`[${res.status}] 요청 실패${preview}`);
     }
   }
 
+  if (res.status === 204) { // (로그인에는 잘 안 쓰이지만 안전망)
+    return { data: undefined as T };
+  }
   // 규약 파싱
   const json = (await res.json()) as ApiEnvelope<T>;
-  if (!json || typeof json.success !== "boolean") throw new Error("서버 응답 형식 오류");
+  if (!json || typeof json.success !== "boolean") {
+    throw new Error(`[${res.status}] 서버 응답 형식 오류`);
+  }
   if (!json.success) {
     const msg = typeof json.error === "string" ? json.error : (json.error?.message ?? "오류");
-    throw new Error(msg);
+    throw new Error(`[${res.status}] ${msg}`);
   }
   return { data: json.data as T };
 }
@@ -87,6 +93,7 @@ export async function loginAction(formData: FormData) {
         typeof data.refreshTokenExpiresIn === "number" && data.refreshTokenExpiresIn > 0
           ? data.refreshTokenExpiresIn
           : 60 * 60 * 24 * 30; // 기본 30일
+
     jar.set({
       name: "REFRESH_TOKEN",
       value: data.refreshToken,
@@ -96,8 +103,9 @@ export async function loginAction(formData: FormData) {
       path: "/",
       maxAge: rtMaxAge,
     });
+  }
 
-    return { ok: true, msg: "로그인 성공", data: { userId: data.userId} } }; // data.token, data.refreshToken 접근 가능.
+    return { ok: true, msg: "로그인 성공", data: { userId: data.userId } }; // data.token, data.refreshToken 접근 가능.
   } catch (e: any) {
     return { ok: false, msg: String(e?.message || "로그인 실패") };
   }
@@ -132,7 +140,7 @@ export async function sendEmailCodeAction(email: string) {
       method: "POST",
       body: JSON.stringify({ email }),
     });
-    return { ok: true, ttl: data?.ttl, msg: "인증번호 전송 완료" };
+    return { ok: true, ttl: data?.ttl, msg: "인증번호를 전송했습니다." };
   } catch (e: any) {
     return { ok: false, msg: String(e?.message || "요청 실패") };
   }
@@ -160,16 +168,23 @@ export async function signupAction(formData: FormData) {
   const code = String(formData.get("code") ?? "");
   const tos = asBool(formData.get("tos"));
 
-  if (!tos) return { ok: false, msg: "약관 동의 필요가 필요합니다." };
+  const CONSENTS = [
+  { type: "TOS",           name: "tos",          label: "서비스 이용 약관",     required: true },
+  { type: "PRIVACY",       name: "privacy",      label: "개인정보 처리방침",     required: true },
+  { type: "VIDEO_CAPTURE", name: "videoCapture", label: "영상 촬영·분석 동의", required: true },
+    ] as const;
+
+  const consents = CONSENTS.map(c => ({ type: c.type, agreed: asBool(formData.get(c.name)) }));
+  const missing  = CONSENTS.filter(c => c.required && !asBool(formData.get(c.name))).map(c => c.label);
+  
+  if (missing.length) {
+    return { ok: false, msg: `다음 항목에 동의가 필요합니다: ${missing.join(", ")}` };
+  }
 
   const payload = {
     email, userName, userId, userPw, code,
     createdAt: new Date().toISOString(), // 백엔드에서 UTC 파싱 권장
-    consents: [
-      { type: "TOS", agreed: true },
-      { type: "PRIVACY", agreed: true },
-      { type: "VIDEO_CAPTURE", agreed: true },
-    ],
+    consents,
   };
 
   try {
