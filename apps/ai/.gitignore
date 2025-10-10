@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Data / Models / Logs
+*.csv
+*.mp4
+*.pt
+*.weights
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
