@@ -1,27 +1,103 @@
-### Java ###
+# ===================== Root / Monorepo =====================
+# 에디터(개인설정) - 팀 공유 불필요
+.vscode/
+**/.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node workspaces (루트/하위 패키지 모두)
+node_modules/
+**/node_modules/
+
+# 패키지 매니저 아티팩트
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+/.pnp
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# 공통 빌드 산출물
+dist/
+**/dist/
+build/
+**/build/
+out/
+**/out/
+coverage/
+**/coverage/
+*.tsbuildinfo
+.turbo/
+**/.turbo/
+nx-out/
+**/nx-out/
+.tmp/
+**/.tmp/
+
+# Env (점으로 시작하는 실제 값은 무시, 예시는 커밋)
+**/.env*
+!**/.env.example
+
+# 호스팅/도구
+.vercel/
+.firebase/
+.supabase/
+
+# ===================== Apps: Next.js =====================
+.next/
+**/.next/
+.storybook-out/
+**/.storybook-out/
+storybook-static/
+**/storybook-static/
+
+# ===================== Packages: Node/TS 라이브러리 =====================
+packages/**/lib/
+packages/**/dist/
+packages/**/esm/
+packages/**/cjs/
+
+libs/**/lib/
+libs/**/dist/
+libs/**/esm/
+libs/**/cjs/
+tools/**/lib/
+tools/**/dist/
+tools/**/esm/
+tools/**/cjs/
+
+# ===================== Java / Gradle (apps/backend 등) =====================
+# Java 아티팩트
 *.class
 *.log
 *.jar
 *.war
 *.ear
 
-# gradle-wrapper.jar 은 예외
+# Gradle wrapper: 필수 파일만 허용
+!gradlew
+!gradlew.bat
 !gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
-### Gradle ###
-apps/backend/.gradle/
-build/
-out/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Gradle 캐시 및 산출물(모듈별)
+.gradle/
+**/.gradle/
 
-### IntelliJ IDEA ###
+# IDE
 .idea/
 *.iws
 *.iml
 *.ipr
 
-### Eclipse / STS ###
+# Eclipse / STS
 .apt_generated
 .classpath
 .factorypath
@@ -29,68 +105,95 @@ out/
 .settings
 .springBeans
 .sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
-.vscode/
+# 백엔드 바이너리 디렉터리(모듈 단위)
+bin/
+**/bin/
 
-### macOS ###
-.DS_Store
-
-**/node_modules/
-
-### Gradle Wrapper ###
-!gradlew
-!gradlew.bat
-!gradle/wrapper/gradle-wrapper.properties
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
+# ===================== Misc =====================
 *.pem
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# ===================== AI / ML Stack =====================
+# --- Python 기본 산출물/캐시 ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.mypy_cache/
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+**/.cache/
+.python-version          # pyenv
+.venv/
+venv/
+env/
+.conda/
+conda-env/
+pip-wheel-metadata/
 
-# env files (can opt-in for committing if needed)
-.env*
+# --- Jupyter ---
+**/.ipynb_checkpoints/
+.jupyter/
 
-# vercel
-.vercel
+# --- 학습 산출물(데이터/모델/로그/체크포인트) ---
+# 폴더 자체는 무시하되, README나 .gitkeep은 허용(프로젝트 구조 유지용)
+data/
+datasets/
+outputs/
+logs/
+runs/                    # TensorBoard
+tb_logs/
+wandb/
+mlruns/                  # MLflow
+lightning_logs/          # PyTorch Lightning
+checkpoints/
+models/
+artifacts/
 
-# typescript
-*.tsbuildinfo
+!data/.gitkeep
+!data/README.md
+!datasets/.gitkeep
+!outputs/.gitkeep
+!logs/.gitkeep
+!runs/.gitkeep
+!checkpoints/.gitkeep
+!models/.gitkeep
+!artifacts/.gitkeep
 
-apps/frontend/.next/
+# --- 대용량/바이너리 모델 파일 포맷 ---
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.hdf5
+*.onnx
+*.tflite
+*.pb
+*.safetensors
+*.joblib
+*.pkl
+*.pickle
+*.sav
+*.npz
+*.npy
+
+# --- CUDA / C++ 빌드 산출물 ---
+*.cu.o
+*.o
+*.obj
+
+# --- Hugging Face/기타 캐시(레포 내부에 생성되는 경우) ---
+.huggingface/
+hf_cache/
