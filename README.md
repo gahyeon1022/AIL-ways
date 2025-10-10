@@ -206,5 +206,10 @@ typescript: "5"
 
 설치방법 : apps/frontend로 이동한 후에 터미널에 npm install 입력
 
-## 프론트엔드 서버 localhost:3000 실행시키는 방법
-apps/frontend로 이동한 후에 터미널에 npm run dev 입력 
+## 프론트엔드 서버 localhost:3000 실행시키는 방법 
+(1) ( 이 단계는 원격 저장소에서 프론트엔드 파일이 있는 브랜치를 자신의 로컬에다가 처음 pull/merge 했을때만 해주시면 됩니다. 그 후에는 안해도 됌.)
+<img width="582" height="916" alt="image" src="https://github.com/user-attachments/assets/a0c92163-9b80-47da-b745-6b0280d9eeb7" />
+.env.example 바로 아래에 .env.local 파일을 생성합니다.
+.env.example의 내용을 복사해서 .env.local에 붙여넣습니다.
+
+(2) apps/frontend로 이동한 후에 터미널에 npm run dev 입력.
