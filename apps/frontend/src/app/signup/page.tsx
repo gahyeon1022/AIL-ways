@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import LocalSignupModal from "@/components/modal/LocalSignupModal";
+import LocalSignupModal from "@/app/signup/components/LocalSignupModal";
 
 export default function SignupPage() {
     const [open, setOpen] = useState(false);
