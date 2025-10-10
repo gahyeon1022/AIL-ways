@@ -211,6 +211,7 @@ typescript: "5"
 <img width="582" height="916" alt="image" src="https://github.com/user-attachments/assets/a0c92163-9b80-47da-b745-6b0280d9eeb7" />
 
 .env.example 바로 아래에 .env.local 파일을 생성합니다.
+
 .env.example의 내용을 복사해서 .env.local에 붙여넣습니다.
 
 (2) apps/frontend로 이동한 후에 터미널에 npm run dev 입력.
