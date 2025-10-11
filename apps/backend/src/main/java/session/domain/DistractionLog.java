@@ -1,6 +1,8 @@
 package session.domain;
 
 import lombok.*;
+import session.domain.SelfFeedback;
+
 import java.time.Instant;
 
 @Getter
@@ -9,6 +11,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DistractionLog {
-    private String activity;    // 휴대폰 사용, 잡담 등
-    private Instant detectedAt;
+    private Instant detectedAt;   // 딴짓이 감지된 시각 (예: "2025-09-22T23:34:34Z")
+    private String activity;      // 감지된 딴짓 내용 (예: "휴대폰 봄")
+    private SelfFeedback selfFeedback; // 멘티의 자기 피드백
 }

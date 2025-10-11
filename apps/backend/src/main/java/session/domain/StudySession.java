@@ -31,4 +31,7 @@ public class StudySession {
 
     @Builder.Default
     private List<DistractionLog> distractionLogs = new ArrayList<>();
+
+    @Builder.Default
+    private List<QuestionLog> questionLogs = new ArrayList<>();
 }

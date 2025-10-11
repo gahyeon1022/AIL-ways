@@ -2,8 +2,8 @@ package session.dto;
 
 import java.time.Instant;
 
-public record StudyLogDTO(
+public record QuestionLogDTO(
         String authorUserId,
-        String content,
-        Instant timestamp
+        String question,
+        Instant createdAt
 ) {}

@@ -11,6 +11,7 @@ import report.domain.Report;
 import report.domain.SelfFeedback;
 import report.dto.CreateReportRequest;
 import report.repository.ReportRepository;
+import session.domain.StudySession;
 
 
 import java.time.Instant;
@@ -23,11 +24,16 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final MatchRepository matchRepository;
 
+
+
     /**
      * API: POST /api/reports
      * 새로운 학습 리포트를 생성합니다.
      */
-
+    //이거 해주세요!!
+    public void createReportFromSession(StudySession ended) {
+    }
+    //이거 말고 createReportFromSession 만들어 주세요
     @Transactional
     public Report createReport(CreateReportRequest req, String menteeUserId) {
         // 요청한 사용자가 리포트의 주체(멘티)가 맞는지 확인
@@ -150,7 +156,6 @@ public class ReportService {
         }
         return match;
     }
-
 
 }
 
