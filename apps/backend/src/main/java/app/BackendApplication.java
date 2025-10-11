@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @SpringBootApplication (
-        scanBasePackages = { "app", "auth", "user", "common", "board", "match", "report" }//app과 동등한 위치 패키지 생성시마다 추가필수
+        scanBasePackages = { "app", "auth", "user", "common", "board", "match", "report" , "session"}//app과 동등한 위치 패키지 생성시마다 추가필수
 )  // 전부 스캔
 public class BackendApplication {
     public static void main(String[] args) {

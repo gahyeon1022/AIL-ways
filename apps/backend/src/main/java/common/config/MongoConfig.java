@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = {"auth.local.repository","user.repository", "board.repository", "match.repository", "report.repository"})
+@EnableMongoRepositories(basePackages = {"auth.local.repository","user.repository", "board.repository", "match.repository", "report.repository", "session.repository"})
 @EnableMongoAuditing
 public class MongoConfig {
 }
