@@ -1,14 +1,19 @@
 package session.service;
 
+import board.repository.BoardRepository;
+import board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import report.repository.ReportRepository;
 import report.service.ReportService;
 import session.domain.*;
 import session.dto.*;
 import session.repository.StudySessionRepository;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -17,6 +22,10 @@ public class StudySessionService {
 
     private final StudySessionRepository studyRepo;
     private final ReportService reportService;
+    private final BoardService boardService;
+    private final BoardRepository boardRepository;
+    private final ReportRepository reportRepository;
+
     // 세션 시작
     @Transactional
     public StudySessionDTO startSession(String matchId, String menteeUserId, String mentorUserId) {
@@ -33,7 +42,6 @@ public class StudySessionService {
         return toDto(saved);
     }
 
-    // 세션 종료
     @Transactional
     public StudySession endSession(String sessionId) {
         StudySession session = studyRepo.findById(sessionId)
@@ -43,13 +51,41 @@ public class StudySessionService {
 
         session.setEndedAt(Instant.now());
         session.setStatus("ENDED");
+
+        // ✅ ReportService 호출 (기존 로직)
+        reportService.createReportFromSession(session);
+
+        // ✅ 2. 세션의 질문 로그를 Q&A 보드에 자동으로 추가하는 로직
+        if (session.getQuestionLogs() != null && !session.getQuestionLogs().isEmpty()) {
+
+            // 3. 제목에 사용할 날짜 포맷 지정 (YYYY.MM.DD)
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd")
+                    .withZone(ZoneId.systemDefault());
+            String formattedDate = formatter.format(session.getStartedAt());
+
+            // 4. 몇 번째 세션인지 계산 (기존 리포트 개수 + 1)
+            long sessionCount = reportRepository.findByMatchId(session.getMatchId()).size();
+            long currentSessionNumber = sessionCount; // createReportFromSession이 먼저 호출되었으므로 +1 하지 않음
+
+            String title = String.format("[%s %d번째 학습]", formattedDate, currentSessionNumber);
+
+            // 5. 해당 매칭의 보드를 찾아서 질문들을 추가
+            boardRepository.findByMatchId(session.getMatchId()).ifPresent(board -> {
+                for (QuestionLog qLog : session.getQuestionLogs()) {
+                    boardService.addEntryToBoard(
+                            board.getId(),
+                            qLog.getAuthorUserId(),
+                            title, // 새로 생성한 제목
+                            qLog.getQuestion() // 질문 내용
+                    );
+                }
+            });
+        }
+
         StudySession ended = studyRepo.save(session);
-
-        // ✅ ReportService 호출
-        reportService.createReportFromSession(ended);
-
         return ended;
     }
+
 
     /**
      * 딴짓 감지 후 자기 피드백 포함해서 로그 추가

@@ -10,6 +10,8 @@ import session.domain.SelfFeedback;
 import session.domain.StudySession;
 import session.dto.StudySessionDTO;
 import session.service.StudySessionService;
+import session.dto.DistractionDetectionRequest;
+import jakarta.validation.Valid;
 
 @Tag(name = "StudySession API", description = "학습 세션 관련 API")
 @RestController
@@ -38,8 +40,8 @@ public class StudySessionController {
     @PostMapping("/{sessionId}/distractions")
     public ApiResponse<StudySession> addDistraction(
             @PathVariable String sessionId,
-            @RequestParam String activity) {
-        return ApiResponse.ok(studyService.addDistraction(sessionId, activity));
+            @RequestBody @Valid DistractionDetectionRequest req) { // @RequestParam -> @RequestBody로 변경
+        return ApiResponse.ok(studyService.addDistraction(sessionId, req.activity()));
     }
 
     @Operation(summary = "멘티 자기 피드백 기록", description = "딴짓 발생 후 멘티가 자기 피드백을 작성")

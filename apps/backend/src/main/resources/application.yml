@@ -63,5 +63,11 @@ logging:
     org.springframework.web: INFO
 
 jwt:
-  # 'secret:'은 'jwt:'보다 두 칸 들여써야 합니다.
   secret: V29vTmVvTGVlS2FuZ0RhaG9vbkhhU2V1bmdKdU5KYWtLYW5nSmlzZW9uZw==
+
+# AI Summary Service Configuration
+# 사용하고자 하는 AI 서비스의 API 엔드포인트 URL을 입력하세요. (예: https://api.openai.com/v1)
+  #ai.api.url=https://api.openai.com/v1
+
+  # 발급받은 AI 서비스의 API 키를 입력하세요.
+  #ai.api.key=여기에_발급받은_API_키를_입력하세요

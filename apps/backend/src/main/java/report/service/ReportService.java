@@ -12,6 +12,8 @@ import report.domain.SelfFeedback;
 import report.dto.CreateReportRequest;
 import report.repository.ReportRepository;
 import session.domain.StudySession;
+import report.domain.DistractionLog;
+import java.util.stream.Collectors;
 
 
 import java.time.Instant;
@@ -24,37 +26,51 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final MatchRepository matchRepository;
 
-
-
+    private final AiSummaryService aiSummaryService;
     /**
-     * API: POST /api/reports
-     * 새로운 학습 리포트를 생성합니다.
+     * StudySession이 종료된 후 호출되어 학습 리포트를 생성하고 저장합니다.
+     * @param endedSession 종료된 학습 세션 객체
      */
-    //이거 해주세요!!
-    public void createReportFromSession(StudySession ended) {
-    }
-    //이거 말고 createReportFromSession 만들어 주세요
     @Transactional
-    public Report createReport(CreateReportRequest req, String menteeUserId) {
-        // 요청한 사용자가 리포트의 주체(멘티)가 맞는지 확인
-        if (!req.menteeUserId().equals(menteeUserId)) {
-            throw new IllegalStateException("You can only create reports for yourself.");
-        }
-        // 매칭 정보가 유효하고, 요청자가 멤버인지 확인
-        checkMatchMembership(req.matchId(), menteeUserId);
+    public void createReportFromSession(StudySession endedSession) {
+        // 2. 학습 로그(studyLogs)를 하나의 문자열로 합칩니다.
+        String studyContents = endedSession.getStudyLogs().stream()
+                .map(log -> log.getContent())
+                .collect(Collectors.joining("\n"));
 
+        // 3. AiSummaryService를 호출하여 요약된 내용을 받습니다.
+        String summary = aiSummaryService.summarize(studyContents);
+
+        // 4. 세션의 딴짓 로그를 리포트의 딴짓 로그 형식으로 변환합니다. (이전 단계에서 완성)
+        List<report.domain.DistractionLog> reportDistractionLogs = endedSession.getDistractionLogs().stream()
+                .map(sessionLog -> {
+                    report.domain.SelfFeedback reportSelfFeedback = null;
+                    if (sessionLog.getSelfFeedback() != null) {
+                        reportSelfFeedback = report.domain.SelfFeedback.builder()
+                                .comment(sessionLog.getSelfFeedback().getComment())
+                                .createdAt(sessionLog.getSelfFeedback().getCreatedAt())
+                                .build();
+                    }
+                    return report.domain.DistractionLog.builder()
+                            .activity(sessionLog.getActivity())
+                            .detectedAt(sessionLog.getDetectedAt())
+                            .selfFeedback(reportSelfFeedback)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // 5. 변환된 데이터를 바탕으로 새로운 Report 객체를 생성합니다.
         Report report = Report.builder()
-                .matchId(req.matchId())
-                .menteeUserId(req.menteeUserId())
-                .aiSummary(req.aiSummary())
-                .distractionLogs(req.distractionLogs())
+                .matchId(endedSession.getMatchId())
+                .menteeUserId(endedSession.getMenteeUserId())
+                .aiSummary(summary) // AI가 생성한 요약문을 저장
+                .distractionLogs(reportDistractionLogs)
                 .createdAt(Instant.now())
                 .build();
 
-        return reportRepository.save(report);
+        reportRepository.save(report);
     }
 
-    // --- 조회 로직 ---
 
     /**
      * API: GET /api/reports/by-match/{matchId}
