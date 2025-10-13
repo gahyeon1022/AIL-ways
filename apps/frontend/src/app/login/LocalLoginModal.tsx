@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { loginAction } from "@/app/_actions/auth"; // 
+import { loginAction } from "@/app/server-actions/auth"; // 
 
 type Props = { open: boolean; onClose: () => void };
 

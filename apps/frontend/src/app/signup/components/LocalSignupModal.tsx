@@ -8,7 +8,7 @@ import {
   sendEmailCodeAction,
   verifyEmailCodeAction,
   signupAction,
-} from "@/app/_actions/auth";
+} from "@/app/server-actions/auth";
 
 const BTN =
   "inline-flex items-center justify-center shrink-0 min-w-[64px] " +
