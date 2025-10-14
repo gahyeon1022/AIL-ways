@@ -17,7 +17,7 @@ public class ExternalApiAiSummaryService implements AiSummaryService {
     // 생성자를 통해 WebClient와 application.properties에서 설정한 API 키를 주입받습니다.
     public ExternalApiAiSummaryService(WebClient.Builder webClientBuilder,
                                        @Value("${ai.api.url}") String apiUrl,
-                                       @Value("${ai.api.key}") String apiKey) {
+                                       @Value("${ai.api.key:dummy-key}") String apiKey) { //키 아직 없음 -> 더미키 임시
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
         this.apiKey = apiKey;
     }
