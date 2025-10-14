@@ -41,6 +41,7 @@ spring:
             client-name: Kakao
             scope:
                - account_email # 카카오 - 비즈앱 등록시 사용 가능
+               - profile_nickname
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
