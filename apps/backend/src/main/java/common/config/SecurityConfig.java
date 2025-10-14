@@ -43,11 +43,11 @@ public class SecurityConfig {
                                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll() //social
                                 .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll() //swagger
                                 .requestMatchers("/api/auth/**").permitAll() //local
-                                // 👇 users/matches는 의도에 맞게 정해 (본인 API면 authenticated 권장)
                                 .requestMatchers("/api/users/**").authenticated() //user
                                 .requestMatchers("/api/matches/**").authenticated() //match
                                 .requestMatchers("/api/boards/**").authenticated() //board
-                                .anyRequest().denyAll() // 화면은 3000이 담당
+                                .requestMatchers("/api/sessions/**").authenticated() // session
+                                .anyRequest().denyAll() // 화면은 3000이 담당, 허용된 경로 외 접근 금지
                 )
 
 // 인증 안 된 요청은 리다이렉트 말고 JSON 401로 (API 개발에 유리)
@@ -81,7 +81,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);// 요청 헤더의 토큰 검증 수행
 
         return http.build();
 

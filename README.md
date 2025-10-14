@@ -3,7 +3,7 @@
 
 ## java : 21
 ## 빌드 도구 : gradle
-## 데이터베이스 : mogoDB 
+## 데이터베이스 : mogoDB
 
 >> brew tap mongodb/brew
 
@@ -15,9 +15,9 @@
 # MongoDB Community Edition 설치
 brew install mongodb-community
 
- 실행 명령어 : 
-  >> 프로젝트 루트 디렉토리에서 실행
->  >  ./gradlew bootRun 
+실행 명령어 :
+>> 프로젝트 루트 디렉토리에서 실행
+>  >  ./gradlew bootRun
 
 
 ## 📖 API 문서 (Swagger)
@@ -30,9 +30,9 @@ brew install mongodb-community
 http://localhost:8080/swagger-ui/index.html 접속
 ### 🔹 주요 기능
 - 컨트롤러/엔드포인트 자동 문서화 (`@Tag`, `@Operation` 적용)
-	•	@Tag → 컨트롤러 단위 그룹 설명 (API 묶음이 어떤 역할인지 서술)
-	•	@Operation → 엔드포인트 단위 설명 (각 URL이 하는 동작을 서술)
-<img width="794" height="406" alt="2060f4c0b42d968374b6c310a9ea92fdbea2d8a05847c61d179bb261a68c843f 복사본" src="https://github.com/user-attachments/assets/d73b57cf-71c1-4c61-ad36-839563d47163" />
+  •	@Tag → 컨트롤러 단위 그룹 설명 (API 묶음이 어떤 역할인지 서술)
+  •	@Operation → 엔드포인트 단위 설명 (각 URL이 하는 동작을 서술)
+  <img width="794" height="406" alt="2060f4c0b42d968374b6c310a9ea92fdbea2d8a05847c61d179bb261a68c843f 복사본" src="https://github.com/user-attachments/assets/d73b57cf-71c1-4c61-ad36-839563d47163" />
 
 
 - 요청/응답 DTO 구조 자동 표시
@@ -64,7 +64,7 @@ http://localhost:8080/swagger-ui/index.html 접속
 인증 (Authentication) - /api/auth
 
 **1. 이메일 인증코드 발송 **
-   >> POST /api/auth/email/code
+>> POST /api/auth/email/code
 설명: 회원가입을 위해 입력된 이메일 주소로 인증코드를 발송합니다.
 
 인증: 불필요
@@ -83,11 +83,11 @@ email: 인증코드를 받을 유효한 이메일 주소여야 합니다.
   "ok": true
 }`
 
-예외처리 : 
+예외처리 :
 <img width="251" height="96" alt="image" src="https://github.com/user-attachments/assets/75c1ecdb-95b0-43ec-bd50-32ed1ffaec3a" />
 
 **2. 로컬 회원가입**
-   >> POST /api/auth/local/signup
+>> POST /api/auth/local/signup
 요청 본문 (Request Body):
 
 `{
@@ -207,4 +207,12 @@ typescript: "5"
 설치방법 : apps/frontend로 이동한 후에 터미널에 npm install 입력
 
 ## 프론트엔드 서버 localhost:3000 실행시키는 방법
-apps/frontend로 이동한 후에 터미널에 npm run dev 입력 
+(1) ( 이 단계는 원격 저장소에서 프론트엔드 파일이 있는 브랜치를 자신의 로컬에다가 처음 pull/merge 했을때만 해주시면 됩니다. 그 후에는 안해도 됌.)
+
+<img width="582" height="916" alt="image" src="https://github.com/user-attachments/assets/a0c92163-9b80-47da-b745-6b0280d9eeb7" />
+
+.env.example 바로 아래에 .env.local 파일을 생성합니다.
+
+.env.example의 내용을 복사해서 .env.local에 붙여넣습니다.
+
+(2) apps/frontend로 이동한 후에 터미널에 npm run dev 입력.

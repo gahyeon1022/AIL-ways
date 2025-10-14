@@ -6,6 +6,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Date;
@@ -59,6 +61,22 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+    public Long getRemainingTime(String token) {
+        Date expiration = parseClaims(token).getExpiration();
+        Date now = new Date();
+        return expiration.getTime() - now.getTime();
+    }
+
+
+// ... (JwtUtil 클래스 내부)
+
+    public String resolveToken(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7); // "Bearer " 다음부터 실제 토큰 값만 잘라냅니다.
+        }
+        return null;
     }
 
 }

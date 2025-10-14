@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,11 +24,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor // 생성자 주입을 위해 @RequiredArgsConstructor 사용
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, String> redisTemplate; // ✨ 2. RedisTemplate 필드 추가 (생성자 주입)
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -37,28 +39,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        if (token != null && jwtUtil.validateToken(token)) {
-            String userId = jwtUtil.getUserId(token);
-            Optional<User> userOptional = userRepository.findByUserId(userId);
+        // ✨ 3. 핵심 수정: 블랙리스트 확인 로직 추가
+        if (token != null) {
+            // Redis에서 해당 토큰이 로그아웃 처리되었는지 확인
+            String isBlocked = redisTemplate.opsForValue().get("BLOCKED:" + token);
 
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                Role role = user.getRole();
+            // 토큰이 블랙리스트에 없고(isBlocked == null) 유효할 경우에만 인증 절차 진행
+            if (isBlocked == null && jwtUtil.validateToken(token)) {
+                String userId = jwtUtil.getUserId(token);
+                Optional<User> userOptional = userRepository.findByUserId(userId);
 
-                // ✅ 핵심 수정 부분: role이 null일 경우를 안전하게 처리
-                List<GrantedAuthority> authorities;
-                if (role != null) {
-                    // 역할이 있으면 해당 역할을 권한으로 추가
-                    authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-                } else {
-                    // 역할이 아직 지정되지 않았으면 (null이면) 권한 목록을 비워둠
-                    authorities = Collections.emptyList();
+                if (userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    Role role = user.getRole();
+
+                    List<GrantedAuthority> authorities;
+                    if (role != null) {
+                        authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+                    } else {
+                        authorities = Collections.emptyList();
+                    }
+
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(userId, null, authorities);
+                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
                 }
-
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(userId, null, authorities);
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 

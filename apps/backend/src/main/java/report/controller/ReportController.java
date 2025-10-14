@@ -55,14 +55,14 @@ public class ReportController {
         return ApiResponse.ok(reportService.addMentorFeedback(reportId, mentorUserId, req.comment()));
     }
 
-    @Operation(summary = "딴짓 로그에 자기 피드백 추가", description = "멘티가 딴짓 로그에 자기 피드백을 추가합니다.")
-    @PostMapping("/{reportId}/distractions/{logIndex}/feedback")
-    public ApiResponse<Report> addSelfFeedback(@PathVariable String reportId,
-                                               @PathVariable int logIndex,
-                                               @RequestBody @Valid AddFeedbackRequest req,
-                                               Authentication auth) {
-        String menteeUserId = auth.getName();
-        return ApiResponse.ok(reportService.addSelfFeedback(reportId, logIndex, menteeUserId, req.comment()));
-    }
+//    @Operation(summary = "딴짓 로그에 자기 피드백 추가", description = "멘티가 딴짓 로그에 자기 피드백을 추가합니다.")
+//    @PostMapping("/{reportId}/distractions/{logIndex}/feedback")
+//    public ApiResponse<Report> addSelfFeedback(@PathVariable String reportId,
+//                                               @PathVariable int logIndex,
+//                                               @RequestBody @Valid AddFeedbackRequest req,
+//                                               Authentication auth) {
+//        String menteeUserId = auth.getName();
+//        return ApiResponse.ok(reportService.addSelfFeedback(reportId, logIndex, menteeUserId, req.comment()));
+//    }
 }
 

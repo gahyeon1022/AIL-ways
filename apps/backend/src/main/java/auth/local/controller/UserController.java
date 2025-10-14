@@ -8,12 +8,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import user.domain.Interest;
+import user.domain.Role;
 import user.domain.User;
 import user.dto.UpdateProfileRequest;
 import user.repository.UserRepository;
 import user.service.UserService;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 
 @Tag(name = "User API", description = "회원 관리 API (프로필 조회/수정, 유저 정보 관리)")
 @RestController
@@ -54,5 +61,22 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ApiResponse.error(new ApiError(ErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다."));
         }
+    }
+    @Operation(summary = "프로필 선택 옵션 조회", description = "회원가입 또는 프로필 수정 시 선택 가능한 역할 및 흥미 목록을 조회합니다.")
+    @GetMapping("/profile-options")
+    public ApiResponse<Map<String, List<String>>> getProfileOptions() {
+        Map<String, List<String>> options = new HashMap<>();
+
+        List<String> roles = Arrays.stream(Role.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        options.put("roles", roles);
+
+        List<String> interests = Arrays.stream(Interest.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        options.put("interests", interests);
+
+        return ApiResponse.ok(options);
     }
 }

@@ -6,6 +6,7 @@ import auth.local.dto.SignUpRequest;
 import auth.local.dto.SignUpResponse;
 import auth.local.service.EmailVerificationService;
 import auth.local.service.LoginService;
+import auth.local.service.LogoutService;
 import auth.local.service.SignUpService;
 
 import common.security.jwt.JwtUtil;
@@ -21,6 +22,7 @@ import common.dto.ErrorCode;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 @Tag(name = "Auth API", description = "회원가입 / 로그인 / 이메일 인증 등 인증 관련 API")
@@ -33,13 +35,15 @@ public class AuthController {
     private final SignUpService signUpSvc;
     private final LoginService loginSvc; // <<< 1. LoginService 필드 추가
     private final JwtUtil jwtUtil; // <<< Add jwtUtil field
+    private final LogoutService logoutService;
 
     // <<< 2. 생성자 파라미터에 LoginService, JwtUtil 추가
-    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc, JwtUtil jwtUtil) {
+    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc, JwtUtil jwtUtil,  LogoutService logoutService) {
         this.emailVerifSvc = emailVerifSvc;
         this.signUpSvc = signUpSvc;
         this.loginSvc = loginSvc; // <<< 3. 주입받은 loginSvc를 필드에 할당.
         this.jwtUtil = jwtUtil; // <<< Assign jwtUtil
+        this.logoutService = logoutService;
     }
 
     // 1) 이메일로 인증코드 보내기
@@ -88,6 +92,17 @@ public class AuthController {
     public ApiResponse<Map<String, Boolean>> checkUserId(@RequestParam("userId") String userId) {
         boolean isAvailable = signUpSvc.isUserIdAvailable(userId);
         return ApiResponse.ok(Map.of("isAvailable", isAvailable));
+    }
+    @Operation(summary = "로그아웃", description = "현재 사용자의 토큰을 무효화합니다.")
+    @PostMapping("/logout")
+    public ApiResponse<Map<String, String>> logout(HttpServletRequest request) {
+        // 클라이언트 요청 헤더에서 Access Token을 추출
+        String token = jwtUtil.resolveToken(request); // (JwtUtil에 이 메소드가 구현되어 있어야 함)
+
+        // LogoutService를 호출하여 토큰을 블랙리스트에 추가
+        logoutService.logout(token);
+
+        return ApiResponse.ok(Map.of("message", "성공적으로 로그아웃되었습니다."));
     }
 
     // DTO (record)

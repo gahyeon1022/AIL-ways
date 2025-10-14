@@ -8,9 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import report.domain.MentorFeedback;
 import report.domain.Report;
-import report.domain.SelfFeedback;
 import report.dto.CreateReportRequest;
 import report.repository.ReportRepository;
+import session.domain.StudySession;
+import java.util.stream.Collectors;
 
 
 import java.time.Instant;
@@ -23,32 +24,51 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final MatchRepository matchRepository;
 
+    private final AiSummaryService aiSummaryService;
     /**
-     * API: POST /api/reports
-     * 새로운 학습 리포트를 생성합니다.
+     * StudySession이 종료된 후 호출되어 학습 리포트를 생성하고 저장합니다.
+     * @param endedSession 종료된 학습 세션 객체
      */
-
     @Transactional
-    public Report createReport(CreateReportRequest req, String menteeUserId) {
-        // 요청한 사용자가 리포트의 주체(멘티)가 맞는지 확인
-        if (!req.menteeUserId().equals(menteeUserId)) {
-            throw new IllegalStateException("You can only create reports for yourself.");
-        }
-        // 매칭 정보가 유효하고, 요청자가 멤버인지 확인
-        checkMatchMembership(req.matchId(), menteeUserId);
+    public void createReportFromSession(StudySession endedSession) {
+        // 2. 학습 로그(studyLogs)를 하나의 문자열로 합칩니다.
+        String studyContents = endedSession.getStudyLogs().stream()
+                .map(log -> log.getContent())
+                .collect(Collectors.joining("\n"));
 
+        // 3. AiSummaryService를 호출하여 요약된 내용을 받습니다.
+        String summary = aiSummaryService.summarize(studyContents);
+
+        // 4. 세션의 딴짓 로그를 리포트의 딴짓 로그 형식으로 변환합니다. (이전 단계에서 완성)
+        List<report.domain.DistractionLog> reportDistractionLogs = endedSession.getDistractionLogs().stream()
+                .map(sessionLog -> {
+                    report.domain.SelfFeedback reportSelfFeedback = null;
+                    if (sessionLog.getSelfFeedback() != null) {
+                        reportSelfFeedback = report.domain.SelfFeedback.builder()
+                                .comment(sessionLog.getSelfFeedback().getComment())
+                                .createdAt(sessionLog.getSelfFeedback().getCreatedAt())
+                                .build();
+                    }
+                    return report.domain.DistractionLog.builder()
+                            .activity(sessionLog.getActivity())
+                            .detectedAt(sessionLog.getDetectedAt())
+                            .selfFeedback(reportSelfFeedback)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        // 5. 변환된 데이터를 바탕으로 새로운 Report 객체를 생성합니다.
         Report report = Report.builder()
-                .matchId(req.matchId())
-                .menteeUserId(req.menteeUserId())
-                .aiSummary(req.aiSummary())
-                .distractionLogs(req.distractionLogs())
+                .matchId(endedSession.getMatchId())
+                .menteeUserId(endedSession.getMenteeUserId())
+                .aiSummary(summary) // AI가 생성한 요약문을 저장
+                .distractionLogs(reportDistractionLogs)
                 .createdAt(Instant.now())
                 .build();
 
-        return reportRepository.save(report);
+        reportRepository.save(report);
     }
 
-    // --- 조회 로직 ---
 
     /**
      * API: GET /api/reports/by-match/{matchId}
@@ -107,33 +127,38 @@ public class ReportService {
      * API: POST /api/reports/{reportId}/distractions/{logIndex}/feedback
      * '딴짓 로그'에 멘티의 자기 피드백을 추가합니다.
      */
-    @Transactional
-    public Report addSelfFeedback(String reportId, int logIndex, String menteeUserId, String comment) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("Report not found: " + reportId));
-        Match match = checkMatchMembership(report.getMatchId(), menteeUserId);
 
-        // 이 로직은 멘티만 자기 피드백을 남길 수 있도록 보장합니다.
-        if (!match.getMenteeUserId().equals(menteeUserId)) {
-            throw new IllegalStateException("Only the mentee of this match can add self-feedback.");
-        }
-        // 명세서 요구사항: logIndex가 유효한 범위인지 확인
-        if (logIndex < 0 || report.getDistractionLogs() == null || logIndex >= report.getDistractionLogs().size()) {
-            throw new IndexOutOfBoundsException("Distraction log index is out of bounds.");
-        }
-        // 명세서 요구사항: 이미 자기 피드백이 존재하면 Conflict 에러
-        if (report.getDistractionLogs().get(logIndex).getSelfFeedback() != null) {
-            throw new IllegalStateException("Self-feedback already exists on this distraction log.");
-        }
+    /*
+    멘티의 셀프 피드백을 session에서 가져오는 거 구현해야됨
+    */
 
-        SelfFeedback feedback = SelfFeedback.builder()
-                .comment(comment)
-                .createdAt(Instant.now())
-                .build();
-
-        report.getDistractionLogs().get(logIndex).setSelfFeedback(feedback);
-        return reportRepository.save(report);
-    }
+//    @Transactional
+//    public Report addSelfFeedback(String reportId, int logIndex, String menteeUserId, String comment) {
+//        Report report = reportRepository.findById(reportId)
+//                .orElseThrow(() -> new IllegalArgumentException("Report not found: " + reportId));
+//        Match match = checkMatchMembership(report.getMatchId(), menteeUserId);
+//
+//        // 이 로직은 멘티만 자기 피드백을 남길 수 있도록 보장합니다.
+//        if (!match.getMenteeUserId().equals(menteeUserId)) {
+//            throw new IllegalStateException("Only the mentee of this match can add self-feedback.");
+//        }
+//        // 명세서 요구사항: logIndex가 유효한 범위인지 확인
+//        if (logIndex < 0 || report.getDistractionLogs() == null || logIndex >= report.getDistractionLogs().size()) {
+//            throw new IndexOutOfBoundsException("Distraction log index is out of bounds.");
+//        }
+//        // 명세서 요구사항: 이미 자기 피드백이 존재하면 Conflict 에러
+//        if (report.getDistractionLogs().get(logIndex).getSelfFeedback() != null) {
+//            throw new IllegalStateException("Self-feedback already exists on this distraction log.");
+//        }
+//
+//        SelfFeedback feedback = SelfFeedback.builder()
+//                .comment(comment)
+//                .createdAt(Instant.now())
+//                .build();
+//
+//        report.getDistractionLogs().get(logIndex).setSelfFeedback(feedback);
+//        return reportRepository.save(report);
+//    }
 
     /**
      * [공통 메서드]
@@ -151,6 +176,9 @@ public class ReportService {
         return match;
     }
 
-
+    public Report createReport(@Valid CreateReportRequest req, String menteeUserId) {
+        return null;
+        //아직완성안된코드임
+    }
 }
 
