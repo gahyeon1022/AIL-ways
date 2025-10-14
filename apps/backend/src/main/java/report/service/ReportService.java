@@ -8,11 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import report.domain.MentorFeedback;
 import report.domain.Report;
-import report.domain.SelfFeedback;
 import report.dto.CreateReportRequest;
 import report.repository.ReportRepository;
 import session.domain.StudySession;
-import report.domain.DistractionLog;
 import java.util.stream.Collectors;
 
 
@@ -129,33 +127,38 @@ public class ReportService {
      * API: POST /api/reports/{reportId}/distractions/{logIndex}/feedback
      * '딴짓 로그'에 멘티의 자기 피드백을 추가합니다.
      */
-    @Transactional
-    public Report addSelfFeedback(String reportId, int logIndex, String menteeUserId, String comment) {
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("Report not found: " + reportId));
-        Match match = checkMatchMembership(report.getMatchId(), menteeUserId);
 
-        // 이 로직은 멘티만 자기 피드백을 남길 수 있도록 보장합니다.
-        if (!match.getMenteeUserId().equals(menteeUserId)) {
-            throw new IllegalStateException("Only the mentee of this match can add self-feedback.");
-        }
-        // 명세서 요구사항: logIndex가 유효한 범위인지 확인
-        if (logIndex < 0 || report.getDistractionLogs() == null || logIndex >= report.getDistractionLogs().size()) {
-            throw new IndexOutOfBoundsException("Distraction log index is out of bounds.");
-        }
-        // 명세서 요구사항: 이미 자기 피드백이 존재하면 Conflict 에러
-        if (report.getDistractionLogs().get(logIndex).getSelfFeedback() != null) {
-            throw new IllegalStateException("Self-feedback already exists on this distraction log.");
-        }
+    /*
+    멘티의 셀프 피드백을 session에서 가져오는 거 구현해야됨
+    */
 
-        SelfFeedback feedback = SelfFeedback.builder()
-                .comment(comment)
-                .createdAt(Instant.now())
-                .build();
-
-        report.getDistractionLogs().get(logIndex).setSelfFeedback(feedback);
-        return reportRepository.save(report);
-    }
+//    @Transactional
+//    public Report addSelfFeedback(String reportId, int logIndex, String menteeUserId, String comment) {
+//        Report report = reportRepository.findById(reportId)
+//                .orElseThrow(() -> new IllegalArgumentException("Report not found: " + reportId));
+//        Match match = checkMatchMembership(report.getMatchId(), menteeUserId);
+//
+//        // 이 로직은 멘티만 자기 피드백을 남길 수 있도록 보장합니다.
+//        if (!match.getMenteeUserId().equals(menteeUserId)) {
+//            throw new IllegalStateException("Only the mentee of this match can add self-feedback.");
+//        }
+//        // 명세서 요구사항: logIndex가 유효한 범위인지 확인
+//        if (logIndex < 0 || report.getDistractionLogs() == null || logIndex >= report.getDistractionLogs().size()) {
+//            throw new IndexOutOfBoundsException("Distraction log index is out of bounds.");
+//        }
+//        // 명세서 요구사항: 이미 자기 피드백이 존재하면 Conflict 에러
+//        if (report.getDistractionLogs().get(logIndex).getSelfFeedback() != null) {
+//            throw new IllegalStateException("Self-feedback already exists on this distraction log.");
+//        }
+//
+//        SelfFeedback feedback = SelfFeedback.builder()
+//                .comment(comment)
+//                .createdAt(Instant.now())
+//                .build();
+//
+//        report.getDistractionLogs().get(logIndex).setSelfFeedback(feedback);
+//        return reportRepository.save(report);
+//    }
 
     /**
      * [공통 메서드]
