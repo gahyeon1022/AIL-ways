@@ -1,3 +1,3 @@
 package user.domain;
 
-public enum Role { USER, MENTOR, MENTEE }
+public enum Role { MENTOR, MENTEE }
