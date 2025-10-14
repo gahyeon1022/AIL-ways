@@ -33,7 +33,7 @@ public class StudySessionService {
                 .matchId(matchId)
                 .menteeUserId(menteeUserId)
                 .mentorUserId(mentorUserId)
-                .status("ACTIVE")
+                .status(SessionStatus.ACTIVE)
                 .startedAt(Instant.now())
                 .build();
 
@@ -46,11 +46,11 @@ public class StudySessionService {
     public StudySession endSession(String sessionId) {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
-        if ("ENDED".equals(session.getStatus()))
+        if (session.getStatus() == SessionStatus.ENDED)
             throw new IllegalStateException("이미 종료된 세션입니다.");
 
         session.setEndedAt(Instant.now());
-        session.setStatus("ENDED");
+        session.setStatus(SessionStatus.ENDED);
 
         // ✅ ReportService 호출 (기존 로직)
         reportService.createReportFromSession(session);
@@ -101,7 +101,7 @@ public class StudySessionService {
                 .build();
 
         session.getDistractionLogs().add(log);
-        session.setStatus("PAUSED"); // 학습 일시정지
+        session.setStatus(SessionStatus.PAUSED); // 학습 일시정지
         return studyRepo.save(session);
     }
 
@@ -126,8 +126,8 @@ public class StudySessionService {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("스터디 세션을 찾을 수 없습니다."));
 
-        // 상태를 ACTIVE로 변경
-        session.setStatus("ACTIVE");
+        // 상태를 ACTIVE로 변경(Enum)
+        session.setStatus(SessionStatus.ACTIVE);
         return studyRepo.save(session);
     }
 

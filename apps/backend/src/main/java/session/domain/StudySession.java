@@ -24,7 +24,7 @@ public class StudySession {
 
     private Instant startedAt;
     private Instant endedAt;
-    private String status; // ACTIVE, ENDED
+    private SessionStatus status; // ENUM [ACTIVE, PAUSED, ENDED]
 
     @Builder.Default
     private List<StudyLog> studyLogs = new ArrayList<>();
