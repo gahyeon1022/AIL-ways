@@ -9,7 +9,6 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudyLog {
-    private String authorUserId;
     private String content;
     private Instant timestamp;
 }

@@ -74,7 +74,7 @@ public class StudySessionService {
                 for (QuestionLog qLog : session.getQuestionLogs()) {
                     boardService.addEntryToBoard(
                             board.getId(),
-                            qLog.getAuthorUserId(),
+                            session.getMenteeUserId(), //author == mentee -> session의 mentee id만 가져오면 됨!
                             title, // 새로 생성한 제목
                             qLog.getQuestion() // 질문 내용
                     );
@@ -133,12 +133,11 @@ public class StudySessionService {
 
     // 학습 내용 추가
     @Transactional
-    public StudySession addStudyLog(String sessionId, String authorUserId, String content) {
+    public StudySession addStudyLog(String sessionId, String content) {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션 없음"));
         session.getStudyLogs().add(
                 StudyLog.builder()
-                        .authorUserId(authorUserId)
                         .content(content)
                         .timestamp(Instant.now())
                         .build()
@@ -148,13 +147,12 @@ public class StudySessionService {
 
     //질문 내용 추가
     @Transactional
-    public StudySession addQuestionLog(String sessionId, String authorUserId, String question) {
+    public StudySession addQuestionLog(String sessionId, String question) {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
 
         session.getQuestionLogs().add(
                 QuestionLog.builder()
-                        .authorUserId(authorUserId)
                         .question(question)
                         .createdAt(Instant.now())
                         .build()
@@ -184,7 +182,7 @@ public class StudySessionService {
         if (s.getStudyLogs() != null) {
             for (StudyLog l : s.getStudyLogs()) {
                 studyLogDTOs.add(
-                        new StudyLogDTO(l.getAuthorUserId(), l.getContent(), l.getTimestamp())
+                        new StudyLogDTO(l.getContent(), l.getTimestamp())
                 );
             }
         }
@@ -193,7 +191,7 @@ public class StudySessionService {
         if (s.getQuestionLogs() != null) {
             for (QuestionLog q : s.getQuestionLogs()) {
                 questionLogDTOs.add(
-                        new QuestionLogDTO(q.getAuthorUserId(), q.getQuestion(), q.getCreatedAt())
+                        new QuestionLogDTO(q.getQuestion(), q.getCreatedAt())
                 );
             }
         }
