@@ -6,6 +6,7 @@ import auth.local.dto.SignUpRequest;
 import auth.local.dto.SignUpResponse;
 import auth.local.service.EmailVerificationService;
 import auth.local.service.LoginService;
+import auth.local.service.LogoutService;
 import auth.local.service.SignUpService;
 
 import common.security.jwt.JwtUtil;
@@ -37,12 +38,12 @@ public class AuthController {
     private final LogoutService logoutService;
 
     // <<< 2. 생성자 파라미터에 LoginService, JwtUtil 추가
-    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc, JwtUtil jwtUtil) {
+    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc, JwtUtil jwtUtil,  LogoutService logoutService) {
         this.emailVerifSvc = emailVerifSvc;
         this.signUpSvc = signUpSvc;
         this.loginSvc = loginSvc; // <<< 3. 주입받은 loginSvc를 필드에 할당.
         this.jwtUtil = jwtUtil; // <<< Assign jwtUtil
-        this.logoutService=logoutService;
+        this.logoutService = logoutService;
     }
 
     // 1) 이메일로 인증코드 보내기

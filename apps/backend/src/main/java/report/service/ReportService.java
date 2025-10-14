@@ -173,5 +173,9 @@ public class ReportService {
         return match;
     }
 
+    public Report createReport(@Valid CreateReportRequest req, String menteeUserId) {
+        return null;
+        //아직완성안된코드임
+    }
 }
 
