@@ -216,3 +216,13 @@ typescript: "5"
 .env.example의 내용을 복사해서 .env.local에 붙여넣습니다.
 
 (2) apps/frontend로 이동한 후에 터미널에 npm run dev 입력.
+
+
+
+#1015이후 실행 시
+프로젝트 최상단에 
+>> brew install redis
+로 redis를 설치 해야 합니다.
+서버 실행 후
+>> brew services start redis
+로 redis를 실행시켜줘야 로그아웃이 진행됩니다
