@@ -63,8 +63,7 @@ public class StudySessionController {
     public ApiResponse<StudySession> addStudyLog(@PathVariable String sessionId,
                                                  @RequestParam String content,
                                                  Authentication auth) {
-        String authorUserId = auth.getName();
-        return ApiResponse.ok(studyService.addStudyLog(sessionId, authorUserId, content));
+        return ApiResponse.ok(studyService.addStudyLog(sessionId, content));
     }
 
     @Operation(summary = "질문 내용 입력", description = "세션 진행 중 궁금한 내용을 입력")
@@ -72,7 +71,6 @@ public class StudySessionController {
     public ApiResponse<StudySession> addQuestionLog(@PathVariable String sessionId,
                                                     @RequestParam String question,
                                                     Authentication auth) {
-        String authorUserId = auth.getName();
-        return ApiResponse.ok(studyService.addQuestionLog(sessionId, authorUserId, question));
+        return ApiResponse.ok(studyService.addQuestionLog(sessionId, question));
     }
 }

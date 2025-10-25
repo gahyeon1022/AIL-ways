@@ -9,6 +9,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -23,8 +24,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
 
         // 카카오 고유 id를 subject로 JWT 발급
-        String token = jwtUtil.generateToken(String.valueOf(oAuth2User.getAttributes().get("id")));
+//        String token = jwtUtil.generateToken(String.valueOf(oAuth2User.getAttributes().get("id")));
 
+        String email = ((Map<String, Object>) oAuth2User.getAttributes().get("kakao_account")).get("email").toString();
+        String token = jwtUtil.generateToken(email);
         // 프론트로 redirect
         String redirectUrl = "http://localhost:3000/select?token=" + token;
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);

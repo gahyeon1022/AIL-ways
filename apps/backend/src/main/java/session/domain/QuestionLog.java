@@ -9,7 +9,6 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionLog {
-    private String authorUserId; // 질문 작성자
     private String question;     // 질문 내용
     private Instant createdAt;   // 작성 시각
 }
