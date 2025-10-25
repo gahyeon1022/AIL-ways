@@ -110,14 +110,23 @@ public class StudySessionService {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
 
-        // 마지막 딴짓 로그에 피드백 추가
         List<DistractionLog> logs = session.getDistractionLogs();
-        if (!logs.isEmpty()) {
-            logs.get(logs.size() - 1).setSelfFeedback(selfFeedback);
+        if (logs.isEmpty()) {
+            // 예외를 던져서 클라이언트에게 잘못된 요청임을 알림
+            throw new IllegalStateException("피드백을 추가할 딴짓 기록이 없습니다.");
         }
 
+        DistractionLog lastLog = logs.get(logs.size() - 1);
+
+        // 이미 피드백이 작성되었는지 확인하는 로직도 추가하면 더 좋습니다.
+        if (lastLog.getSelfFeedback() != null) {
+            throw new IllegalStateException("이미 피드백이 작성된 딴짓 기록입니다.");
+        }
+
+        lastLog.setSelfFeedback(selfFeedback);
         return studyRepo.save(session);
     }
+
     /**
      * 자기 피드백 후 학습 재개
      */
