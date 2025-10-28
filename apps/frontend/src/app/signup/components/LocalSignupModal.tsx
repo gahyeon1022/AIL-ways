@@ -1,6 +1,6 @@
 "use client";
 
-import ScrollableTerms from "@/app/signup/components/ScrollableTerms";
+import ScrollableTerms from "@/components/ui/ScrollableTerms";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
