@@ -2,7 +2,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { callAPI } from "@/app/lib/api/http";           // 규약(Envelope)까지 처리하는 공통 호출
+import { callAPI, callAPIWithAuth } from "@/app/lib/api/http";           // 규약(Envelope)까지 처리하는 공통 호출
 import { BackendError } from "@/app/lib/api/envelope";
 import { BE } from "@/app/lib/server/env";              
 
@@ -85,13 +85,16 @@ export async function loginAction(formData: FormData) {
   }
 }
 
-// ── 로그아웃 (필요 시 활성화) ──
-// export async function logoutAction() {
-//   const jar = await cookies();
-//   jar.delete("AUTH_TOKEN");
-//   jar.delete("REFRESH_TOKEN");
-//   return { ok: true, msg: "로그아웃 완료" };
-// }
+export async function logoutAction() {
+  const jar = await cookies();
+  try {
+    await callAPIWithAuth<null>("/api/auth/logout", { method: "POST" });
+  } catch {
+  }
+  jar.delete("AUTH_TOKEN");
+  jar.delete("REFRESH_TOKEN");
+  return { ok: true, msg: "로그아웃 완료" };
+}
 
 // 아이디 중복 확인
 export async function checkUserIdAction(userId: string) {
