@@ -18,6 +18,8 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Map;
+
 
 @Configuration
 @RequiredArgsConstructor
@@ -71,8 +73,9 @@ public class SecurityConfig {
                             DefaultOAuth2User oAuth2User = (DefaultOAuth2User) auth.getPrincipal();
                             //  DB에 저장/업데이트 보장
                             kakaoService.upsertUser(oAuth2User);
-                            String kakaoId = String.valueOf(oAuth2User.getAttributes().get("id"));
-                            String token = jwtUtil.generateToken(kakaoId);
+                            Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
+                            String email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
+                            String token = jwtUtil.generateToken(email);
 
                             res.sendRedirect("http://localhost:3000/select?token=" + token);
                         })

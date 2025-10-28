@@ -1,5 +1,7 @@
 package session.dto;
 
+import session.domain.SessionStatus;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -10,7 +12,7 @@ public record StudySessionDTO(
         String mentorUserId,
         Instant startedAt,
         Instant endedAt,
-        String status,
+        SessionStatus status,
         List<DistractionLogDTO> distractionLogs,
         List<StudyLogDTO> studyLogs,
         List<QuestionLogDTO> questionLogs

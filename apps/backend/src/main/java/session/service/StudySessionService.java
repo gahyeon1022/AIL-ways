@@ -33,7 +33,7 @@ public class StudySessionService {
                 .matchId(matchId)
                 .menteeUserId(menteeUserId)
                 .mentorUserId(mentorUserId)
-                .status("ACTIVE")
+                .status(SessionStatus.ACTIVE)
                 .startedAt(Instant.now())
                 .build();
 
@@ -46,11 +46,11 @@ public class StudySessionService {
     public StudySession endSession(String sessionId) {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
-        if ("ENDED".equals(session.getStatus()))
+        if (session.getStatus() == SessionStatus.ENDED)
             throw new IllegalStateException("이미 종료된 세션입니다.");
 
         session.setEndedAt(Instant.now());
-        session.setStatus("ENDED");
+        session.setStatus(SessionStatus.ENDED);
 
         // ✅ ReportService 호출 (기존 로직)
         reportService.createReportFromSession(session);
@@ -74,7 +74,7 @@ public class StudySessionService {
                 for (QuestionLog qLog : session.getQuestionLogs()) {
                     boardService.addEntryToBoard(
                             board.getId(),
-                            qLog.getAuthorUserId(),
+                            session.getMenteeUserId(), //author == mentee -> session의 mentee id만 가져오면 됨!
                             title, // 새로 생성한 제목
                             qLog.getQuestion() // 질문 내용
                     );
@@ -101,7 +101,7 @@ public class StudySessionService {
                 .build();
 
         session.getDistractionLogs().add(log);
-        session.setStatus("PAUSED"); // 학습 일시정지
+        session.setStatus(SessionStatus.PAUSED); // 학습 일시정지
         return studyRepo.save(session);
     }
 
@@ -110,14 +110,23 @@ public class StudySessionService {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
 
-        // 마지막 딴짓 로그에 피드백 추가
         List<DistractionLog> logs = session.getDistractionLogs();
-        if (!logs.isEmpty()) {
-            logs.get(logs.size() - 1).setSelfFeedback(selfFeedback);
+        if (logs.isEmpty()) {
+            // 예외를 던져서 클라이언트에게 잘못된 요청임을 알림
+            throw new IllegalStateException("피드백을 추가할 딴짓 기록이 없습니다.");
         }
 
+        DistractionLog lastLog = logs.get(logs.size() - 1);
+
+        // 이미 피드백이 작성되었는지 확인하는 로직도 추가하면 더 좋습니다.
+        if (lastLog.getSelfFeedback() != null) {
+            throw new IllegalStateException("이미 피드백이 작성된 딴짓 기록입니다.");
+        }
+
+        lastLog.setSelfFeedback(selfFeedback);
         return studyRepo.save(session);
     }
+
     /**
      * 자기 피드백 후 학습 재개
      */
@@ -126,19 +135,18 @@ public class StudySessionService {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("스터디 세션을 찾을 수 없습니다."));
 
-        // 상태를 ACTIVE로 변경
-        session.setStatus("ACTIVE");
+        // 상태를 ACTIVE로 변경(Enum)
+        session.setStatus(SessionStatus.ACTIVE);
         return studyRepo.save(session);
     }
 
     // 학습 내용 추가
     @Transactional
-    public StudySession addStudyLog(String sessionId, String authorUserId, String content) {
+    public StudySession addStudyLog(String sessionId, String content) {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션 없음"));
         session.getStudyLogs().add(
                 StudyLog.builder()
-                        .authorUserId(authorUserId)
                         .content(content)
                         .timestamp(Instant.now())
                         .build()
@@ -148,13 +156,12 @@ public class StudySessionService {
 
     //질문 내용 추가
     @Transactional
-    public StudySession addQuestionLog(String sessionId, String authorUserId, String question) {
+    public StudySession addQuestionLog(String sessionId, String question) {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
 
         session.getQuestionLogs().add(
                 QuestionLog.builder()
-                        .authorUserId(authorUserId)
                         .question(question)
                         .createdAt(Instant.now())
                         .build()
@@ -184,7 +191,7 @@ public class StudySessionService {
         if (s.getStudyLogs() != null) {
             for (StudyLog l : s.getStudyLogs()) {
                 studyLogDTOs.add(
-                        new StudyLogDTO(l.getAuthorUserId(), l.getContent(), l.getTimestamp())
+                        new StudyLogDTO(l.getContent(), l.getTimestamp())
                 );
             }
         }
@@ -193,7 +200,7 @@ public class StudySessionService {
         if (s.getQuestionLogs() != null) {
             for (QuestionLog q : s.getQuestionLogs()) {
                 questionLogDTOs.add(
-                        new QuestionLogDTO(q.getAuthorUserId(), q.getQuestion(), q.getCreatedAt())
+                        new QuestionLogDTO(q.getQuestion(), q.getCreatedAt())
                 );
             }
         }
