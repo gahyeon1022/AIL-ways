@@ -5,9 +5,15 @@ import { fetchWithAuth } from "@/app/server-actions/auth";
 import { parseEnvelopeBody, BackendError } from "@/app/lib/api/envelope";
 
 export type ProfileOptionsDTO = { roles: string[]; interests: string[] };
+export type UserConsentDTO = {
+  type: string;
+  agreed: boolean;
+};
+
 export type UserProfileDTO = {
   role: string | null;
   interests: string[] | null;
+  consents?: UserConsentDTO[] | null;
 };
 
 // 정상 액션 (기존)

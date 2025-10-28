@@ -25,15 +25,16 @@ export default async function Page({ searchParams }: PageProps) {
     redirect("/login");
   }
 
-  const consentsConfirmed = jar.get("CONSENTS_CONFIRMED")?.value === "1";
-  if (!consentsConfirmed) {
-    redirect("/terms-consents");
-  }
-
   let profile: Awaited<ReturnType<typeof fetchMyProfileAction>> | null = null;
   try {
     profile = await fetchMyProfileAction();
   } catch {}
+
+  const hasConsents =
+    Array.isArray(profile?.consents) && profile.consents.some(consent => consent?.agreed);
+  if (!hasConsents) {
+    redirect("/terms-consents");
+  }
 
   if (profile?.role && profile?.interests && profile.interests.length > 0) {
     redirect("/home");
