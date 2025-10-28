@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: ailways-backend-test
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/alpha-test  # 별도 테스트 DB로 분리
+
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: INFO
+    org.springframework.web: DEBUG
