@@ -6,6 +6,16 @@ import { callAPI } from "@/app/lib/api/http";           // 규약(Envelope)까�
 import { BackendError } from "@/app/lib/api/envelope";
 import { BE } from "@/app/lib/server/env";              
 
+function formatError(e: unknown, fallback: string) {
+  if (e instanceof BackendError) {
+    return `[${e.status}] ${e.message}${e.code ? ` (${e.code})` : ""}`;
+  }
+  if (e instanceof Error) {
+    return e.message || fallback;
+  }
+  return fallback;
+}
+
 // 폼 헬퍼: 체크박스/토글 등 FormData → boolean
 const asBool = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").toLowerCase();
@@ -70,12 +80,8 @@ export async function loginAction(formData: FormData) {
     }
 
     return { ok: true, msg: "로그인 성공", data: { userId: data.userId } };
-  } catch (e: any) {
-    const msg =
-      e instanceof BackendError
-        ? `[${e.status}] ${e.message}${e.code ? ` (${e.code})` : ""}`
-        : String(e?.message || "로그인 실패");
-    return { ok: false, msg };
+  } catch (e: unknown) {
+    return { ok: false, msg: formatError(e, "로그인 실패") };
   }
 }
 
@@ -100,12 +106,8 @@ export async function checkUserIdAction(userId: string) {
       isAvailable: available,
       msg: available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.",
     };
-  } catch (e: any) {
-    const msg =
-      e instanceof BackendError
-        ? `[${e.status}] ${e.message}${e.code ? ` (${e.code})` : ""}`
-        : String(e?.message || "요청 실패");
-    return { ok: false, msg };
+  } catch (e: unknown) {
+    return { ok: false, msg: formatError(e, "요청 실패") };
   }
 }
 
@@ -118,12 +120,8 @@ export async function sendEmailCodeAction(email: string) {
       body: JSON.stringify({ email }),
     });
     return { ok: true, ttl: data?.ttl, msg: "인증번호를 전송했습니다." };
-  } catch (e: any) {
-    const msg =
-      e instanceof BackendError
-        ? `[${e.status}] ${e.message}${e.code ? ` (${e.code})` : ""}`
-        : String(e?.message || "요청 실패");
-    return { ok: false, msg };
+  } catch (e: unknown) {
+    return { ok: false, msg: formatError(e, "요청 실패") };
   }
 }
 
@@ -136,12 +134,8 @@ export async function verifyEmailCodeAction(email: string, code: string) {
       body: JSON.stringify({ email, code }),
     });
     return { ok: true, msg: "인증 성공" };
-  } catch (e: any) {
-    const msg =
-      e instanceof BackendError
-        ? `[${e.status}] ${e.message}${e.code ? ` (${e.code})` : ""}`
-        : String(e?.message || "오류");
-    return { ok: false, msg };
+  } catch (e: unknown) {
+    return { ok: false, msg: formatError(e, "오류") };
   }
 }
 
@@ -178,12 +172,8 @@ export async function signupAction(formData: FormData) {
       body: JSON.stringify(payload),
     });
     return { ok: true, msg: "회원가입 성공" };
-  } catch (e: any) {
-    const msg =
-      e instanceof BackendError
-        ? `[${e.status}] ${e.message}${e.code ? ` (${e.code})` : ""}`
-        : String(e?.message || "회원가입 실패");
-    return { ok: false, msg };
+  } catch (e: unknown) {
+    return { ok: false, msg: formatError(e, "회원가입 실패") };
   }
 }
 
@@ -204,4 +194,3 @@ export async function fetchWithAuth(path: string, init?: RequestInit) {
 
   return fetch(`${BE}${path}`, { cache: "no-store", ...init, headers });
 }
-

@@ -28,14 +28,18 @@ export function preview(text: string, max = 160): string {
 }
 
 //넘어온 JSON이 규약에 맞는 형태인지 검사
-export function ensureEnvelope<T>(input: any): asserts input is ApiEnvelope<T> { 
-  if (!input || typeof input !== "object" || typeof input.success !== "boolean") {
+export function ensureEnvelope<T>(input: unknown): asserts input is ApiEnvelope<T> {
+  if (
+    !input ||
+    typeof input !== "object" ||
+    typeof (input as { success?: unknown }).success !== "boolean"
+  ) {
     throw new Error("INVALID_ENVELOPE_SHAPE");
   }
 }
 
 //에러 메시지가 문자열인지 객체인지 추출
-export function extractEnvelopeError(error: EnvelopeErrorPayload) { 
+export function extractEnvelopeError(error: EnvelopeErrorPayload): { message: string; code?: string } {
   if (typeof error === "string") {
     return { message: error, code: undefined };
   }
@@ -49,28 +53,30 @@ export function extractEnvelopeError(error: EnvelopeErrorPayload) {
 }
 
  //응답 본문을 JSON으로 바꾸고 규약에 맞으면 data 반환, 아니면 에러 던짐
-export function parseEnvelopeBody<T>(raw: string, status: number): T { 
+export function parseEnvelopeBody<T>(raw: string, status: number): T {
   if (!raw && status === 204) return undefined as unknown as T;
 
-  let json: any;
+  let parsed: unknown;
   try {
-    json = raw ? JSON.parse(raw) : {};
+    parsed = raw ? JSON.parse(raw) : {};
   } catch {
     throw new BackendError(status, "서버 응답 형식 오류(Envelope 아님)", "INVALID_ENVELOPE", raw);
   }
 
   try {
-    ensureEnvelope<T>(json);
+    ensureEnvelope<T>(parsed);
   } catch {
-    throw new BackendError(status, "서버 응답 형식 오류(Envelope 아님)", "INVALID_ENVELOPE", json);
+    throw new BackendError(status, "서버 응답 형식 오류(Envelope 아님)", "INVALID_ENVELOPE", parsed);
   }
 
-  if (!json.success) {
-    const { message, code } = extractEnvelopeError(json.error);
-    throw new BackendError(status, message, code, json);
+  const envelope = parsed as ApiEnvelope<T>;
+
+  if (!envelope.success) {
+    const { message, code } = extractEnvelopeError(envelope.error);
+    throw new BackendError(status, message, code, envelope);
   }
 
-  return json.data as T;
+  return envelope.data as T;
 }
 
 export async function parseEnvelopeResponse<T>(res: Response): Promise<T> {

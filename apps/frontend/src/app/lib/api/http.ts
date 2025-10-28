@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { BE } from "@/app/lib/server/env";
 import {
   BackendError,
+  ensureEnvelope,
   extractEnvelopeError,
   parseEnvelopeBody,
   preview,
@@ -48,16 +49,23 @@ function prepareRequest(path: string, init?: RequestInit, token?: string) {
 }
 
 //스프링 표준 오류 형식을 비롯해 의미있는 에러 메시지 찾아냄
-function extractErrorMessage(payload: any): string | undefined {
+function extractErrorMessage(payload: unknown): string | undefined {
   if (!payload || typeof payload !== "object") return;
-  return (
-    payload.message ||
-    payload.error_description ||
-    payload.error ||
-    payload.detail ||
-    (typeof payload?.errors?.[0]?.defaultMessage === "string" && payload.errors[0].defaultMessage) ||
-    undefined
-  );
+  const record = payload as Record<string, unknown>;
+
+  if (typeof record.message === "string") return record.message;
+  if (typeof record.error_description === "string") return record.error_description;
+  if (typeof record.error === "string") return record.error as string;
+  if (typeof record.detail === "string") return record.detail as string;
+
+  const errors = record.errors;
+  if (Array.isArray(errors) && errors.length > 0) {
+    const first = errors[0];
+    if (first && typeof first === "object" && typeof (first as { defaultMessage?: unknown }).defaultMessage === "string") {
+      return (first as { defaultMessage: string }).defaultMessage;
+    }
+  }
+  return undefined;
 }
 
 //http상태가 실패일때 응답본문 분석해 BackendError 만듬.
@@ -69,13 +77,14 @@ function buildErrorFromBody(res: Response, raw: string): BackendError {
     try {
       const parsed = raw ? JSON.parse(raw) : {};
 
-      if (parsed && typeof parsed.success === "boolean") {
+      try {
+        ensureEnvelope<unknown>(parsed);
         const { message, code } = extractEnvelopeError(parsed.error);
         return new BackendError(res.status, message, code, parsed);
+      } catch {
+        const message = extractErrorMessage(parsed) || preview(raw);
+        return new BackendError(res.status, message, undefined, parsed);
       }
-
-      const message = extractErrorMessage(parsed) || preview(raw);
-      return new BackendError(res.status, message, undefined, parsed);
     } catch {
       // fall-through to text fallback
     }

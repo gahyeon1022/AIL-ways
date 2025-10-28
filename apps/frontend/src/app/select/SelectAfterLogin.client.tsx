@@ -42,8 +42,9 @@ export default function SelectAfterLogin({
         interests, 
       });
       router.replace("/home");
-    } catch (e: any) {
-      alert(e?.message ?? "저장 중 오류가 발생했습니다.");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "저장 중 오류가 발생했습니다.";
+      alert(message);
     } finally {
       setLoading(false);
     }

@@ -35,8 +35,9 @@ export default async function Page() {
     const opts = await fetchProfileOptionsAction();
     roleOptions = opts.roles ?? [];
     interestOptions = opts.interests ?? [];
-  } catch (e: any) {
-    loadError = String(e?.message || "옵션 조회 실패");
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "옵션 조회 실패";
+    loadError = message;
   }
 
   return (

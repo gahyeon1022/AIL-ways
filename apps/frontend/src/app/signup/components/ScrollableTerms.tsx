@@ -20,7 +20,11 @@ export default function ScrollableTerms({
         const t = await res.text();
         if (alive) setText(t);
       })
-      .catch((e: any) => alive && setErr(e.message ?? "로드 오류"));
+      .catch((error: unknown) => {
+        if (!alive) return;
+        const message = error instanceof Error ? error.message : "로드 오류";
+        setErr(message);
+      });
     return () => { alive = false; };
   }, [src]);
 
