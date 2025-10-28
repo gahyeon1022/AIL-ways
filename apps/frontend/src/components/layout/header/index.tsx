@@ -26,7 +26,9 @@ export default function Header() {
           <Link href="/mentoring-current">
             <Button variant="ghost">멘토링 현황</Button>
           </Link>
+          <Link href="/home">
           <Button variant="ghost">홈</Button>
+          </Link>
           <Link href="/board-list">
             <Button variant="ghost">게시판</Button>
           </Link>
