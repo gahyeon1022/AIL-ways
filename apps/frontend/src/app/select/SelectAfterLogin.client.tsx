@@ -39,7 +39,7 @@ export default function SelectAfterLogin({
     try {
       await saveRoleAndInterestsAction({
         role,
-        interests, // 서버액션에서 빈 배열은 null로 정규화해 PATCH 전송
+        interests, 
       });
       router.replace("/home");
     } catch (e: any) {
