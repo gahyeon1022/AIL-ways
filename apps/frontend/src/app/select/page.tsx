@@ -1,42 +1,51 @@
 // /app/select/page.tsx
 import { redirect } from "next/navigation";
-import { fetchInterestEnumsAction } from "@/app/server-actions/select";
-import { fetchWithAuth } from "@/app/server-actions/auth";
-import { parseEnvelope } from "@/app/lib/api/envelope";
+import { cookies } from "next/headers";
 import SelectAfterLogin from "./SelectAfterLogin.client";
-
-// 내가 저장해둔 프로필 타입(백엔드 스펙 맞춰 조정 가능)
-type MyProfile = {
-  role: string | null;
-  interests: string[] | null; // 다중 선택 저장하는 스펙
-};
+import { fetchProfileOptionsAction, fetchMyProfileAction } from "@/app/server-actions/select";
 
 export const dynamic = "force-dynamic";
 
-// 서버에서 내 프로필 조회 (이미 완료면 /home으로 즉시 리다이렉트)
-async function fetchMyProfile(): Promise<MyProfile> {
-  const res = await fetchWithAuth(`/api/users/me/profile`, { cache: "no-store" });
-  const data = await parseEnvelope<MyProfile>(res);
-  return data;
-}
-
 export default async function Page() {
-  const [profile, interestOptions] = await Promise.all([
-    fetchMyProfile().catch(() => ({ role: null, interests: null })),
-    fetchInterestEnumsAction().catch(() => [] as string[]),
-  ]);
+  const jar = await cookies();
+  const token = jar.get("AUTH_TOKEN")?.value ?? null;
+  if (!token) {
+    // 토큰이 없다 = 로그인 미완료 → 로그인 화면으로
+    redirect("/login");
+  }
 
-  const hasRole = !!profile.role;
-  const hasInterests = Array.isArray(profile.interests) && profile.interests.length > 0;
-  if (hasRole && hasInterests) {
+  let profile: Awaited<ReturnType<typeof fetchMyProfileAction>> | null = null;
+  try {
+    profile = await fetchMyProfileAction();
+  } catch {}
+
+  if (profile?.role && profile?.interests && profile.interests.length > 0) {
     redirect("/home");
+  }
+
+  const initialRole = profile?.role ?? null;
+  const initialInterests = Array.isArray(profile?.interests) ? profile.interests : [];
+
+  // 2) 옵션 로딩 시도 (SSR: GET만, 부작용 없음)
+  let roleOptions: string[] = [];
+  let interestOptions: string[] = [];
+  let loadError: string | null = null;
+
+  try {
+    const opts = await fetchProfileOptionsAction();
+    roleOptions = opts.roles ?? [];
+    interestOptions = opts.interests ?? [];
+  } catch (e: any) {
+    loadError = String(e?.message || "옵션 조회 실패");
   }
 
   return (
     <SelectAfterLogin
+      roleOptions={roleOptions}
       interestOptions={interestOptions}
-      initialRole={profile.role}
-      initialInterests={Array.isArray(profile.interests) ? profile.interests : []}
+      initialRole={initialRole}
+      initialInterests={initialInterests}
+      loadError={loadError}
     />
   );
 }
