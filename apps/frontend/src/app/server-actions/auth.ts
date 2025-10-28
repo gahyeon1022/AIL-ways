@@ -188,19 +188,20 @@ export async function signupAction(formData: FormData) {
 }
 
 // 보호 API 비상구(원시 Response 필요 시만 사용)
+// /app/server-actions/auth.ts
 export async function fetchWithAuth(path: string, init?: RequestInit) {
   const jar = await cookies();
   const token = jar.get("AUTH_TOKEN")?.value;
-  if (!token) throw new BackendError(401, "인증 필요(로그인하세요)", "UNAUTHORIZED");
+  if (!token) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401, headers: { "Content-Type": "application/json" },
+    });
+  }
 
-  const res = await fetch(`${BE}${path}`, {
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(init?.headers ?? {}),
-    },
-    ...init,
-  });
-  return res; // 호출부에서 res.ok 확인 및 json()/blob()/stream 직접 처리
+  const headers = new Headers(init?.headers || {});
+  if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  headers.set("Authorization", `Bearer ${token}`);
+
+  return fetch(`${BE}${path}`, { cache: "no-store", ...init, headers });
 }
+
