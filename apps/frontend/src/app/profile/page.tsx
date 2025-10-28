@@ -40,10 +40,9 @@ export default async function ProfilePage() {
   const interests = formatInterests(profile.interests ?? null);
 
   return (
-    <main className="mx-auto mt-16 w-full max-w-3xl px-6">
+    <main className="mx-auto -mt-2 w-full max-w-3xl px-6">
       <section className="rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="text-2xl font-semibold text-gray-900">내 정보</h1>
-        <p className="mt-2 text-sm text-gray-500">현재 계정에 저장된 기본 정보를 확인할 수 있어요.</p>
 
         <dl className="mt-8 space-y-6 text-base text-gray-800">
           <div>
