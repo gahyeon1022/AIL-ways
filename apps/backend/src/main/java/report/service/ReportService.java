@@ -138,6 +138,7 @@ public class ReportService {
         return report.domain.DistractionLog.builder()
                 .activity(sessionLog.getActivity())
                 .detectedAt(sessionLog.getDetectedAt())
+                .detectionType(sessionLog.getDetectionType())
                 .selfFeedback(reportSelfFeedback)
                 .build();
     }

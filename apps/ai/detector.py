@@ -4,7 +4,39 @@ import time
 import numpy as np
 import cv2
 import mediapipe as mp
+import torch
 from ultralytics import YOLO
+
+# --- YOLO 내부 클래스 ---
+from ultralytics.nn.tasks import DetectionModel
+from ultralytics.nn.modules.conv import Conv, Concat        # ✅ Concat 추가
+from ultralytics.nn.modules.block import C2f
+try:
+    from ultralytics.nn.modules.common import SPPF, Bottleneck
+except ModuleNotFoundError:
+    from ultralytics.nn.tasks import SPPF, Bottleneck
+from ultralytics.nn.modules.head import Detect
+
+# --- PyTorch 표준 모듈들 ---
+from torch.nn import (
+    Sequential,
+    ModuleList,
+    Conv2d,
+    BatchNorm2d,
+    SiLU,
+    MaxPool2d,
+    Upsample,
+)
+
+# ✅ PyTorch 2.6+ weights_only 대응: YOLO에서 필요한 모든 클래스 허용
+torch.serialization.add_safe_globals([
+    # YOLO / Ultralytics 내부
+    DetectionModel, Conv, C2f, SPPF, Bottleneck, Detect, Concat,
+    # PyTorch 표준 계층
+    Sequential, ModuleList, Conv2d, BatchNorm2d, SiLU, MaxPool2d, Upsample
+])
+
+
 
 # ---------- 설정 데이터클래스 ----------
 @dataclass
@@ -22,15 +54,17 @@ class DetectorConfig:
     detect_phone_every_n: int = 3  # 매 N프레임마다 YOLO
 
     # 기타
-    mirror: bool = True  # 보기 편하게 좌우반전 적용 여부
-    max_side: int = 640  # FaceMesh/YOLO 입력 리사이즈 상한(속도/정확도 트레이드오프)
+    mirror: bool = True
+    max_side: int = 640
 
-# ---------- EAR 계산에 쓰는 FaceMesh 랜드마크 인덱스 ----------
-LEFT_EYE  = [33, 160, 158, 133, 153, 144]   # p0..p5
+# ---------- EAR 계산 ----------
+LEFT_EYE = [33, 160, 158, 133, 153, 144]
 RIGHT_EYE = [362, 385, 387, 263, 373, 380]
 
+
 def _dist(a, b):
-    return np.hypot(a[0]-b[0], a[1]-b[1])
+    return np.hypot(a[0] - b[0], a[1] - b[1])
+
 
 def _compute_ear(landmarks: np.ndarray, eye_idx: List[int]) -> float:
     p = landmarks[eye_idx]
@@ -39,12 +73,13 @@ def _compute_ear(landmarks: np.ndarray, eye_idx: List[int]) -> float:
     C = _dist(p[0], p[3])
     return 1.0 if C == 0 else (A + B) / (2.0 * C)
 
+
 # ---------- 메인 Detector ----------
 class Detector:
     def __init__(self, cfg: DetectorConfig = DetectorConfig()):
         self.cfg = cfg
 
-        # MediaPipe Face Mesh
+        # ✅ MediaPipe Face Mesh 초기화
         self.mp_face_mesh = mp.solutions.face_mesh
         self.face_mesh = self.mp_face_mesh.FaceMesh(
             max_num_faces=1,
@@ -53,58 +88,46 @@ class Detector:
             min_tracking_confidence=0.6
         )
 
-        # YOLO (COCO)
-        # 기본 가벼운 모델. 더 빠르게는 yolov8n, 더 정확하게는 yolov8s/m
+        # ✅ YOLO 모델 로드 (PyTorch 2.6 호환)
         self.yolo = YOLO("yolov8n.pt")
 
-        # 상태 카운터
+        # 상태값 초기화
         self._drowsy_count = 0
         self._absence_count = 0
         self._phone_count = 0
         self._frame_no = 0
 
-        # 클래스 이름 캐시
+        # 클래스 이름 캐시 및 'cell phone' 클래스 id 탐색
         self._names = self.yolo.names
-        # 'cell phone' 클래스 id 탐색
         self._cell_phone_ids = {i for i, n in self._names.items() if n == "cell phone"}
 
     def _prepare_frame(self, frame: np.ndarray) -> np.ndarray:
         img = frame
         if self.cfg.mirror:
             img = cv2.flip(img, 1)
-        # 과도한 해상도면 축소(속도 ↑)
         h, w = img.shape[:2]
-        scale = 1.0
         if max(h, w) > self.cfg.max_side:
             scale = self.cfg.max_side / max(h, w)
-            img = cv2.resize(img, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_AREA)
+            img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
         return img
 
     def process(self, frame: np.ndarray) -> Dict[str, Any]:
         """
-        입력: BGR 프레임 (numpy array, OpenCV)
-        출력: {
-            'drowsy': bool, 'left_seat': bool, 'phone': bool,
-            'ear': float or None, 'face_detected': bool,
-            'phone_score': float or None,
-            'phone_boxes': [(x1,y1,x2,y2,score), ...],
-            'ts': ISO8601
-        }
+        입력: BGR 프레임
+        출력: 졸음, 자리이탈, 휴대폰 감지 정보
         """
         t0 = time.time()
         img = self._prepare_frame(frame)
         rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        # --- 1) FaceMesh로 얼굴/눈 EAR ---
+        # --- 1) FaceMesh ---
         face_detected = False
         ear = None
-        with self.face_mesh as fm:
-            res = fm.process(rgb)
+        res = self.face_mesh.process(rgb)
 
         if res.multi_face_landmarks:
             face_detected = True
             lm = res.multi_face_landmarks[0]
-            # 정규화 좌표(0~1)를 px로 변환
             h, w = img.shape[:2]
             pts = np.array([(p.x * w, p.y * h) for p in lm.landmark], dtype=np.float32)
 
@@ -112,39 +135,32 @@ class Detector:
             R = _compute_ear(pts, RIGHT_EYE)
             ear = (L + R) / 2.0
 
-            # 졸음 카운터
             if ear < self.cfg.ear_threshold:
                 self._drowsy_count += 1
             else:
                 self._drowsy_count = 0
-
-            # 얼굴 있으면 absence 리셋
             self._absence_count = 0
         else:
-            # 얼굴 없음: drowsy 리셋, absence 증가
             self._drowsy_count = 0
             self._absence_count += 1
 
-        # --- 2) YOLO로 휴대폰 ---
-        phone_boxes: List[Tuple[int,int,int,int,float]] = []
+        # --- 2) YOLO ---
+        phone_boxes: List[Tuple[int, int, int, int, float]] = []
         phone_score: Optional[float] = None
         phone_detected_now = False
 
         if self._frame_no % self.cfg.detect_phone_every_n == 0:
-            # verbose=False로 출력 억제
             results = self.yolo(rgb, verbose=False)
             if results:
                 r0 = results[0]
                 if r0.boxes is not None and len(r0.boxes) > 0:
-                    # boxes: xyxy, conf, cls
                     xyxy = r0.boxes.xyxy.cpu().numpy()
                     conf = r0.boxes.conf.cpu().numpy()
-                    cls  = r0.boxes.cls.cpu().numpy().astype(int)
-                    for (x1,y1,x2,y2), sc, c in zip(xyxy, conf, cls):
+                    cls = r0.boxes.cls.cpu().numpy().astype(int)
+                    for (x1, y1, x2, y2), sc, c in zip(xyxy, conf, cls):
                         if c in self._cell_phone_ids and sc >= self.cfg.phone_min_conf:
-                            phone_boxes.append((int(x1),int(y1),int(x2),int(y2),float(sc)))
+                            phone_boxes.append((int(x1), int(y1), int(x2), int(y2), float(sc)))
                     if phone_boxes:
-                        # 최고 점수
                         phone_score = max(b[-1] for b in phone_boxes)
                         phone_detected_now = True
 
@@ -153,21 +169,20 @@ class Detector:
         else:
             self._phone_count = 0
 
-        # --- 최종 판정 ---
+        # --- 3) 최종 판정 ---
         drowsy = self._drowsy_count >= self.cfg.drowsy_consec_frames
         left_seat = self._absence_count >= self.cfg.absence_consec_frames
         phone = self._phone_count >= self.cfg.phone_consec_frames
 
         self._frame_no += 1
-        out = {
+        return {
             "drowsy": drowsy,
             "left_seat": left_seat,
             "phone": phone,
             "ear": None if ear is None else float(ear),
             "face_detected": bool(face_detected),
             "phone_score": phone_score,
-            "phone_boxes": phone_boxes,  # 필요 없으면 사용처에서 버려도 됨
+            "phone_boxes": phone_boxes,
             "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
             "latency_ms": int((time.time() - t0) * 1000),
         }
-        return out

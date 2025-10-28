@@ -68,8 +68,16 @@ jwt:
 
 ai:
   api:
-    url: https://api.openai.com/v1/chat/completions
-# AI Summary Service Configuration
+    url: http://127.0.0.1:8000
+    key: dummy-key
+
+
+#ai:
+#  api:
+#    url: https://api.openai.com/v1/chat/completions
+
+
+  # AI Summary Service Configuration
 # 사용하고자 하는 AI 서비스의 API 엔드포인트 URL을 입력하세요. (예: https://api.openai.com/v1)
   #ai.api.url=https://api.openai.com/v1
 
