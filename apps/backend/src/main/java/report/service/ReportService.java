@@ -39,20 +39,7 @@ public class ReportService {
 
         // 4. 세션의 딴짓 로그를 리포트의 딴짓 로그 형식으로 변환합니다. (이전 단계에서 완성)
         List<report.domain.DistractionLog> reportDistractionLogs = endedSession.getDistractionLogs().stream()
-                .map(sessionLog -> {
-                    report.domain.SelfFeedback reportSelfFeedback = null;
-                    if (sessionLog.getSelfFeedback() != null) {
-                        reportSelfFeedback = report.domain.SelfFeedback.builder()
-                                .comment(sessionLog.getSelfFeedback().getComment())
-                                .createdAt(sessionLog.getSelfFeedback().getCreatedAt())
-                                .build();
-                    }
-                    return report.domain.DistractionLog.builder()
-                            .activity(sessionLog.getActivity())
-                            .detectedAt(sessionLog.getDetectedAt())
-                            .selfFeedback(reportSelfFeedback)
-                            .build();
-                })
+                .map(this::toReportDistractionLog)
                 .collect(Collectors.toList());
 
         // 5. 변환된 데이터를 바탕으로 새로운 Report 객체를 생성합니다.
@@ -120,10 +107,6 @@ public class ReportService {
         report.setMentorFeedback(feedback);
         return reportRepository.save(report);
     }
-    /*
-    멘티의 셀프 피드백을 session에서 가져오는 거 구현해야됨
-    */
-
     /**
      * [공통 메서드]
      * 요청을 보낸 사용자가 해당 매칭의 멤버(멘토 또는 멘티)인지 확인합니다.
@@ -138,5 +121,24 @@ public class ReportService {
             throw new IllegalStateException("User " + actingUserId + " is not a member of match " + matchId);
         }
         return match;
+    }
+
+    /**
+     * StudySession의 딴짓 로그를 Report 도메인으로 변환하면서 멘티 셀프 피드백을 복사합니다.
+     */
+    private report.domain.DistractionLog toReportDistractionLog(session.domain.DistractionLog sessionLog) {
+        report.domain.SelfFeedback reportSelfFeedback = null;
+        if (sessionLog.getSelfFeedback() != null) {
+            reportSelfFeedback = report.domain.SelfFeedback.builder()
+                    .comment(sessionLog.getSelfFeedback().getComment())
+                    .createdAt(sessionLog.getSelfFeedback().getCreatedAt())
+                    .build();
+        }
+
+        return report.domain.DistractionLog.builder()
+                .activity(sessionLog.getActivity())
+                .detectedAt(sessionLog.getDetectedAt())
+                .selfFeedback(reportSelfFeedback)
+                .build();
     }
 }
