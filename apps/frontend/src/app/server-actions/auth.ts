@@ -1,4 +1,3 @@
-// /app/server-actions/auth.ts
 "use server";
 
 import { cookies } from "next/headers";
@@ -97,6 +96,65 @@ export async function logoutAction() {
   return { ok: true, msg: "로그아웃 완료" };
 }
 
+export async function persistAuthToken(token: string) {
+  if (!token) throw new Error("토큰이 필요합니다.");
+  const jar = await cookies();
+  jar.set({
+    name: "AUTH_TOKEN",
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 15,
+  });
+  return { ok: true };
+}
+
+export type SocialConsentInput = {
+  type: "TOS" | "PRIVACY" | "VIDEO_CAPTURE";
+  agreed: boolean;
+};
+
+export async function saveSocialConsentsAction(consents: SocialConsentInput[]) {
+  if (!consents || consents.length === 0) {
+    return { ok: false, msg: "동의 항목이 필요합니다." };
+  }
+
+  const allAgreed = consents.every(c => c.agreed);
+  if (!allAgreed) {
+    return { ok: false, msg: "필수 약관에 모두 동의해야 합니다." };
+  }
+
+  const payload = consents.map(c => ({
+    type: c.type,
+    agreed: true,
+    agreedAt: new Date().toISOString(),
+  }));
+
+  try {
+    await callAPIWithAuth("/api/auth/social/consents", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    const jar = await cookies();
+    jar.set({
+      name: "CONSENTS_CONFIRMED",
+      value: "1",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
+    return { ok: true };
+  } catch (e: unknown) {
+    return { ok: false, msg: formatError(e, "약관 동의 저장에 실패했습니다.") };
+  }
+}
+
 // 아이디 중복 확인
 export async function checkUserIdAction(userId: string) {
   if (!userId) return { ok: false, msg: "아이디를 입력하세요" };
@@ -182,7 +240,6 @@ export async function signupAction(formData: FormData) {
 }
 
 // 보호 API 비상구(원시 Response 필요 시만 사용)
-// /app/server-actions/auth.ts
 export async function fetchWithAuth(path: string, init?: RequestInit) {
   const jar = await cookies();
   const token = jar.get("AUTH_TOKEN")?.value;

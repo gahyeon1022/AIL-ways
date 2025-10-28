@@ -1,37 +1,48 @@
-// /app/terms-consents/page.tsx
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import TermsConsentsScreen from "./terms-consents.client";
+import TermsConsentsScreen from "./TermsConsentsScreen.client";
+import { fetchMyProfileAction } from "@/app/server-actions/select";
 
-type PageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
-};
+type SearchParamsPromise = Promise<Record<string, string | string[] | undefined>>;
 
 export const dynamic = "force-dynamic";
 
-export default async function TermsConsentsPage({ searchParams }: PageProps) {
-  const jar = await cookies();
-  const tokenCookie = jar.get("AUTH_TOKEN")?.value ?? null;
-  const consentsDone = jar.get("CONSENTS_CONFIRMED")?.value === "1";
+export default async function TermsConsentsPage({
+  searchParams,
+}: {
+  searchParams: SearchParamsPromise;
+}) {
+  const params = await searchParams;
+  const tokenParamRaw = params?.token;
+  const tokenParam = Array.isArray(tokenParamRaw) ? tokenParamRaw[0] : tokenParamRaw || null;
 
-  const queryTokenEntries = searchParams?.token;
-  const queryToken = Array.isArray(queryTokenEntries)
-    ? queryTokenEntries[0]
-    : queryTokenEntries || null;
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("AUTH_TOKEN")?.value ?? null;
+  const hasAuthToken = Boolean(authToken);
 
-  if (consentsDone) {
+  let alreadyConsented = false;
+  if (hasAuthToken) {
+    try {
+      const profile = await fetchMyProfileAction();
+      alreadyConsented = Array.isArray(profile?.consents) && profile.consents.some(item => item?.agreed);
+    } catch {
+      alreadyConsented = false;
+    }
+  }
+
+  if (alreadyConsented) {
     redirect("/select");
   }
 
-  if (!tokenCookie && !queryToken) {
-    redirect("/login");
+  if (!tokenParam && !hasAuthToken) {
+    return <TermsConsentsScreen tokenParam={null} hasAuthToken={false} alreadyConsented={false} />;
   }
 
   return (
     <TermsConsentsScreen
-      tokenParam={queryToken}
-      hasAuthToken={Boolean(tokenCookie)}
+      tokenParam={tokenParam}
+      hasAuthToken={hasAuthToken}
+      alreadyConsented={alreadyConsented}
     />
   );
 }
-

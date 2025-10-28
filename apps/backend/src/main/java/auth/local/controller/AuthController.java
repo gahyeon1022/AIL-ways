@@ -100,8 +100,8 @@ public class AuthController {
         return ApiResponse.ok(Map.of("isAvailable", isAvailable));
     }
 
-    @Operation(summary = "약관 동의 저장", description = "최초 로그인 시 사용자가 약관에 동의한 내역을 저장합니다.")
-    @PostMapping("/consents")
+    @Operation(summary = "약관 동의 저장", description = "소셜 최초 로그인 시 사용자가 약관에 동의한 내역을 저장합니다.")
+    @PostMapping("/social/consents")
     public ApiResponse<Map<String, String>> saveUserConsents(
             @RequestBody @Valid List<ConsentDTO> consents,
             Authentication auth

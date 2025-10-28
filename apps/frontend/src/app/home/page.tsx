@@ -1,39 +1,37 @@
-"use client";
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { cookies } from "next/headers";
+import HomeShell from "./HomeShell.client";
+import { fetchMyProfileAction } from "@/app/server-actions/select";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+type PageProps = {
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export default async function HomePage({ searchParams }: PageProps) {
+  const params = searchParams ?? {};
+  const tokenParamRaw = params.token;
+  const tokenParam = Array.isArray(tokenParamRaw) ? tokenParamRaw[0] : tokenParamRaw || null;
+
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get("AUTH_TOKEN")?.value ?? null;
+  const hasAuthToken = Boolean(authToken);
+
+  let initialConsented = false;
+  if (hasAuthToken) {
+    try {
+      const profile = await fetchMyProfileAction();
+      initialConsented = Array.isArray(profile?.consents) && profile.consents.some(item => item?.agreed);
+    } catch {
+      initialConsented = false;
+    }
+  }
+
   return (
-    <div className="text-center">
-      <h1 className="relative top-[-10px] text-[15rem] font-extrabold tracking-tight text-white drop-shadow -mt-[40px]">
-        AIL-ways
-      </h1>
-
-        <div className="relative -top-5 flex items-baseline justify-center text-2xl mt-3 text-white/90 gap-2">
-          <Image src="/wing_left.png" alt="왼쪽 날개" width={100} height={100} className="relative top-4 left-3"/>
-              학습에 날개를 달아보세요!
-          <Image src="/wing_right.png" alt="오른쪽 날개" width={100} height={100} className="relative top-4 right-3" />
-        </div>
-
-
-      <div className="mt-8">
-        <motion.div
-        animate={{ rotate: [0, -5, 5, -5, 0] }} // 좌우로 흔들림
-        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-      >
-        <Link
-          href="/login"
-          className="inline-block rounded-full px-10 py-4 text-lg font-semibold 
-                     bg-white/50  text-gray-900 shadow-lg 
-                     hover:bg-white transition 
-                     focus:outline-none focus:ring-2 focus:ring-white/70
-                     active:scale-95"
-          >
-          학습하러가기
-          </Link>
-        </motion.div>
-      </div>
-    </div>
+    <HomeShell
+      tokenParam={tokenParam}
+      hasAuthToken={hasAuthToken}
+      initialConsented={initialConsented}
+    />
   );
 }
