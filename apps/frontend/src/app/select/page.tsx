@@ -6,12 +6,28 @@ import { fetchProfileOptionsAction, fetchMyProfileAction } from "@/app/server-ac
 
 export const dynamic = "force-dynamic";
 
-export default async function Page() {
+type PageProps = {
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export default async function Page({ searchParams }: PageProps) {
   const jar = await cookies();
+  const tokenQuery = searchParams?.token;
+  const tokenParam = Array.isArray(tokenQuery) ? tokenQuery[0] : tokenQuery || null;
+
+  if (tokenParam) {
+    redirect(`/terms-consents?token=${encodeURIComponent(tokenParam)}`);
+  }
+
   const token = jar.get("AUTH_TOKEN")?.value ?? null;
   if (!token) {
     // 토큰이 없다 = 로그인 미완료 → 로그인 화면으로
     redirect("/login");
+  }
+
+  const consentsConfirmed = jar.get("CONSENTS_CONFIRMED")?.value === "1";
+  if (!consentsConfirmed) {
+    redirect("/terms-consents");
   }
 
   let profile: Awaited<ReturnType<typeof fetchMyProfileAction>> | null = null;

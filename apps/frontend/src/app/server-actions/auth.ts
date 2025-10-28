@@ -93,6 +93,7 @@ export async function logoutAction() {
   }
   jar.delete("AUTH_TOKEN");
   jar.delete("REFRESH_TOKEN");
+  jar.delete("CONSENTS_CONFIRMED");
   return { ok: true, msg: "로그아웃 완료" };
 }
 
