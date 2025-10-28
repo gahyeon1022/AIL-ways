@@ -3,9 +3,8 @@ package user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // <<< 1. @Transactional 임포트
-import user.domain.Interest;
-import user.domain.Role;
-import user.domain.User;
+import user.domain.*;
+import user.dto.ConsentDTO;
 import user.repository.UserRepository;
 
 import java.time.Instant;
@@ -64,5 +63,27 @@ public class UserService {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 흥미 분야입니다: " + interestStr));
         }
+    }
+
+    // <<< 3. 카카오 최초 로그인시 약관 동의 항목
+    @Transactional
+    public void saveConsents(String userId, List<ConsentDTO> consents) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+
+        // ✅ DTO -> Entity 변환
+        List<Consent> consentEntities = consents.stream()
+                .map(dto -> new Consent(
+                        ConsentType.valueOf(dto.getType().toUpperCase()),            // 약관 유형
+                        dto.isAgreed(),                   // 동의 여부
+                        dto.getAgreedAt() != null         // 동의 일시 (없으면 서버 기준 시간)
+                                ? dto.getAgreedAt()
+                                : Instant.now()
+                ))
+                .toList();
+
+        // ✅ User에 약관 동의 내역 저장
+        user.setConsents(consentEntities);
+        userRepository.save(user);
     }
 }
