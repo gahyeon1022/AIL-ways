@@ -5,19 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a9561966-c41a-422e-a484-996b87fa1829" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_springframework_spring_beans_6_2_10.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_springframework_spring_beans_6_2_10.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/ai/detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ai/detector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/ai/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ai/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/ai/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ai/server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/report/domain/DistractionLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/report/domain/DistractionLog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/report/service/ReportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/report/service/ReportService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/session/controller/StudySessionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/session/controller/StudySessionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/session/domain/DistractionLog.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/session/domain/DistractionLog.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/session/dto/DistractionLogDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/session/dto/DistractionLogDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/session/service/StudySessionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/session/service/StudySessionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/report/service/ExternalApiAiSummaryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/report/service/ExternalApiAiSummaryService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,33 +65,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.소스 다운로드.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.AilWaysBackendApplication.executor": "Run",
-    "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "feat/backend/study-session-selffeedback",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/seungzun/Desktop/AIL-ways",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "프로젝트",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.소스 다운로드.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.AilWaysBackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/backend/study-session-selffeedback&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/seungzun/Desktop/AIL-ways&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;프로젝트&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Spring Boot.BackendApplication">
     <configuration name="AilWaysBackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="backend.main" />
@@ -146,6 +136,8 @@
       <updated>1757749913502</updated>
       <workItem from="1757749914531" duration="359000" />
       <workItem from="1761650705391" duration="2038000" />
+      <workItem from="1761652772318" duration="107000" />
+      <workItem from="1761727905129" duration="1095000" />
     </task>
     <servers />
   </component>

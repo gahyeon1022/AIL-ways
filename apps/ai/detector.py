@@ -46,7 +46,9 @@ class DetectorConfig:
     drowsy_consec_frames: int = 12  # 대략 0.5~0.7s
 
     # Absence (no face)
-    absence_consec_frames: int = 30
+    absence_consec_frames: int = 1 #테스트해본다고 잠시 바꿀게여!!
+    #absence_consec_frames: int = 30
+
 
     # Phone (YOLO)
     phone_min_conf: float = 0.50
