@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { loginAction } from "@/app/_actions/auth"; // 
+import { loginAction } from "@/app/server-actions/auth"; // 
 
 type Props = { open: boolean; onClose: () => void };
 
@@ -24,8 +24,9 @@ export default function LocalLoginModal({ open, onClose }: Props) {
 
       router.replace("/select");
       onClose();
-    } catch (err: any) {
-      alert(err.message ?? "문제가 발생했습니다.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "문제가 발생했습니다.";
+      alert(message);
     } finally {
       setLoading(false);
     }

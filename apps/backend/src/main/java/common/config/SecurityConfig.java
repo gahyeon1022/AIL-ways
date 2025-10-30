@@ -69,15 +69,21 @@ public class SecurityConfig {
                                 // 🔑 KakaoService.loadUser() → upsertUser() 실행되도록 연결
                                 userInfo.userService(kakaoService)
                         )
-                        .successHandler((req,res,auth) -> {
+                        .successHandler((req, res, auth) -> {
                             DefaultOAuth2User oAuth2User = (DefaultOAuth2User) auth.getPrincipal();
-                            //  DB에 저장/업데이트 보장
-                            kakaoService.upsertUser(oAuth2User);
+                            // ✅ 신규 유저 여부 확인
+                            boolean isNewUser = kakaoService.upsertUser(oAuth2User);
+                            // ✅ 이메일 추출
                             Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
                             String email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
+                            // ✅ JWT 생성
                             String token = jwtUtil.generateToken(email);
-
-                            res.sendRedirect("http://localhost:3000/select?token=" + token);
+                            // ✅ 신규 / 기존 유저에 따라 리다이렉트 분기
+                            if (isNewUser) {
+                                res.sendRedirect("http://localhost:3000/terms-consents?token=" + token);
+                            } else {
+                                res.sendRedirect("http://localhost:3000/home?token=" + token);
+                            }
                         })
                 )
 

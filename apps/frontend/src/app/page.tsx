@@ -16,7 +16,6 @@ export default function HomePage() {
           <Image src="/wing_right.png" alt="오른쪽 날개" width={100} height={100} className="relative top-4 right-3" />
         </div>
 
-
       <div className="mt-8">
         <motion.div
         animate={{ rotate: [0, -5, 5, -5, 0] }} // 좌우로 흔들림
