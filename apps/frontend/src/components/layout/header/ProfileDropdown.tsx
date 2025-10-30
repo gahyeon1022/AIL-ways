@@ -8,11 +8,15 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button"; 
 import { UserCircle } from "lucide-react";
+import { logoutAction } from "@/app/server-actions/auth";
 
 export default function ProfileDropdown() {
   const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const router = useRouter();
   const anchorRef = useRef<HTMLDivElement>(null); 
   const menuRef = useRef<HTMLDivElement>(null);  
   const [pos, setPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
@@ -64,6 +68,18 @@ export default function ProfileDropdown() {
     };
   }, [open]);
 
+  const handleLogout = async () => {
+    if (pending) return;
+    setPending(true);
+    try {
+      await logoutAction();
+      router.replace("/login");
+    } finally {
+      setPending(false);
+      setOpen(false);
+    }
+  };
+
   return (
     <>
       <div ref={anchorRef} className="relative flex-shrink-0">
@@ -91,6 +107,14 @@ export default function ProfileDropdown() {
           >
             내 정보
           </Link>
+          <button
+            type="button"
+            className="block w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={handleLogout}
+            disabled={pending}
+          >
+            {pending ? "로그아웃 중..." : "로그아웃"}
+          </button>
         </div>,
         document.body
       )}

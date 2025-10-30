@@ -9,10 +9,10 @@ export function Button({ variant = "default", className, ...props }: ButtonProps
     <button
       {...props}
       className={clsx(
-        "px-4 py-2 rounded-md transition-colors",
-        variant === "default" && "bg-black text-white hover:bg-black/80",
-        variant === "ghost" && "bg-transparent text-black hover:bg-black/10",
-        className="text-black hover:bg-black/10 hover:text-black text-sm px-4 py-2 transition-colors"
+        "rounded-md px-4 py-2 text-sm transition-colors",
+        variant === "default" ? "bg-black text-white hover:bg-black/80" : null,
+        variant === "ghost" ? "bg-transparent text-black hover:bg-black/10" : null,
+        className
       )}
     />
   );

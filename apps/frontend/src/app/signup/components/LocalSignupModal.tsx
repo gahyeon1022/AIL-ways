@@ -1,6 +1,6 @@
 "use client";
 
-import ScrollableTerms from "@/app/signup/components/ScrollableTerms";
+import ScrollableTerms from "@/components/ui/ScrollableTerms";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,7 +8,7 @@ import {
   sendEmailCodeAction,
   verifyEmailCodeAction,
   signupAction,
-} from "@/app/_actions/auth";
+} from "@/app/server-actions/auth";
 
 const BTN =
   "inline-flex items-center justify-center shrink-0 min-w-[64px] " +

@@ -13,7 +13,7 @@ export default function LoginPage() {
       <div className="grid gap-3">
         <Link
           href={`${API_BASE}/oauth2/authorization/kakao`} // /api/auth/signin/kakao, 직접 구현이면 백엔드 시작점으로 변경
-          className="relative item-center w-full justify-center rounded-xl px-4 py-3 font-medium bg-[#FEE500] text-black hover:brightness-95 transition inline-block">
+          className="relative item-center w-full justify-center rounded-xl px-4 py-3 font-medium bg-[#FFEB3C] text-black hover:brightness-95 transition inline-block">
           <Image src="/kakao_logo.png" alt="Kakao" width={23} height={23} className="absolute left-5 top-3.5"/>
           <span className="leading-none">카카오로 로그인</span>
         </Link>
@@ -29,7 +29,7 @@ export default function LoginPage() {
           onClick={() => setOpen(true)}
           className="relative item-center justify-center w-full rounded-xl px-4 py-3 font-medium bg-indigo-500 text-white hover:bg-indigo-500 transition inline-block">
           <Image src="/letter.png" alt="letter" width={23} height={23} className="absolute left-5 top-3"/>
-          이메일로 로그인
+          아이디로 로그인
         </button>
         
         <div className="h-[1px] bg-gray-300"/>
