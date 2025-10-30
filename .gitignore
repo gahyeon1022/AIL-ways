@@ -1,4 +1,3 @@
-
 # ===================== Root / Monorepo =====================
 # 에디터(개인설정) - 팀 공유 불필요
 .vscode/
@@ -92,7 +91,7 @@ tools/**/cjs/
 .gradle/
 **/.gradle/
 
-# IDE
+# IDEA / Eclipse / STS / NetBeans IDE 설정
 .idea/
 *.iws
 *.iml
@@ -198,3 +197,6 @@ artifacts/
 # --- Hugging Face/기타 캐시(레포 내부에 생성되는 경우) ---
 .huggingface/
 hf_cache/
+
+# ===================== Frontend (Next.js / Vercel) =====================
+apps/frontend/.next/
