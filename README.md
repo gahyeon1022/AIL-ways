@@ -226,3 +226,86 @@ typescript: "5"
 서버 실행 후
 >> brew services start redis
 로 redis를 실행시켜줘야 로그아웃이 진행됩니다
+
+
+------------------------------------------------------------
+# 💻 Windows 환경 실행 가이드
+
+## MongoDB 설치 및 실행
+1. [MongoDB Community Edition (Windows Installer)](https://www.mongodb.com/try/download/community) 설치  
+   설치 시 **"서비스로 등록"** 옵션을 체크하면 자동 실행됩니다.
+
+2. 수동 실행 시:
+"C:\Program Files\MongoDB\Server<버전>\bin\mongod.exe"
+
+
+3. 서비스로 실행 시:
+net start MongoDB
+
+
+---
+
+## 백엔드(Spring Boot) 실행
+루트 디렉토리에서 아래 명령어 실행:
+gradlew.bat bootRun
+
+
+브라우저에서 접속:
+http://localhost:8080/swagger-ui/index.html
+
+---
+
+## 프론트엔드 실행
+1️⃣ 경로 이동  
+cd apps\frontend
+
+2️⃣ 패키지 설치  
+npm install
+
+3️⃣ 개발 서버 실행  
+npm run dev
+브라우저에서 접속:  
+http://localhost:3000
+
+---
+
+## Redis 실행 (선택)
+로그아웃 기능 사용 시 필요합니다.
+redis-server
+
+또는
+"C:\Program Files\Redis\redis-server.exe"
+
+
+------------------------------------------------------------
+# 🤖 AI 모듈 실행 가이드 (딴짓 감지 + 요약 기능)
+
+## Python 환경 구성
+> ⚠️ **Python 3.11.x 버전 사용 필수 (예: 3.11.7)**  
+> mediapipe는 3.12 이상 버전에서 호환되지 않습니다.
+
+## Python 환경 구성
+cd apps\ai
+python -m venv venv
+
+가상환경 활성화:
+venv\Scripts\activate
+
+---
+
+## 필수 패키지 설치
+pip install fastapi
+pip install "uvicorn[standard]"
+pip install python-dotenv
+pip install openai
+pip install ultralytics
+pip install mediapipe
+pip install opencv-python
+pip install numpy==1.26.4
+> ⚠️ `ultralytics`는 numpy 2.x 버전과 호환되지 않으므로 반드시 `numpy==1.26.4`로 고정하세요.
+
+---
+
+## FastAPI 서버 실행
+uvicorn server:app --reload
+
