@@ -226,3 +226,32 @@ typescript: "5"
 서버 실행 후
 >> brew services start redis
 로 redis를 실행시켜줘야 로그아웃이 진행됩니다
+
+#ai 서버 실행
+>관련 파일 모두 설치 후,
+> 
+> $ cd apps/ai
+> 
+> $ source venv/bin/activate
+> 
+> $ uvicorn server:app --reload                   
+
+---
+
+## ⚠️ 테스트용 코드 주의 (Swagger 전용 감지 로직)
+
+현재 AI 모듈(`apps/ai/server.py`, `apps/ai/detector.py`)에는  
+**Swagger 연동 테스트 전용 코드(`#swagger-test`)** 와  
+**실시간 감지용 코드(`#real-time`)** 두 버전이 모두 포함되어 있습니다.
+
+- `# swagger-test`  
+  → 단일 프레임(사진) 테스트용. Swagger에서 딴짓 감지 결과를 빠르게 확인하기 위한 임시 로직입니다.  
+  → `absence_consec_frames=1`, `phone_consec_frames=1` 등의 테스트용 값으로 설정되어 있습니다.
+
+- `# real-time`  
+  → 실제 서비스(학습 세션 중 영상 기반 딴짓 감지)에서 사용되는 로직입니다.  
+  → 영상 입력 시 안정적인 감지를 위해 `absence_consec_frames=30`, `phone_consec_frames=5` 등으로 설정되어 있습니다.
+
+> ⚠️ **주의:**  
+> Swagger 테스트용 코드(swagger-test)는 운영 배포 시 반드시 주석 처리하거나 real-time 버전으로 되돌려야 합니다.  
+> 테스트용 로직이 그대로 배포되면 감지 민감도가 과도하게 높아지고, 실제 서비스에서 오탐(False Positive)이 발생할 수 있습니다.

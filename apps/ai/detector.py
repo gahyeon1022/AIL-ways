@@ -39,21 +39,32 @@ torch.serialization.add_safe_globals([
 
 
 # ---------- 설정 데이터클래스 ----------
+# @dataclass
+# class DetectorConfig: #real-time
+#     # Drowsiness (EAR)
+#     ear_threshold: float = 0.20
+#     drowsy_consec_frames: int = 12  # 대략 0.5~0.7s
+#
+#     # Absence (no face)
+#     absence_consec_frames: int = 30
+#
+#     # Phone (YOLO)
+#     phone_min_conf: float = 0.50
+#     phone_consec_frames: int = 5
+#     detect_phone_every_n: int = 3  # 매 N프레임마다 YOLO
+#
+#     # 기타
+#     mirror: bool = True
+#     max_side: int = 640
+
 @dataclass
-class DetectorConfig:
-    # Drowsiness (EAR)
+class DetectorConfig: #swagger-test, 실사용은 이거 주석 처리하고, 무조건 위에거 써야함!!
     ear_threshold: float = 0.20
-    drowsy_consec_frames: int = 12  # 대략 0.5~0.7s
-
-    # Absence (no face)
-    absence_consec_frames: int = 30
-
-    # Phone (YOLO)
-    phone_min_conf: float = 0.50
-    phone_consec_frames: int = 5
-    detect_phone_every_n: int = 3  # 매 N프레임마다 YOLO
-
-    # 기타
+    drowsy_consec_frames: int = 1        # 단일 프레임에서도 바로 졸음 처리
+    absence_consec_frames: int = 1       # 얼굴 없으면 즉시 자리이탈
+    phone_min_conf: float = 0.3          # 작게 보이는 폰도 잡게 감도 완화
+    phone_consec_frames: int = 1         # 단일 프레임 테스트용 즉시 반응
+    detect_phone_every_n: int = 1        # YOLO 매번 실행
     mirror: bool = True
     max_side: int = 640
 
@@ -111,7 +122,8 @@ class Detector:
             img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
         return img
 
-    def process(self, frame: np.ndarray) -> Dict[str, Any]:
+    # def process(self, frame: np.ndarray) -> Dict[str, Any]: #real-time
+    def process(self, frame: np.ndarray, single_frame: bool = False) -> Dict[str, Any]: #swagger-test
         """
         입력: BGR 프레임
         출력: 졸음, 자리이탈, 휴대폰 감지 정보
@@ -149,6 +161,8 @@ class Detector:
         phone_score: Optional[float] = None
         phone_detected_now = False
 
+        self.cfg.phone_min_conf = 0.25  #swagger-test
+
         if self._frame_no % self.cfg.detect_phone_every_n == 0:
             results = self.yolo(rgb, verbose=False)
             if results:
@@ -168,7 +182,6 @@ class Detector:
             self._phone_count += 1
         else:
             self._phone_count = 0
-
         # --- 3) 최종 판정 ---
         drowsy = self._drowsy_count >= self.cfg.drowsy_consec_frames
         left_seat = self._absence_count >= self.cfg.absence_consec_frames
