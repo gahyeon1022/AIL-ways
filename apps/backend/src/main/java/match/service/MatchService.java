@@ -174,4 +174,74 @@ public class MatchService {
                 .filter(Objects::nonNull)
                 .toList();
     }
+
+    // [추가된 부분] 멘토가 받은 '대기 중'인 매칭 요청 목록 조회
+    public List<MenteeInfoDTO> getReceivedMatchesForMentor(String mentorUserId) {
+        // 멘토 ID로 PENDING 상태인 매칭 목록을 찾습니다.
+        List<Match> matches = matchRepo.findByMentorUserIdAndStatus(mentorUserId, MatchStatus.PENDING);
+
+        if (matches.isEmpty()) {
+            return List.of();
+        }
+
+        // 매칭 목록에서 멘티 ID 리스트를 추출합니다.
+        List<String> menteeUserIds = matches.stream()
+                .map(Match::getMenteeUserId)
+                .toList();
+
+        // 멘티 ID 리스트로 멘티 유저 정보를 한 번에 조회합니다.
+        Map<String, User> menteeMap = userRepo.findAllByUserIdIn(menteeUserIds).stream()
+                .collect(Collectors.toMap(User::getUserId, user -> user));
+
+        // 매칭 정보와 멘티 유저 정보를 조합하여 DTO 리스트를 생성합니다.
+        return matches.stream()
+                .map(match -> {
+                    User mentee = menteeMap.get(match.getMenteeUserId());
+                    if (mentee == null) {
+                        return null; // 혹시 유저 정보가 없으면 null 반환
+                    }
+                    return new MenteeInfoDTO(
+                            mentee.getUserId(),
+                            mentee.getUserName(),
+                            match.getMatchId()
+                    );
+                })
+                .filter(Objects::nonNull) // null인 경우 최종 리스트에서 제외
+                .toList();
+    }
+
+    // [추가된 부분] 멘티가 보낸 '대기 중'인 매칭 요청 목록 조회
+    public List<MentorInfoDTO> getSentMatchesByMentee(String menteeUserId) {
+        // 멘티 ID로 PENDING 상태인 매칭 목록을 찾습니다.
+        List<Match> matches = matchRepo.findByMenteeUserIdAndStatus(menteeUserId, MatchStatus.PENDING);
+
+        if (matches.isEmpty()) {
+            return List.of();
+        }
+
+        // 매칭 목록에서 멘토 ID 리스트를 추출합니다.
+        List<String> mentorUserIds = matches.stream()
+                .map(Match::getMentorUserId)
+                .toList();
+
+        // 멘토 ID 리스트로 멘토 유저 정보를 한 번에 조회합니다.
+        Map<String, User> mentorMap = userRepo.findAllByUserIdIn(mentorUserIds).stream()
+                .collect(Collectors.toMap(User::getUserId, user -> user));
+
+        // 매칭 정보와 멘토 유저 정보를 조합하여 DTO 리스트를 생성합니다.
+        return matches.stream()
+                .map(match -> {
+                    User mentor = mentorMap.get(match.getMentorUserId());
+                    if (mentor == null) {
+                        return null; // 혹시 유저 정보가 없으면 null 반환
+                    }
+                    return new MentorInfoDTO(
+                            mentor.getUserId(),
+                            mentor.getUserName(),
+                            match.getMatchId()
+                    );
+                })
+                .filter(Objects::nonNull) // null인 경우 최종 리스트에서 제외
+                .toList();
+    }
 }

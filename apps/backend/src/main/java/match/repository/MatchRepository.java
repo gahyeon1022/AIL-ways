@@ -3,6 +3,7 @@ package match.repository;
 import match.domain.Match;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import match.domain.MatchStatus;
 
 import java.util.List;
 
@@ -14,4 +15,6 @@ public interface MatchRepository extends MongoRepository<Match, String> {
 
     List<Match> findByMentorUserId(String mentorUserId);
     List<Match> findByMenteeUserId(String menteeUserId);
+    List<Match> findByMentorUserIdAndStatus(String mentorUserId, MatchStatus status);
+    List<Match> findByMenteeUserIdAndStatus(String menteeUserId, MatchStatus status);
 }

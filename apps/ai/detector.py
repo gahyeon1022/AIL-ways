@@ -21,6 +21,7 @@ from ultralytics.nn.modules.head import Detect
 from torch.nn import (
     Sequential,
     ModuleList,
+
     Conv2d,
     BatchNorm2d,
     SiLU,
