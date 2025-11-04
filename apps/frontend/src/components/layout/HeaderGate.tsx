@@ -3,7 +3,7 @@
 // Gate는 "표시 여부"만 담당하고, 실제 UI는 Header가 책임지도록 분리.
 
 import { usePathname } from "next/navigation";
-import Header from "@/components/layout/header"; // index.tsx의 default export
+import Header from "@/components/layout/header/Header"; // index.tsx의 default export
 
 const HIDE_ROUTES = new Set<string>(["/", "/login", "/signup", "/select"]);
 

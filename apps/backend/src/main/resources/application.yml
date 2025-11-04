@@ -12,13 +12,14 @@ spring:
 
   data:
     mongodb:
+      # uri: ${MONGO_DB_URI}
       uri: mongodb://localhost:27017/alpha
 
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ailways714@gmail.com     # ✅ Gmail 계정
-    password: fiob bliv enod hrya        # ✅ 앱 비밀번호 (16자리) 유출, gpt 금지!!
+    username: ailways714@gmail.com # ✅ Gmail 계정
+    password: ${APP_PW} # ✅ 앱 비밀번호 (16자리) 유출, gpt 금지!!
     properties:
       mail:
         smtp:
@@ -35,13 +36,13 @@ spring:
       client:
         registration:
           kakao:
-            client-id: 7e8ed3bafed88daf71e6001352a95d44  # 유출 금지
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}" # 스프링 기본 콜백
+            client-id: ${KAKAO_PW} # 유출 금지
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}' # 스프링 기본 콜백
             authorization-grant-type: authorization_code
             client-name: Kakao
             scope:
-               - account_email # 카카오 - 비즈앱 등록시 사용 가능
-               - profile_nickname
+              - account_email # 카카오 - 비즈앱 등록시 사용 가능
+              - profile_nickname
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -52,10 +53,10 @@ spring:
 app:
   cors:
     allowed-origins:
-      - "http://localhost:3000"
-      - "http://127.0.0.1:3000"
-    allowed-methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
-    allowed-headers: "*"
+      - 'http://localhost:3000'
+      - 'http://127.0.0.1:3000'
+    allowed-methods: 'GET,POST,PUT,DELETE,PATCH,OPTIONS'
+    allowed-headers: '*'
     allow-credentials: true
 
 logging:
@@ -68,18 +69,10 @@ jwt:
 
 ai:
   api:
-    url: http://127.0.0.1:8000
-    key: dummy-key
-
-
-#ai:
-#  api:
-#    url: https://api.openai.com/v1/chat/completions
-
-
-  # AI Summary Service Configuration
+    url: https://api.openai.com/v1/chat/completions
+# AI Summary Service Configuration
 # 사용하고자 하는 AI 서비스의 API 엔드포인트 URL을 입력하세요. (예: https://api.openai.com/v1)
-  #ai.api.url=https://api.openai.com/v1
+#ai.api.url=https://api.openai.com/v1
 
-  # 발급받은 AI 서비스의 API 키를 입력하세요.
-  #ai.api.key=여기에_발급받은_API_키를_입력하세요
+# 발급받은 AI 서비스의 API 키를 입력하세요.
+#ai.api.key=여기에_발급받은_API_키를_입력하세요

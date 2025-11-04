@@ -1,1 +1,1 @@
-export { default } from "./MentoringCurrent";
+export { default } from "./components/MentoringCurrent";
