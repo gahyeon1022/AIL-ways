@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { callAPIWithAuth } from "@/app/lib/api/http";
-import MentoringCurrentClient, { MentorCard, PendingMatchCard } from "./MentoringCurrent.client";
+import MentoringCurrentClient, { MatchCard, PendingMatchCard } from "./MentoringCurrent.client";
 
 type UserProfileDTO = {
   userId: string | null;
@@ -31,7 +31,7 @@ async function fetchProfile(): Promise<UserProfileDTO | null> {
   }
 }
 
-async function fetchMentorsForMentee(): Promise<MentorCard[]> {
+async function fetchMentorsForMentee(): Promise<MatchCard[]> {
   try {
     const mentors = await callAPIWithAuth<MentorInfoDTO[]>("/api/matches/myMentors", { cache: "no-store" });
     if (!Array.isArray(mentors)) return [];
@@ -47,9 +47,25 @@ async function fetchMentorsForMentee(): Promise<MentorCard[]> {
   }
 }
 
-async function fetchIncomingForMentor(): Promise<PendingMatchCard[]> {
+async function fetchAcceptedMenteesForMentor(): Promise<MatchCard[]> {
   try {
     const mentees = await callAPIWithAuth<MenteeInfoDTO[]>("/api/matches/myMentees", { cache: "no-store" });
+    if (!Array.isArray(mentees)) return [];
+    return mentees
+      .filter(item => item && typeof item.userId === "string" && typeof item.matchId === "string")
+      .map(item => ({
+        id: item.userId,
+        name: item.userName ?? item.userId,
+        matchId: item.matchId,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+async function fetchIncomingForMentor(): Promise<PendingMatchCard[]> {
+  try {
+    const mentees = await callAPIWithAuth<MenteeInfoDTO[]>("/api/matches/received", { cache: "no-store" });
     if (!Array.isArray(mentees)) return [];
     return mentees
       .filter(item => item && typeof item.userId === "string" && typeof item.matchId === "string")
@@ -72,12 +88,18 @@ export default async function MentoringCurrent() {
 
   const role = profile.role === "MENTOR" || profile.role === "MENTEE" ? profile.role : null;
 
-  const [mentors, pending] = await Promise.all([
-    role === "MENTEE" ? fetchMentorsForMentee() : Promise.resolve<MentorCard[]>([]),
+  const [mentors, mentees, pending] = await Promise.all([
+    role === "MENTEE" ? fetchMentorsForMentee() : Promise.resolve<MatchCard[]>([]),
+    role === "MENTOR" ? fetchAcceptedMenteesForMentor() : Promise.resolve<MatchCard[]>([]),
     role === "MENTOR" ? fetchIncomingForMentor() : Promise.resolve<PendingMatchCard[]>([]),
   ]);
 
   return (
-    <MentoringCurrentClient role={role} initialMentors={mentors} initialPendingMatches={pending} />
+    <MentoringCurrentClient
+      role={role}
+      initialMentors={role === "MENTEE" ? mentors : undefined}
+      initialMentees={role === "MENTOR" ? mentees : undefined}
+      initialPendingMatches={pending}
+    />
   );
 }

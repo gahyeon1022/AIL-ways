@@ -1,20 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  fetchAcceptedMenteesForMentor,
   fetchIncomingMatchesForMentor,
   fetchMentorsForMentee,
   requestMatchAction,
   respondMatchAction,
 } from "@/app/server-actions/matches";
 
-export type MentorCard = { id: string; name: string; matchId?: string; avatar?: string };
+export type MatchCard = { id: string; name: string; matchId?: string; avatar?: string };
 export type PendingMatchCard = { matchId: string; menteeId: string; menteeName: string };
 
 type MentoringCurrentClientProps = {
   role: "MENTOR" | "MENTEE" | null;
-  initialMentors: MentorCard[];
+  initialMentors?: MatchCard[];
+  initialMentees?: MatchCard[];
   initialPendingMatches: PendingMatchCard[];
 };
 
@@ -30,7 +32,7 @@ const errorMessage = (err: unknown) => {
   return "요청 처리 중 문제가 발생했습니다.";
 };
 
-const toMentorCards = (list: MentorCard[]) =>
+const normalizeCards = (list: MatchCard[]) =>
   list
     .filter(item => item && typeof item.id === "string" && typeof item.name === "string")
     .map(item => ({ ...item, id: item.id.trim(), name: item.name.trim() }));
@@ -38,15 +40,18 @@ const toMentorCards = (list: MentorCard[]) =>
 export default function MentoringCurrentClient({
   role,
   initialMentors,
+  initialMentees,
   initialPendingMatches,
 }: MentoringCurrentClientProps) {
   const router = useRouter();
-  const [mentors, setMentors] = useState<MentorCard[]>(() => toMentorCards(initialMentors));
+  const [mentors, setMentors] = useState<MatchCard[]>(() => normalizeCards(initialMentors ?? []));
+  const [mentees, setMentees] = useState<MatchCard[]>(() => normalizeCards(initialMentees ?? []));
   const [pendingMatches, setPendingMatches] = useState<PendingMatchCard[]>(initialPendingMatches);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [code, setCode] = useState("");
-  const [activeMentor, setActiveMentor] = useState<MentorCard | null>(null);
+  const [activeMentor, setActiveMentor] = useState<MatchCard | null>(null);
+  const [activeMentee, setActiveMentee] = useState<MatchCard | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,8 +70,12 @@ export default function MentoringCurrentClient({
   }, [error]);
 
   useEffect(() => {
-    setMentors(toMentorCards(initialMentors));
+    setMentors(normalizeCards(initialMentors ?? []));
   }, [initialMentors]);
+
+  useEffect(() => {
+    setMentees(normalizeCards(initialMentees ?? []));
+  }, [initialMentees]);
 
   useEffect(() => {
     setPendingMatches(initialPendingMatches);
@@ -98,8 +107,6 @@ export default function MentoringCurrentClient({
     };
   }, [role]);
 
-  const currentRequest = useMemo(() => (pendingMatches.length > 0 ? pendingMatches[0] : null), [pendingMatches]);
-
   const refreshMentors = async () => {
     if (role !== "MENTEE") return;
     try {
@@ -109,7 +116,22 @@ export default function MentoringCurrentClient({
         name: item.userName ?? item.userId,
         matchId: item.matchId,
       }));
-      setMentors(toMentorCards(mapped));
+      setMentors(normalizeCards(mapped));
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  };
+
+  const refreshMentees = async () => {
+    if (role !== "MENTOR") return;
+    try {
+      const next = await fetchAcceptedMenteesForMentor();
+      const mapped = next.map(item => ({
+        id: item.userId,
+        name: item.userName ?? item.userId,
+        matchId: item.matchId,
+      }));
+      setMentees(normalizeCards(mapped));
     } catch (err) {
       setError(errorMessage(err));
     }
@@ -129,6 +151,8 @@ export default function MentoringCurrentClient({
       setFeedback("매칭 요청을 전송했습니다.");
       setCode("");
       setShowAdd(false);
+      setActiveMentor(null);
+      setActiveMentee(null);
       await refreshMentors();
     } catch (err) {
       setError(errorMessage(err));
@@ -144,6 +168,11 @@ export default function MentoringCurrentClient({
       await respondMatchAction(match.matchId, decision);
       setPendingMatches(prev => prev.filter(item => item.matchId !== match.matchId));
       setFeedback(decision === "accept" ? "매칭을 수락했습니다." : "매칭을 거절했습니다.");
+      if (decision === "accept") {
+        await refreshMentees();
+      }
+      setActiveMentor(null);
+      setActiveMentee(null);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -151,9 +180,8 @@ export default function MentoringCurrentClient({
     }
   };
 
-  const goReport = (type: "weekly" | "study") => {
-    if (!activeMentor) return;
-    router.push(`/reports/${type}?mentor=${activeMentor.id}`);
+  const goReport = (type: "weekly" | "study", targetId: string, target: "mentor" | "mentee") => {
+    router.push(`/reports/${type}?${target}=${targetId}`);
   };
 
   return (
@@ -171,16 +199,19 @@ export default function MentoringCurrentClient({
                 {mentors.map(m => (
                   <button
                     key={`${m.id}-${m.matchId ?? ""}`}
-                    onClick={() => setActiveMentor(m)}
+                    onClick={() => {
+                      setActiveMentor(m);
+                      setActiveMentee(null);
+                    }}
                     className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-white/5 p-6 shadow-inner transition hover:bg-white/10"
                   >
                     <div className="h-32 w-32 rounded-full bg-gray-300 shadow-inner" />
-                    <span className="mt-4 text-sm font-medium text-white/90">{m.name}</span>
+                    <span className="mt-4 text-sm font-medium text-white/90">{`${m.name} 멘토`}</span>
                   </button>
                 ))}
 
                 {mentors.length === 0 && (
-                  <div className="col-span-full py-24 text-center text-sm text-white/70">
+                  <div className="col-span-full py-24 text-center text-xl text-white/70">
                     아직 매칭된 멘토가 없습니다. 우측 하단의 + 버튼으로 매칭을 요청해 보세요.
                   </div>
                 )}
@@ -201,12 +232,32 @@ export default function MentoringCurrentClient({
             )}
           </>
         ) : role === "MENTOR" ? (
-          <div className="flex h-full flex-col items-center justify-center text-center text-white/80">
-            <p className="text-lg font-semibold">멘티의 매칭 요청을 기다리고 있습니다.</p>
-            <p className="mt-2 text-sm text-white/60">
-              새로운 요청이 도착하면 화면 중앙에 알림이 표시됩니다.
-            </p>
-          </div>
+          <>
+            <div className="flex-1 overflow-y-auto pb-16">
+              <div className="grid grid-cols-1 place-items-center gap-x-7 gap-y-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {mentees.map(m => (
+                  <button
+                    key={`${m.id}-${m.matchId ?? ""}`}
+                    onClick={() => {
+                      setActiveMentee(m);
+                      setActiveMentor(null);
+                    }}
+                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-white/5 p-6 text-center shadow-inner transition hover:bg-white/10"
+                  >
+                    <div className="h-32 w-32 rounded-full bg-gray-300 shadow-inner" />
+                    <span className="mt-4 text-sm font-medium text-white/90">{`${m.name} 멘티`}</span>
+                  </button>
+                ))}
+
+                {mentees.length === 0 && (
+                  <div className="col-span-full py-24 text-center text-xl text-white/70">
+                    아직 매칭을 수락한 멘티가 없습니다.
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </>
         ) : (
           <div className="flex h-full items-center justify-center text-center text-white/70">
             프로필에서 역할을 설정하면 매칭 기능을 이용할 수 있습니다.
@@ -228,11 +279,10 @@ export default function MentoringCurrentClient({
         <div className="absolute inset-0 z-40 flex items-center justify-center rounded-2xl bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-gray-900">
             <h3 className="mb-4 text-lg font-semibold">멘토 추가</h3>
-            <p className="mb-3 text-sm text-gray-600">코드를 입력하면 해당 멘토에게 매칭 요청을 전송합니다.</p>
             <input
               value={code}
               onChange={e => setCode(e.target.value)}
-              placeholder="멘토 아이디를 입력하세요"
+              placeholder="멘토 아이디를 입력하세요."
               className="mb-4 w-full rounded-lg border border-gray-200 p-3 text-sm"
               disabled={isSubmitting}
             />
@@ -264,12 +314,18 @@ export default function MentoringCurrentClient({
             aria-label="패널 닫기"
           />
           <div className="absolute left-6 top-6 z-40 w-64 rounded-2xl bg-white p-6 text-gray-900 shadow-xl">
-            <div className="mb-4 text-lg font-semibold">{activeMentor.name}</div>
+            <div className="mb-4 text-lg font-semibold">{`${activeMentor.name} 멘토`}</div>
             <div className="grid gap-2">
-              <button onClick={() => goReport("weekly")} className="rounded-lg bg-gray-100 px-4 py-2 text-sm">
+              <button
+                onClick={() => goReport("weekly", activeMentor.id, "mentor")}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm"
+              >
                 주간 리포트
               </button>
-              <button onClick={() => goReport("study")} className="rounded-lg bg-gray-100 px-4 py-2 text-sm">
+              <button
+                onClick={() => goReport("study", activeMentor.id, "mentor")}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm"
+              >
                 학습 리포트
               </button>
             </div>
@@ -283,28 +339,68 @@ export default function MentoringCurrentClient({
         </>
       )}
 
-      {role === "MENTOR" && currentRequest && (
+      {role === "MENTOR" && activeMentee && (
+        <>
+          <button
+            onClick={() => setActiveMentee(null)}
+            className="absolute inset-0 z-30 bg-black/20"
+            aria-label="패널 닫기"
+          />
+          <div className="absolute left-6 top-6 z-40 w-64 rounded-2xl bg-white p-6 text-gray-900 shadow-xl">
+            <div className="mb-4 text-lg font-semibold">{`${activeMentee.name} 멘티`}</div>
+            <div className="grid gap-2">
+              <button
+                onClick={() => goReport("weekly", activeMentee.id, "mentee")}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm"
+              >
+                주간 리포트
+              </button>
+              <button
+                onClick={() => goReport("study", activeMentee.id, "mentee")}
+                className="rounded-lg bg-gray-100 px-4 py-2 text-sm"
+              >
+                학습 리포트
+              </button>
+            </div>
+            <button
+              onClick={() => setActiveMentee(null)}
+              className="mt-6 text-sm text-gray-500 underline"
+            >
+              닫기
+            </button>
+          </div>
+        </>
+      )}
+
+      {role === "MENTOR" && pendingMatches.length > 0 && (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center text-gray-900 shadow-xl">
-            <h3 className="text-xl font-semibold text-gray-900">매칭이 도착했습니다</h3>
-            <p className="mt-4 text-sm text-gray-600">
-              {currentRequest.menteeName} 님이 매칭을 요청했습니다.
-            </p>
-            <div className="mt-6 flex justify-center gap-3">
-              <button
-                onClick={() => handleRespond(currentRequest, "reject")}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
-                disabled={processingMatchId === currentRequest.matchId}
-              >
-                거절
-              </button>
-              <button
-                onClick={() => handleRespond(currentRequest, "accept")}
-                className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white transition hover:bg-gray-800 disabled:opacity-60"
-                disabled={processingMatchId === currentRequest.matchId}
-              >
-                {processingMatchId === currentRequest.matchId ? "처리 중..." : "수락"}
-              </button>
+          <div className="w-full max-w-lg rounded-2xl bg-white p-8 text-gray-900 shadow-xl">
+            <h3 className="text-xl font-semibold text-gray-900">새 매칭 요청이 있습니다</h3>
+            <div className="mt-6 max-h-48 space-y-4 overflow-y-auto pr-2 [scrollbar-width:thin]">
+              {pendingMatches.map(match => (
+                <div
+                  key={match.matchId}
+                  className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                >
+                  <div className="text-sm font-medium">{match.menteeName} 멘티</div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleRespond(match, "reject")}
+                      className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 transition hover:bg-gray-100 disabled:opacity-60"
+                      disabled={processingMatchId === match.matchId}
+                    >
+                      거절
+                    </button>
+                    <button
+                      onClick={() => handleRespond(match, "accept")}
+                      className="rounded-lg bg-gray-900 px-3 py-1.5 text-sm text-white transition hover:bg-gray-800 disabled:opacity-60"
+                      disabled={processingMatchId === match.matchId}
+                    >
+                      {processingMatchId === match.matchId ? "처리 중..." : "수락"}
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

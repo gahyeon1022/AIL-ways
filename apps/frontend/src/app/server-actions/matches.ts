@@ -16,7 +16,7 @@ export type MentorInfoDTO = {
   matchId: string;
 };
 
-type MenteeInfoDTO = {
+export type MenteeInfoDTO = {
   userId: string;
   userName: string;
   matchId: string;
@@ -55,7 +55,7 @@ export type IncomingMatchDTO = {
 
 export async function fetchIncomingMatchesForMentor(): Promise<IncomingMatchDTO[]> {
   try {
-    const mentees = await callAPIWithAuth<MenteeInfoDTO[]>("/api/matches/myMentees", { cache: "no-store" });
+    const mentees = await callAPIWithAuth<MenteeInfoDTO[]>("/api/matches/received", { cache: "no-store" });
     return Array.isArray(mentees)
       ? mentees.map(item => ({
           matchId: item.matchId,
@@ -63,6 +63,17 @@ export async function fetchIncomingMatchesForMentor(): Promise<IncomingMatchDTO[
           menteeName: item.userName ?? item.userId,
         }))
       : [];
+  } catch (e) {
+    if (e instanceof BackendError && e.status === 403) {
+      return [];
+    }
+    throw e;
+  }
+}
+
+export async function fetchAcceptedMenteesForMentor(): Promise<MenteeInfoDTO[]> {
+  try {
+    return await callAPIWithAuth<MenteeInfoDTO[]>("/api/matches/myMentees", { cache: "no-store" });
   } catch (e) {
     if (e instanceof BackendError && e.status === 403) {
       return [];
