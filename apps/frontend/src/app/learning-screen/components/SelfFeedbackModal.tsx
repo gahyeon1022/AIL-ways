@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { addDistractionLog, submitSelfFeedback } from '@/_actions/session';
+import { addDistractionLog, submitSelfFeedback } from '@/app/server-actions/session';
 
 // 모달 컴포넌트가 받을 props 타입 정의
 interface FeedbackModalProps {

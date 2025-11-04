@@ -32,8 +32,22 @@ const callSessionAPI = <T,>(path: string, init?: RequestInit) =>
   callAPIWithAuth<T>(path, init);
 
 // 1. 세션 시작 함수
-export async function startSession(): Promise<SessionRes> {
-  return callSessionAPI<SessionRes>(`/api/sessions/start`, { method: 'POST' });
+export async function startSession(
+  matchId: string,
+  mentorUserId: string
+): Promise<SessionRes> {
+  const trimmedMatchId = matchId?.trim();
+  const trimmedMentorId = mentorUserId?.trim();
+  if (!trimmedMatchId) throw new Error('유효하지 않은 matchId');
+  if (!trimmedMentorId) throw new Error('유효하지 않은 mentorUserId');
+
+  const qs = new URLSearchParams({
+    matchId: trimmedMatchId,
+    mentorUserId: trimmedMentorId,
+  }).toString();
+  return callSessionAPI<SessionRes>(`/api/sessions/start?${qs}`, {
+    method: 'POST',
+  });
 }
 
 // 2. 학습 내용 입력(저장) 함수

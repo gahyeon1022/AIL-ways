@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   fetchAcceptedMenteesForMentor,
   fetchIncomingMatchesForMentor,
@@ -44,6 +44,8 @@ export default function MentoringCurrentClient({
   initialPendingMatches,
 }: MentoringCurrentClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const showLearningCTA = searchParams.get("intent") === "study";
   const [mentors, setMentors] = useState<MatchCard[]>(() => normalizeCards(initialMentors ?? []));
   const [mentees, setMentees] = useState<MatchCard[]>(() => normalizeCards(initialMentees ?? []));
   const [pendingMatches, setPendingMatches] = useState<PendingMatchCard[]>(initialPendingMatches);
@@ -184,6 +186,20 @@ export default function MentoringCurrentClient({
     router.push(`/reports/${type}?${target}=${targetId}`);
   };
 
+  const goLearningScreen = (mentor: MatchCard) => {
+    if (!showLearningCTA) return;
+    if (!mentor.matchId) {
+      setError("선택한 멘토와의 매칭 정보가 없습니다.");
+      return;
+    }
+    const query = new URLSearchParams({
+      matchId: mentor.matchId,
+      mentorId: mentor.id,
+    });
+    router.push(`/learning-screen?${query.toString()}`);
+    setActiveMentor(null);
+  };
+
   return (
     <div className="relative mx-auto h-[560px] w-full max-w-[1040px] overflow-hidden rounded-2xl bg-[#3a3a3a] p-8 text-white">
       <div className="space-y-2">
@@ -269,7 +285,6 @@ export default function MentoringCurrentClient({
         <button
           onClick={() => setShowAdd(true)}
           className="absolute bottom-6 right-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#c9d5f4] text-4xl font-bold text-gray-900 shadow-lg transition hover:scale-105"
-          aria-label="멘토 추가"
         >
           +
         </button>
@@ -311,7 +326,6 @@ export default function MentoringCurrentClient({
           <button
             onClick={() => setActiveMentor(null)}
             className="absolute inset-0 z-30 bg-black/20"
-            aria-label="패널 닫기"
           />
           <div className="absolute left-6 top-6 z-40 w-64 rounded-2xl bg-white p-6 text-gray-900 shadow-xl">
             <div className="mb-4 text-lg font-semibold">{`${activeMentor.name} 멘토`}</div>
@@ -328,6 +342,14 @@ export default function MentoringCurrentClient({
               >
                 학습 리포트
               </button>
+              {showLearningCTA && (
+                <button
+                  onClick={() => goLearningScreen(activeMentor)}
+                  className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white transition hover:bg-gray-800"
+                >
+                  학습 시작
+                </button>
+              )}
             </div>
             <button
               onClick={() => setActiveMentor(null)}
@@ -344,7 +366,6 @@ export default function MentoringCurrentClient({
           <button
             onClick={() => setActiveMentee(null)}
             className="absolute inset-0 z-30 bg-black/20"
-            aria-label="패널 닫기"
           />
           <div className="absolute left-6 top-6 z-40 w-64 rounded-2xl bg-white p-6 text-gray-900 shadow-xl">
             <div className="mb-4 text-lg font-semibold">{`${activeMentee.name} 멘티`}</div>
@@ -374,8 +395,14 @@ export default function MentoringCurrentClient({
 
       {role === "MENTOR" && pendingMatches.length > 0 && (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-8 text-gray-900 shadow-xl">
-            <h3 className="text-xl font-semibold text-gray-900">새 매칭 요청이 있습니다</h3>
+          <div className="relative w-full max-w-lg rounded-2xl bg-white p-8 text-gray-900 shadow-xl">
+            <button
+              onClick={() => setPendingMatches([])}
+              className="absolute right-4 top-4 rounded p-1 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            <h3 className="text-xl font-semibold text-gray-900">새로운 매칭 요청이 있습니다</h3>
             <div className="mt-6 max-h-48 space-y-4 overflow-y-auto pr-2 [scrollbar-width:thin]">
               {pendingMatches.map(match => (
                 <div

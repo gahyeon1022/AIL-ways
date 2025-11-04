@@ -1,14 +1,19 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import QuestionManager from './components/QuestionManager';
 import NoteEditor from './components/NoteEditor';
 import CheckFinishedModal from './components/CheckFinishedModal';
 import SelfFeedbackModal from './components/SelfFeedbackModal';
-import { startSession, resumeSession } from '../server-actions/session';
+import { startSession, resumeSession } from '@/app/server-actions/session';
 
 export default function LearningScreenPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const matchId = searchParams.get("matchId") ?? "";
+  const mentorId = searchParams.get("mentorId") ?? "";
+
   const [questions, setQuestions] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [sessionId, setSessionId] = useState<string>('');
@@ -23,9 +28,14 @@ export default function LearningScreenPage() {
   // 세션 시작 + 웹캠 시작
   useEffect(() => {
     const initPage = async () => {
+      if (!matchId || !mentorId) {
+        console.error('매칭 정보가 없습니다.');
+        router.replace('/mentoring-current');
+        return;
+      }
+
       try {
-        // 세션 시작
-        const session = await startSession();
+        const session = await startSession(matchId, mentorId);
         setSessionId(session.sessionId);
         console.log('세션 시작:', session.sessionId);
         // 웹캠 시작
@@ -48,7 +58,7 @@ export default function LearningScreenPage() {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [matchId, mentorId, router]);
 
   // 학습 재개
   useEffect(() => {

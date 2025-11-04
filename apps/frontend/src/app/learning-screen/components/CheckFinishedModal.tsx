@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { saveStudyLog, addQuestionLog, endSession } from '@/_actions/session';
+import { saveStudyLog, addQuestionLog, endSession } from '@/app/server-actions/session';
 
 type ModalProps = {
   open: boolean;
