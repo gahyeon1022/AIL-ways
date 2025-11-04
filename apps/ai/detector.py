@@ -190,13 +190,17 @@ class Detector:
 
         self._frame_no += 1
         return {
-            "drowsy": drowsy,
-            "left_seat": left_seat,
-            "phone": phone,
-            "ear": None if ear is None else float(ear),
-            "face_detected": bool(face_detected),
-            "phone_score": phone_score,
-            "phone_boxes": phone_boxes,
-            "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            "latency_ms": int((time.time() - t0) * 1000),
+            "success": True,
+            "data": {
+                "drowsy": drowsy,
+                "left_seat": left_seat,
+                "phone": phone,
+                "ear": None if ear is None else float(ear),
+                "face_detected": bool(face_detected),
+                "phone_score": phone_score,
+                "phone_boxes": phone_boxes,
+                "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                "latency_ms": int((time.time() - t0) * 1000),
+            },
+            "error": None
         }
