@@ -14,11 +14,8 @@ export default function Home() {
         <Link href="/learning-screen" className="text-blue-600 hover:underline">
           학습 화면
         </Link>
-        <Link
-          href="/weekly-dashboard"
-          className="text-blue-600 hover:underline"
-        >
-          주간 대시보드
+        <Link href="/weekly-report" className="text-blue-600 hover:underline">
+          주간 리포트
         </Link>
       </nav>
     </main>

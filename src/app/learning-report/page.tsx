@@ -1,126 +1,95 @@
+'use client';
+import { useState } from 'react';
+import CalendarModal from './components/CalendarModal';
+import ReportHeader from './components/ReportHeader'; // 1. 헤더 임포트
+import ReportSection from './components/ReportSection'; // 2. 섹션 임포트
+
+function pad(n: number) {
+  return String(n).padStart(2, '0');
+}
+
 export default function LearingReportPage() {
+  const [open, setOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const dateStr = `${selectedDate.getFullYear()}-${pad(
+    selectedDate.getMonth() + 1
+  )}-${pad(selectedDate.getDate())}`;
+
+  const handlePrevDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() - 1);
+    setSelectedDate(newDate);
+  };
+
+  const handleNextDay = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + 1);
+    setSelectedDate(newDate);
+  };
+
   return (
     <main className="min-h-screen">
-      <header className="from-rose-quartz-500 to-serenity-500 p-4">
-        <div className="flex flex-col items-center">
-          {/* 상단 로고 / 타이틀 */}
-          <h1 className="text-xl font-bold mb-2 self-start">AIL-Ways</h1>
-
-          {/* 네비게이션 메뉴 */}
-          <nav className="flex gap-30 space-x-8">
-            <a href="#" className="hover:underline">
-              멘토링 현황
-            </a>
-            <a href="#" className="hover:underline">
-              홈
-            </a>
-            <a href="#" className="hover:underline">
-              게시판
-            </a>
-          </nav>
-        </div>
-      </header>
-
-      {/* 본문 */}
-      <section className="flex-1 flex items-center justify-center">
-        <div className="w-[80%] flex items-center justify-between">
-          {/* 멘티 이름 및 화살표&달력 */}
-          <div className="inline-block bg-white/95 rounded-full px-10 py-3 shadow mb-4">
-            <span className="text-xl font-semibold tracking-tight">
-              OOO 멘티
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="bg-white rounded-full px-3 py-3 shadow mb-4 hover: cursor-pointer"
-            >
-              &lt;
-            </button>
-            <button
-              type="button"
-              className="bg-white rounded-full px-3 py-3 shadow mb-4 hover: cursor-pointer"
-            >
-              &gt;
-            </button>
-            <button
-              type="button"
-              className="bg-white rounded-full px-3 py-3 shadow mb-4 hover: cursor-pointer"
-            >
-              YYYY-MM-DD
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* === 1. ReportHeader 컴포넌트로 교체 === */}
+      <ReportHeader
+        menteeName="OOO 멘티"
+        dateStr={dateStr}
+        onPrevClick={handlePrevDay}
+        onNextClick={handleNextDay}
+        onDateClick={() => setOpen(true)}
+      />
 
       <section className="mx-auto">
-        {/*  학습 내용 요약 */}
-        <div
-          className="rounded-2xl border border-black/10 shadow-md
-                     bg-gradient-to-r from-white/95 via-white/85 to-rose-100/70
-                     flex-1 p-5 w-[80%] mx-auto mb-5"
-        >
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-            학습 내용 요약
-          </h2>
-
+        {/* === 2. ReportSection 컴포넌트로 교체 === */}
+        <ReportSection title="학습 내용 요약">
+          {/* 자식(children)으로 기존 내부 컨텐츠를 그대로 넣어줍니다 */}
           <div className="w-full h-[150px] rounded-lg border bg-white/85">
-            <p className="text-gray leading-relaxed px-5 py-5">
+            <p className="text-gray-500 leading-relaxed px-5 py-5">
               요약 내용(추후 백에서 받아올 예정)
             </p>
           </div>
-        </div>
+        </ReportSection>
 
-        {/*  학습 행동 분석 */}
-        <div
-          className="rounded-2xl border border-black/10 shadow mb-4
-                     bg-gradient-to-r from-white/95 via-white/85 to-rose-100/70
-                     flex-1 p-5 w-[80%] mx-auto mb-5"
-        >
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-            학습 행동 분석
-          </h2>
-
+        <ReportSection title="학습 행동 분석">
           <div className="w-full h-[150px] rounded-lg border bg-white/85">
-            <p className="text-gray leading-relaxed px-5 py-5">
+            <p className="text-gray-500 leading-relaxed px-5 py-5">
               분석 내용(추후 백에서 받아올 예정)
             </p>
           </div>
-        </div>
+        </ReportSection>
 
-        {/*  자기 피드백 */}
-        <div
-          className="rounded-2xl border border-black/10 shadow-md
-                     bg-gradient-to-r from-white/95 via-white/85 to-rose-100/70
-                     flex-1 p-5 w-[80%] mx-auto mb-5"
-        >
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">자기 피드백</h2>
-
+        <ReportSection title="자기 피드백">
           <div className="w-full h-[150px] rounded-lg border bg-white/85">
-            <p className="text-gray leading-relaxed px-5 py-5">
+            <p className="text-gray-500 leading-relaxed px-5 py-5">
               피드백 내용(추후 백에서 받아올 예정)
             </p>
           </div>
-        </div>
+        </ReportSection>
 
-        {/*  멘토 피드백 */}
-        <div
-          className="rounded-2xl border border-black/10 shadow-md
-                     bg-gradient-to-r from-white/95 via-white/85 to-rose-100/70
-                     flex-1 p-5 w-[80%] mx-auto mb-5"
-        >
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">멘토 피드백</h2>
-
+        <ReportSection title="멘토 피드백">
+          {/* 높이가 다른 섹션도 children 덕분에 문제없이 처리됩니다 */}
           <div
             className="w-full h-[340px] sm:h-[380px] md:h-[150px]
                        rounded-lg border bg-white/85"
           >
-            <p className="text-gray leading-relaxed px-5 py-5">
+            <p className="text-gray-500 leading-relaxed px-5 py-5">
               피드백 내용(추후 백에서 받아올 예정)
             </p>
           </div>
-        </div>
+        </ReportSection>
       </section>
+
+      {/* 캘린더 모달은 페이지 레벨에 둡니다 */}
+      <CalendarModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onPick={(d) => {
+          setSelectedDate(new Date(d));
+          setOpen(false);
+        }}
+        initialMonth={selectedDate}
+        title="날짜 선택"
+      />
     </main>
   );
 }
