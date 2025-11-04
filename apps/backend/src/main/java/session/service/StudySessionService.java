@@ -5,6 +5,7 @@ import board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import report.repository.ReportRepository;
 import report.service.ReportService;
 import session.domain.*;
@@ -25,6 +26,7 @@ public class StudySessionService {
     private final BoardService boardService;
     private final BoardRepository boardRepository;
     private final ReportRepository reportRepository;
+    private final VisionAiClient visionAiClient;
 
     // 세션 시작
     @Transactional
@@ -91,18 +93,30 @@ public class StudySessionService {
      * 딴짓 감지 후 자기 피드백 포함해서 로그 추가
      */
     @Transactional
-    public StudySession addDistraction(String sessionId, String activity) {
+    public StudySession addDistraction(String sessionId, String activity, String detectionType) {
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
 
-        DistractionLog log = DistractionLog.builder()
-                .activity(activity)
-                .detectedAt(Instant.now())
-                .build();
-
-        session.getDistractionLogs().add(log);
-        session.setStatus(SessionStatus.PAUSED); // 학습 일시정지
+        appendDistraction(session, activity, detectionType);
         return studyRepo.save(session);
+    }
+
+    /**
+     * Vision AI에 프레임을 전달하여 딴짓을 자동 감지합니다.
+     */
+    @Transactional
+    public StudySession analyzeFrameAndAddDistraction(String sessionId, MultipartFile frame) {
+        StudySession session = studyRepo.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("세션을 찾을 수 없습니다."));
+
+        boolean detected = visionAiClient.detectDistraction(sessionId, frame)
+                .map(result -> {
+                    appendDistraction(session, result.activity(), result.detectionType());
+                    return true;
+                })
+                .orElse(false);
+
+        return detected ? studyRepo.save(session) : session;
     }
 
     @Transactional
@@ -169,6 +183,20 @@ public class StudySessionService {
 
         return studyRepo.save(session);
     }
+
+    private void appendDistraction(StudySession session, String activity, String detectionType) {
+        String source = (detectionType == null || detectionType.isBlank()) ? "UNKNOWN" : detectionType;
+
+        DistractionLog log = DistractionLog.builder()
+                .activity(activity)
+                .detectedAt(Instant.now())
+                .detectionType(source)
+                .build();
+
+        session.getDistractionLogs().add(log);
+        session.setStatus(SessionStatus.PAUSED); // 학습 일시정지
+    }
+
     private StudySessionDTO toDto(StudySession s) {
 
         List<DistractionLogDTO> distractionLogDTOs = new java.util.ArrayList<>();
@@ -182,7 +210,7 @@ public class StudySessionService {
                     );
                 }
                 distractionLogDTOs.add(
-                        new DistractionLogDTO(d.getActivity(), d.getDetectedAt(), feedbackDto)
+                        new DistractionLogDTO(d.getActivity(), d.getDetectionType(), d.getDetectedAt(), feedbackDto)
                 );
             }
         }

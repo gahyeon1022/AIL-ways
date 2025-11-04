@@ -71,7 +71,7 @@ public class UserService {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
-        // ✅ DTO -> Entity 변환
+        //  DTO -> Entity 변환
         List<Consent> consentEntities = consents.stream()
                 .map(dto -> new Consent(
                         ConsentType.valueOf(dto.getType().toUpperCase()),            // 약관 유형
@@ -82,7 +82,7 @@ public class UserService {
                 ))
                 .toList();
 
-        // ✅ User에 약관 동의 내역 저장
+        //  User에 약관 동의 내역 저장
         user.setConsents(consentEntities);
         userRepository.save(user);
     }

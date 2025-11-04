@@ -94,6 +94,45 @@ public class MatchController {
         List<MentorInfoDTO> mentors = matchService.getMentorsForMentee(userId);
         return ApiResponse.ok(mentors);
     }
+    @Operation(summary = "멘토가 받은 매칭 목록 조회", description = "본인(멘토)이 멘티로부터 받은 '대기 중'인 매칭 요청 목록을 조회합니다.")
+    @GetMapping("/received")
+    public ApiResponse<List<MenteeInfoDTO>> getReceivedMatches(Authentication auth) {
+        String userId = auth.getName();
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        // 멘토만 이 API를 사용할 수 있음
+        if (user.getRole() != Role.MENTOR) {
+            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "멘토만 접근할 수 있습니다."));
+        }
+
+        List<MenteeInfoDTO> matches = matchService.getReceivedMatchesForMentor(userId);
+        return ApiResponse.ok(matches);
+    }
+
+    // [추가된 부분] 멘티가 보낸 매칭 목록 조회 (대기 중)
+    @Operation(summary = "멘티가 보낸 매칭 목록 조회", description = "본인(멘티)이 멘토에게 보낸 '대기 중'인 매칭 요청 목록을 조회합니다.")
+    @GetMapping("/{menteeId}/sent")
+    public ApiResponse<List<MentorInfoDTO>> getSentMatches(@PathVariable String menteeId, Authentication auth) {
+        String currentUserId = auth.getName();
+        User user = userRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
+        // 본인의 요청 목록만 조회 가능하도록 검사
+        if (!user.getUserId().equals(menteeId)) {
+            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "자신의 요청 목록만 조회할 수 있습니다."));
+        }
+
+        // 멘티만 이 API를 사용할 수 있음
+        if (user.getRole() != Role.MENTEE) {
+            return ApiResponse.error(new ApiError(ErrorCode.FORBIDDEN, "멘티만 접근할 수 있습니다."));
+        }
+
+        List<MentorInfoDTO> matches = matchService.getSentMatchesByMentee(menteeId);
+        return ApiResponse.ok(matches);
+    }
+    // [여기까지]
+
 
     /** 요청 바디 DTO */
     public record MatchRequest(String mentorUserId) {}
