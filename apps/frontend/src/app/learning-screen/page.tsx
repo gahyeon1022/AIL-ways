@@ -104,7 +104,7 @@ export default function LearningScreenPage() {
 
   return (
     <main className="min-h-screen">
-      <section className="w-[80%] flex-1 flex gap-5 mx-auto h-[500px]">
+      <section className="w-[80vw] h-[80vh] flex gap-5 mx-auto items-stretch">
         {/* 질문 */}
         <QuestionManager
           questions={questions}
@@ -112,14 +112,14 @@ export default function LearningScreenPage() {
         />
 
         {/* 웹캠 화면 */}
-        <div className="flex-[2.5] flex flex-col items-center justify-center">
+        <div className="flex-[2.5] h-full flex flex-col items-center justify-center">
           <div className="w-full h-full bg-gray-200 rounded shadow flex items-center justify-center">
             <video
               ref={videoRef}
               autoPlay
               playsInline
               muted
-              className="w-full h-full object-cover rounded-md scale-x-[-1]"
+              className="w-full h-full object-contain rounded-md scale-x-[-1]"
             />
           </div>
         </div>
