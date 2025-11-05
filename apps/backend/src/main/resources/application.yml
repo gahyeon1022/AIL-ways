@@ -16,6 +16,7 @@ spring:
       uri: ${MONGO_DB_URI}
       # uri: mongodb://localhost:27017/alpha
 
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -70,12 +71,13 @@ jwt:
 
 ai:
   api:
-    url: http://127.0.0.1:8000
-    key: dummy-key
+    url: ${AI_SUMMARY_URL:http://127.0.0.1:8000}
+    key: ${OPENAI_API_KEY}
 
   vision: #추가
     enabled: true
     base-url: http://127.0.0.1:8000   # Vision AI 서버가 띄워진 주소/포트
+
 
   #ai:
   #  api:
@@ -88,3 +90,10 @@ ai:
 
   # 발급받은 AI 서비스의 API 키를 입력하세요.
   #ai.api.key=여기에_발급받은_API_키를_입력하세요
+
+#ai:
+#  api:
+#    url: ${AI_SUMMARY_URL:http://127.0.0.1:8000}
+#    key: ${AI_SUMMARY_KEY:}
+
+
