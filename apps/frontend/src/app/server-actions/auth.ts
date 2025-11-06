@@ -80,6 +80,14 @@ export async function loginAction(formData: FormData) {
 
     return { ok: true, msg: "로그인 성공", data: { userId: data.userId } };
   } catch (e: unknown) {
+    if (e instanceof BackendError) {
+      if (e.status === 404 || e.code === "USER_NOT_FOUND" || /not[\s_-]*found/i.test(e.message)) {
+        return { ok: false, msg: "존재하지 않는 아이디입니다." };
+      }
+      if (e.status === 401) {
+        return { ok: false, msg: "비밀번호가 틀렸습니다." };
+      }
+    }
     return { ok: false, msg: formatError(e, "로그인 실패") };
   }
 }

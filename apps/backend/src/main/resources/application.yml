@@ -12,7 +12,8 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGO_DB_URI}
+#      uri: ${MONGO_DB_URI}
+     uri: mongodb://localhost:27017/alpha
 
   mail:
     host: smtp.gmail.com
@@ -71,6 +72,9 @@ ai:
     url: http://127.0.0.1:8000
     key: dummy-key
 
+  vision: #추가
+    enabled: true
+    base-url: http://127.0.0.1:8000   # Vision AI 서버가 띄워진 주소/포트
 
   #ai:
   #  api:

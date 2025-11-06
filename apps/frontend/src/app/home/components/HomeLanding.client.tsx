@@ -35,7 +35,7 @@ export default function HomeLanding() {
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
         >
           <Link
-            href="/login"
+            href="/mentoring-current?intent=study"
             className="inline-block rounded-full bg-white/50 px-10 py-4 text-lg font-semibold text-gray-900 shadow-lg transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/70 active:scale-95"
           >
             학습하러가기

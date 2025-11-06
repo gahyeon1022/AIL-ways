@@ -1,7 +1,7 @@
 // /app/select/page.tsx
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import SelectAfterLogin from "./SelectAfterLogin.client";
+import SelectAfterLogin from "./components/SelectAfterLogin.client";
 import { fetchProfileOptionsAction, fetchMyProfileAction } from "@/app/server-actions/select";
 
 export const dynamic = "force-dynamic";

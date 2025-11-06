@@ -5,8 +5,44 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a9561966-c41a-422e-a484-996b87fa1829" name="변경" comment="Merge remote-tracking branch 'origin/feat/backend/study-session-selffeedback' into feat/backend/social-consent-connect&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;apps/ai/detector.py">
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-report/components/CalendarModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-report/components/ReportHeader.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-report/components/ReportSection.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-report/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-screen/components/CheckFinishedModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-screen/components/NoteEditor.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-screen/components/QuestionManager.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-screen/components/SelfFeedbackModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/learning-screen/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/mento-feedback/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/server-actions/matches.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/server-actions/session.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/app/weekly-report/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/components/layout/MentoringCurrent/components/MentoringCurrent.client.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/components/layout/MentoringCurrent/components/MentoringCurrent.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/frontend/src/components/layout/MentoringCurrent/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ai/detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ai/detector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/common/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/common/config/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/test/java/AilWaysBackendApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/test/java/AilWaysBackendApplicationTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/AIL-ways" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/home/HomeLanding.client.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/home/components/HomeLanding.client.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/home/HomeShell.client.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/home/components/HomeShell.client.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/home/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/home/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/login/LocalLoginModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/login/components/LocalLoginModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/login/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/mentoring-current/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/mentoring-current/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/select/SelectAfterLogin.client.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/select/components/SelectAfterLogin.client.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/select/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/select/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/server-actions/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/server-actions/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/terms-consents/TermsConsentsScreen.client.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/terms-consents/components/TermsConsentsScreen.client.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/app/terms-consents/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/app/terms-consents/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/components/layout/HeaderGate.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/components/layout/HeaderGate.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/components/layout/MentoringCurrent.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/components/layout/header/NotificationDropdown.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/components/layout/header/components/NotificationDropdown.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/components/layout/header/ProfileDropdown.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/components/layout/header/components/ProfileDropdown.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/frontend/src/components/layout/header/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/frontend/src/components/layout/header/Header.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +102,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Gradle.StudySessionServiceTest.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.backend 빌드.executor&quot;: &quot;Run&quot;,
     &quot;Gradle.소스 다운로드.executor&quot;: &quot;Run&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
@@ -78,7 +115,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;Spring Boot.AilWaysBackendApplication.executor&quot;: &quot;Run&quot;,
     &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;link/backend/ai-backend-detector-connect&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;fix/backend/social-error-fix&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/seungzun/Desktop/AIL-ways&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -89,10 +126,36 @@
     &quot;project.structure.last.edited&quot;: &quot;프로젝트&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;terminal&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RunManager" selected="Spring Boot.BackendApplication">
+    <configuration name="StudySessionServiceTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/apps/backend" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;session.service.StudySessionServiceTest&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="AilWaysBackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="backend.main" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="Jar.AilWaysBackendApplication" />
@@ -103,9 +166,9 @@
     <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
       <envs>
         <env name="APP_PW" value="fiob bliv enod hrya" />
-        <env name="KAKAO_PW" value="7e8ed3bafed88daf71e6001352a95d44 " />
-        <env name="MONGO_DB_URI" value="mongodb+srv://ailways714:ailways714%40@ail-ways.pzey2v6.mongodb.net/AIL_ways_DB?appName=AIL-ways" />
         <env name="JWT_PW" value="V29vTmVvTGVlS2FuZ0RhaG9vbkhhU2V1bmdKdU5KYWtLYW5nSmlzZW9uZw==" />
+        <env name="KAKAO_PW" value="7e8ed3bafed88daf71e6001352a95d44" />
+        <env name="MONGO_DB_URI" value="mongodb+srv://ailways714:ailways714%40@ail-ways.pzey2v6.mongodb.net/AIL_ways_DB?appName=AIL-ways" />
       </envs>
       <module name="backend.main" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="app.BackendApplication" />
@@ -132,12 +195,14 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Gradle.StudySessionServiceTest" />
       <item itemvalue="Spring Boot.AilWaysBackendApplication" />
       <item itemvalue="Spring Boot.BackendApplication" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Spring Boot.BackendApplication" />
+        <item itemvalue="Gradle.StudySessionServiceTest" />
       </list>
     </recent_temporary>
   </component>
@@ -168,6 +233,11 @@
       <workItem from="1761879826455" duration="1989000" />
       <workItem from="1762189233171" duration="308000" />
       <workItem from="1762262524369" duration="1091000" />
+      <workItem from="1762320592796" duration="2973000" />
+      <workItem from="1762323671869" duration="256000" />
+      <workItem from="1762336881119" duration="9256000" />
+      <workItem from="1762392470460" duration="974000" />
+      <workItem from="1762408770184" duration="2714000" />
     </task>
     <servers />
   </component>

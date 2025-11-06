@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import TermsConsentsScreen from "./TermsConsentsScreen.client";
+import TermsConsentsScreen from "./components/TermsConsentsScreen.client";
 import { fetchMyProfileAction } from "@/app/server-actions/select";
 
 type SearchParamsPromise = Promise<Record<string, string | string[] | undefined>>;

@@ -1,16 +1,16 @@
 import { cookies } from "next/headers";
-import HomeShell from "./HomeShell.client";
+import HomeShell from "./components/HomeShell.client";
 import { fetchMyProfileAction } from "@/app/server-actions/select";
 
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function HomePage({ searchParams }: PageProps) {
-  const params = searchParams ?? {};
-  const tokenParamRaw = params.token;
+  const params = await searchParams;
+  const tokenParamRaw = params?.token;
   const tokenParam = Array.isArray(tokenParamRaw) ? tokenParamRaw[0] : tokenParamRaw || null;
 
   const cookieStore = await cookies();

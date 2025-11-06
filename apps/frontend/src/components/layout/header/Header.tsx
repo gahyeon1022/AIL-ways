@@ -5,14 +5,14 @@ import Link from "next/link";
 import { Bell } from "lucide-react";
 
 import { Button } from "../../ui/Button";           
-import UserMenu from "./ProfileDropdown";           
-import NotificationDropdown from "./NotificationDropdown"; 
+import UserMenu from "./components/ProfileDropdown";           
+import NotificationDropdown from "./components/NotificationDropdown"; 
 
 export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="w-full bg-gradient-to-r from-rose-quartz-500 to-serenity-500 px-6 py-3 shadow-sm">
+    <header className="w-full px-6 py-3 shadow-sm">
       <div className="mx-auto grid grid-cols-3 items-center h-14">
         {/* Logo */}
         <div className="flex items-center">

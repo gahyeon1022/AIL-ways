@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import LocalLoginModal from "@/app/login/LocalLoginModal"; // 경로는 프로젝트 구조에 맞게
+import LocalLoginModal from "@/app/login/components/LocalLoginModal"; // 경로는 프로젝트 구조에 맞게
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080";
 
 export default function LoginPage() {
