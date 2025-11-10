@@ -40,7 +40,10 @@ export default function NoteEditor({
       className={[
         'flex-1 bg-yellow-100 p-4 rounded shadow focus:outline-none overflow-y-auto break-words',
         '[&:empty]:before:text-gray-400 [&:empty]:before:content-[attr(data-placeholder)]',
-      ].join(' ')}
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
     />
   );
 }

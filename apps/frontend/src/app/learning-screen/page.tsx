@@ -12,6 +12,18 @@ const SAMPLE_MS = 200; // 5 FPS 정도
 const TARGET_W = 640; // 업로드 해상도 가로
 const QUALITY = 0.7; // JPEG/WebP 품질
 
+type ImageCaptureLike = {
+  grabFrame: () => Promise<ImageBitmap>;
+};
+
+const isImageCaptureLike = (value: unknown): value is ImageCaptureLike => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { grabFrame?: unknown }).grabFrame === 'function'
+  );
+};
+
 // 이벤트 우선순위(중복 시 가장 먼저 보일 항목)
 const EVENT_PRIORITY: Array<'PHONE' | 'LEFT_SEAT' | 'DROWSY'> = [
   'PHONE',
@@ -45,7 +57,7 @@ export default function LearningScreenPage() {
   const wasFeedbackOpen = useRef(false);
 
   // 캡처/업로드
-  const capRef = useRef<any>(null); // ImageCapture 또는 null
+  const capRef = useRef<ImageCaptureLike | null>(null); // ImageCapture 또는 null
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const loopTimer = useRef<number | null>(null);
   const inflight = useRef<boolean>(false);
@@ -86,8 +98,9 @@ export default function LearningScreenPage() {
 
     try {
       await v.play();
-    } catch (e: any) {
-      if (e?.name !== 'AbortError') console.warn('video.play 실패:', e);
+    } catch (error: unknown) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      console.warn('video.play 실패:', error);
     }
 
     setVideoReady(true);
@@ -119,10 +132,17 @@ export default function LearningScreenPage() {
 
         // ImageCapture 준비(가능하면)
         const track = stream.getVideoTracks()[0];
-        // @ts-ignore
-        capRef.current = (window as any).ImageCapture
-          ? new (window as any).ImageCapture(track)
-          : null;
+        const imageCaptureCtor = (
+          window as typeof window & {
+            ImageCapture?: new (mediaTrack: MediaStreamTrack) => unknown;
+          }
+        ).ImageCapture;
+        if (imageCaptureCtor) {
+          const candidate = new imageCaptureCtor(track);
+          capRef.current = isImageCaptureLike(candidate) ? candidate : null;
+        } else {
+          capRef.current = null;
+        }
 
         // 비디오 안전 시작
         await startVideo(stream);
@@ -133,12 +153,13 @@ export default function LearningScreenPage() {
 
     initPage();
 
+    const videoElement = videoRef.current;
     return () => {
       // cleanup
       if (loopTimer.current) window.clearTimeout(loopTimer.current);
       const s = streamRef.current;
       s?.getTracks().forEach((t) => t.stop());
-      if (videoRef.current) videoRef.current.srcObject = null;
+      if (videoElement) videoElement.srcObject = null;
       initedRef.current = false;
       setVideoReady(false);
     };
@@ -189,8 +210,8 @@ export default function LearningScreenPage() {
         }
       } catch {}
 
-      let cw = TARGET_W,
-        ch: number;
+      const cw = TARGET_W;
+      let ch: number;
       if (!canvasRef.current)
         canvasRef.current = document.createElement('canvas');
       const canvas = canvasRef.current;

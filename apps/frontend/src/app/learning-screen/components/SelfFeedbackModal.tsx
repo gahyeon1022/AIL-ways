@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { addDistractionLog, submitSelfFeedback } from '@/app/server-actions/session';
+import {
+  addDistractionLog,
+  submitSelfFeedback,
+  type DistractionEventReq,
+} from '@/app/server-actions/session';
 
 // 감지 이벤트 타입
 export type DetectedActivity = 'PHONE' | 'LEFT_SEAT' | 'DROWSY';
@@ -59,11 +63,11 @@ export default function SelfFeedbackModal({
     if (hasLoggedRef.current || !detectedActivity) return;
     hasLoggedRef.current = true;
 
-    const payload = {
+    const payload: DistractionEventReq & { confidence?: number } = {
       activity: detectedActivity,
       detectedAt: detectedAt ?? new Date().toISOString(),
       confidence: typeof confidence === 'number' ? confidence : 0.9,
-    } as any;
+    };
 
     (async () => {
       try {
