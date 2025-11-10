@@ -7,12 +7,13 @@ import { fetchProfileOptionsAction, fetchMyProfileAction } from "@/app/server-ac
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function Page({ searchParams }: PageProps) {
   const jar = await cookies();
-  const tokenQuery = searchParams?.token;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const tokenQuery = resolvedSearchParams?.token;
   const tokenParam = Array.isArray(tokenQuery) ? tokenQuery[0] : tokenQuery || null;
 
   if (tokenParam) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import QuestionManager from './components/QuestionManager';
 import NoteEditor from './components/NoteEditor';
@@ -32,6 +32,20 @@ const EVENT_PRIORITY: Array<'PHONE' | 'LEFT_SEAT' | 'DROWSY'> = [
 ];
 
 export default function LearningScreenPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center text-white">
+          학습 화면 준비 중…
+        </main>
+      }
+    >
+      <LearningScreenContent />
+    </Suspense>
+  );
+}
+
+function LearningScreenContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const matchId = searchParams.get('matchId') ?? '';
