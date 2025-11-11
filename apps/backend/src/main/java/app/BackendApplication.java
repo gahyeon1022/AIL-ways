@@ -2,8 +2,6 @@ package app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-//import org.springframework.data.mongodb.config.EnableMongoAuditing;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @SpringBootApplication (
         scanBasePackages = { "app", "auth", "user", "common", "board", "match", "report" , "session"}//app과 동등한 위치 패키지 생성시마다 추가필수
@@ -11,5 +9,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 public class BackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(BackendApplication.class, args);
+        System.out.println("🧩 MONGO_URI_PROPERTY=" + System.getProperty("spring.data.mongodb.uri"));
+
     }
 }
