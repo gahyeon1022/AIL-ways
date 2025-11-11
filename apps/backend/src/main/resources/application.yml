@@ -37,7 +37,7 @@ spring:
         registration:
           kakao:
             client-id: ${KAKAO_PW}  # 유출 금지
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}" # 스프링 기본 콜백
+            redirect-uri: "https://api.ail-ways.com/login/oauth2/code/{registrationId}" # 스프링 기본 콜백
             authorization-grant-type: authorization_code
             client-name: Kakao
             scope:
