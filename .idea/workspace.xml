@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a9561966-c41a-422e-a484-996b87fa1829" name="변경" comment="Merge remote-tracking branch 'origin/feat/backend/study-session-selffeedback' into feat/backend/social-consent-connect&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;apps/ai/detector.py" />
+    <list default="true" id="a9561966-c41a-422e-a484-996b87fa1829" name="변경" comment="Merge remote-tracking branch 'origin/feat/backend/study-session-selffeedback' into feat/backend/social-consent-connect&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;apps/ai/detector.py">
+      <change beforePath="$PROJECT_DIR$/apps/ai/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ai/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ai/weekly_summarizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ai/weekly_summarizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/app/BackendApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/app/BackendApplication.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -79,7 +83,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.AilWaysBackendApplication.executor": "Run",
     "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "fix/backend/session-duplicate-fix",
+    "git-widget-placeholder": "fix/backend/session-duplicate-fix 병합 중",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/seungzun/Desktop/AIL-ways",
     "node.js.detected.package.eslint": "true",

@@ -46,13 +46,4 @@ def summarize_weekly_report(data: dict) -> dict:
     text = response.choices[0].message.content.strip()
     return {"ai_summary": text}
 
-if __name__ == "__main__":
-    sample_data = {
-        "study_hours": {"월": 3, "화": 4, "수": 5, "목": 2, "금": 6, "토": 1, "일": 3},
-        "focus_me": 85,
-        "focus_avg": 75,
-        "total_hours": 24
-    }
 
-    result = summarize_weekly_report(sample_data)
-    print(result)
