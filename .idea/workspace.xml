@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a9561966-c41a-422e-a484-996b87fa1829" name="변경" comment="Merge remote-tracking branch 'origin/feat/backend/study-session-selffeedback' into feat/backend/social-consent-connect&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;apps/ai/detector.py">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/session/repository/StudySessionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/session/repository/StudySessionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/java/session/service/StudySessionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/java/session/service/StudySessionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/apps/backend/src/main/resources/application.yml" afterDir="false" />
-    </list>
+    <list default="true" id="a9561966-c41a-422e-a484-996b87fa1829" name="변경" comment="Merge remote-tracking branch 'origin/feat/backend/study-session-selffeedback' into feat/backend/social-consent-connect&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;apps/ai/detector.py" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
