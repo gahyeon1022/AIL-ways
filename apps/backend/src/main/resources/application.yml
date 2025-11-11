@@ -1,5 +1,6 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
   servlet: # 한글 깨짐 방지
     encoding:
       enabled: true
@@ -37,7 +38,7 @@ spring:
         registration:
           kakao:
             client-id: ${KAKAO_PW}  # 유출 금지
-            redirect-uri: "https://api.ail-ways.com/login/oauth2/code/{registrationId}" # 스프링 기본 콜백
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}" # 스프링 기본 콜백
             authorization-grant-type: authorization_code
             client-name: Kakao
             scope:
