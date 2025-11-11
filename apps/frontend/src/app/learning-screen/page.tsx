@@ -422,6 +422,13 @@ function LearningScreenContent() {
               muted
               className="w-full h-full object-contain rounded-md scale-x-[-1]"
             />
+            <div className="text-xs text-gray-600 py-1 hidden">
+              {aiUploading
+                ? 'AI로 전송 중…'
+                : videoReady
+                ? '준비 완료'
+                : '카메라 준비 중…'}
+            </div>
           </div>
         </div>
 
@@ -435,13 +442,6 @@ function LearningScreenContent() {
           className="px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
         >
           학습 종료
-        </button>
-        <button
-          type="button"
-          onClick={() => setIsFeedbackModalOpen(true)}
-          className="px-4 py-2 bg-yellow-500 text-white rounded cursor-pointer"
-        >
-          딴짓 (테스트)
         </button>
       </div>
 
