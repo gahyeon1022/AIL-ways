@@ -79,6 +79,10 @@ function LearningScreenContent() {
   const cooldownUntil = useRef<number>(0);
   const lastProcessedDistractionRef = useRef<string | null>(null);
 
+  useEffect(() => {
+    paused.current = isFeedbackModalOpen;
+  }, [isFeedbackModalOpen]);
+
   // StrictMode 중복 실행 방지
   const initedRef = useRef(false);
 
@@ -261,10 +265,13 @@ function LearningScreenContent() {
         setAiUploading(true);
 
         // ▶︎ BE StudySession API로 업로드 (세션별 분석)
-        const res = await fetch(`/api/sessions/${sessionId}/distractions/analyze`, {
-          method: 'POST',
-          body: fd,
-        });
+        const res = await fetch(
+          `/api/sessions/${sessionId}/distractions/analyze`,
+          {
+            method: 'POST',
+            body: fd,
+          }
+        );
         if (!res.ok) throw new Error(`BE ${res.status}`);
 
         // 래핑/비래핑 모두 대응
@@ -282,7 +289,9 @@ function LearningScreenContent() {
           const detectedAtIso: string | undefined = latest.detectedAt;
           const activityRaw: string | undefined = latest.activity;
 
-          const dedupeKey = `${detectedAtIso ?? ''}|${activityRaw ?? ''}|${logs.length}`;
+          const dedupeKey = `${detectedAtIso ?? ''}|${activityRaw ?? ''}|${
+            logs.length
+          }`;
           if (lastProcessedDistractionRef.current === dedupeKey) return null;
           lastProcessedDistractionRef.current = dedupeKey;
 
@@ -294,6 +303,7 @@ function LearningScreenContent() {
             if (
               normalized.includes('phone') ||
               normalized.includes('휴대폰') ||
+              normalized.includes('스마트폰') ||
               normalized.includes('smart')
             ) {
               return 'PHONE';
@@ -321,18 +331,18 @@ function LearningScreenContent() {
           const ev = responsePayload?.events || {};
           const hit = EVENT_PRIORITY.find((k) => ev?.[k]);
           if (!hit) return null;
-          const ts: string = (responsePayload?.ts as string) ?? new Date().toISOString();
+          const ts: string =
+            (responsePayload?.ts as string) ?? new Date().toISOString();
           const conf: number =
-            (responsePayload?.metrics?.phone_score as number | undefined) ?? 0.9;
+            (responsePayload?.metrics?.phone_score as number | undefined) ??
+            0.9;
           const dedupeKey = `${ts}|${hit}`;
           if (lastProcessedDistractionRef.current === dedupeKey) return null;
           lastProcessedDistractionRef.current = dedupeKey;
           return { hit, ts, confidence: conf };
         };
 
-        const detection =
-          deriveFromEventsPayload() ??
-          deriveFromSession();
+        const detection = deriveFromEventsPayload() ?? deriveFromSession();
 
         if (detection) {
           const now = Date.now();
@@ -343,16 +353,8 @@ function LearningScreenContent() {
             setDetectedAt(detection.ts);
             setDetectedConf(detection.confidence);
             setIsFeedbackModalOpen(true);
+            paused.current = true;
           }
-
-          fetch(`/api/sessions/${sessionId}/distractions`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              activity: detection.hit,
-              detectionType: 'VISION_AI',
-            }),
-          }).catch(() => {});
 
           cooldownUntil.current = now + 8000;
         }
@@ -399,6 +401,7 @@ function LearningScreenContent() {
   const handleSubmitFeedback = (feedback: string) => {
     console.log('제출된 자가 피드백:', feedback);
     setIsFeedbackModalOpen(false);
+    cooldownUntil.current = Date.now() + 8000;
   };
 
   return (
@@ -419,13 +422,6 @@ function LearningScreenContent() {
               muted
               className="w-full h-full object-contain rounded-md scale-x-[-1]"
             />
-            <div className="text-xs text-gray-600 py-1">
-              {aiUploading
-                ? 'AI로 전송 중…'
-                : videoReady
-                ? '준비 완료'
-                : '카메라 준비 중…'}
-            </div>
           </div>
         </div>
 
