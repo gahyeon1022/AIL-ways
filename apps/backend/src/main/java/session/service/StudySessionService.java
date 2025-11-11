@@ -31,17 +31,18 @@ public class StudySessionService {
     // 세션 시작
     @Transactional
     public StudySessionDTO startSession(String matchId, String menteeUserId, String mentorUserId) {
-        StudySession session = StudySession.builder()
-                .matchId(matchId)
-                .menteeUserId(menteeUserId)
-                .mentorUserId(mentorUserId)
-                .status(SessionStatus.ACTIVE)
-                .startedAt(Instant.now())
-                .build();
-
-        StudySession saved = studyRepo.save(session);
-
-        return toDto(saved);
+        return studyRepo.findByMatchIdAndStatus(matchId, SessionStatus.ACTIVE)
+                .map(this::toDto) // 이미 진행 중이면 기존 세션 반환
+                .orElseGet(() -> {
+                    StudySession session = StudySession.builder()
+                            .matchId(matchId)
+                            .menteeUserId(menteeUserId)
+                            .mentorUserId(mentorUserId)
+                            .status(SessionStatus.ACTIVE)
+                            .startedAt(Instant.now())
+                            .build();
+                    return toDto(studyRepo.save(session));
+                });
     }
 
     @Transactional

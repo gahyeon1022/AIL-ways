@@ -12,8 +12,8 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGO_DB_URI}
-      # uri: mongodb://localhost:27017/alpha
+#      uri: ${MONGO_DB_URI}
+       uri: mongodb://localhost:27017/alpha
 
   mail:
     host: smtp.gmail.com
