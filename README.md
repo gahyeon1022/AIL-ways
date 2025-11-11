@@ -255,3 +255,25 @@ typescript: "5"
 > ⚠️ **주의:**  
 > Swagger 테스트용 코드(swagger-test)는 운영 배포 시 반드시 주석 처리하거나 real-time 버전으로 되돌려야 합니다.  
 > 테스트용 로직이 그대로 배포되면 감지 민감도가 과도하게 높아지고, 실제 서비스에서 오탐(False Positive)이 발생할 수 있습니다.
+
+---
+
+##🧠 AIL-ways AI 모듈 설치 가이드 (with 버전)
+1️⃣ Python 환경
+Python 3.11.x
+
+
+⚠️ 3.10 이하에서는 일부 Mediapipe 빌드 오류 발생
+⚠️ 3.12 이상에서는 ultralytics, mediapipe 간 호환 이슈 있음
+
+2️⃣ 가상환경 설정
+# Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+
+3️⃣ 의존성 설치
+pip install -r requirements.txt
