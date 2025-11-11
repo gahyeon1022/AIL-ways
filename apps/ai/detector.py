@@ -5,11 +5,12 @@ import numpy as np
 import cv2
 import mediapipe as mp
 import torch
+torch.serialization.add_safe_globals([__import__('ultralytics').nn.modules.block.DFL])
 from ultralytics import YOLO
 
 # --- YOLO 내부 클래스 ---
 from ultralytics.nn.tasks import DetectionModel
-from ultralytics.nn.modules.conv import Conv, Concat        # ✅ Concat 추가
+from ultralytics.nn.modules.conv import Conv, Concat
 from ultralytics.nn.modules.block import C2f
 try:
     from ultralytics.nn.modules.common import SPPF, Bottleneck
@@ -21,7 +22,6 @@ from ultralytics.nn.modules.head import Detect
 from torch.nn import (
     Sequential,
     ModuleList,
-
     Conv2d,
     BatchNorm2d,
     SiLU,
@@ -29,19 +29,16 @@ from torch.nn import (
     Upsample,
 )
 
-# ✅ PyTorch 2.6+ weights_only 대응: YOLO에서 필요한 모든 클래스 허용
+# ✅ PyTorch 2.6+ weights_only 대응
 torch.serialization.add_safe_globals([
-    # YOLO / Ultralytics 내부
     DetectionModel, Conv, C2f, SPPF, Bottleneck, Detect, Concat,
-    # PyTorch 표준 계층
     Sequential, ModuleList, Conv2d, BatchNorm2d, SiLU, MaxPool2d, Upsample
 ])
 
 
-
 # ---------- 설정 데이터클래스 ----------
 @dataclass
-class DetectorConfig: #real-time
+class DetectorConfig:  # real-time
     # Drowsiness (EAR)
     ear_threshold: float = 0.20
     drowsy_consec_frames: int = 12  # 대략 0.5~0.7s
@@ -50,24 +47,14 @@ class DetectorConfig: #real-time
     absence_consec_frames: int = 30
 
     # Phone (YOLO)
-    phone_min_conf: float = 0.50
-    phone_consec_frames: int = 5
-    detect_phone_every_n: int = 3  # 매 N프레임마다 YOLO
+    phone_min_conf: float = 0.25
+    phone_consec_frames: int = 3
+    detect_phone_every_n: int = 1  # 매 N프레임마다 YOLO 실행
 
     # 기타
     mirror: bool = True
-    max_side: int = 640
+    max_side: int = 1280
 
-# @dataclass
-# class DetectorConfig: #swagger-test, 실사용은 이거 주석 처리하고, 무조건 위에거 써야함!!
-#     ear_threshold: float = 0.20
-#     drowsy_consec_frames: int = 1        # 단일 프레임에서도 바로 졸음 처리
-#     absence_consec_frames: int = 1       # 얼굴 없으면 즉시 자리이탈
-#     phone_min_conf: float = 0.3          # 작게 보이는 폰도 잡게 감도 완화
-#     phone_consec_frames: int = 1         # 단일 프레임 테스트용 즉시 반응
-#     detect_phone_every_n: int = 1        # YOLO 매번 실행
-#     mirror: bool = True
-#     max_side: int = 640
 
 # ---------- EAR 계산 ----------
 LEFT_EYE = [33, 160, 158, 133, 153, 144]
@@ -100,8 +87,8 @@ class Detector:
             min_tracking_confidence=0.6
         )
 
-        # ✅ YOLO 모델 로드 (PyTorch 2.6 호환)
-        self.yolo = YOLO("yolov8n.pt")
+        # ✅ YOLO 모델 로드
+        self.yolo = YOLO("yolov8s.pt")
 
         # 상태값 초기화
         self._drowsy_count = 0
@@ -123,8 +110,7 @@ class Detector:
             img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
         return img
 
-    def process(self, frame: np.ndarray) -> Dict[str, Any]: #real-time
-    # def process(self, frame: np.ndarray, single_frame: bool = False) -> Dict[str, Any]: #swagger-test
+    def process(self, frame: np.ndarray) -> Dict[str, Any]:
         """
         입력: BGR 프레임
         출력: 졸음, 자리이탈, 휴대폰 감지 정보
@@ -160,29 +146,37 @@ class Detector:
         # --- 2) YOLO ---
         phone_boxes: List[Tuple[int, int, int, int, float]] = []
         phone_score: Optional[float] = None
-        phone_detected_now = False
+        phone_detected_now = None  # 이번 프레임 YOLO 결과 상태
 
-        self.cfg.phone_min_conf = 0.25  #swagger-test
+        do_yolo = (self._frame_no % self.cfg.detect_phone_every_n == 0)
+        if do_yolo:
+            rgb_for_yolo = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            results = self.yolo(rgb_for_yolo, verbose=False)
 
-        if self._frame_no % self.cfg.detect_phone_every_n == 0:
-            results = self.yolo(rgb, verbose=False)
             if results:
                 r0 = results[0]
                 if r0.boxes is not None and len(r0.boxes) > 0:
                     xyxy = r0.boxes.xyxy.cpu().numpy()
                     conf = r0.boxes.conf.cpu().numpy()
                     cls = r0.boxes.cls.cpu().numpy().astype(int)
+
                     for (x1, y1, x2, y2), sc, c in zip(xyxy, conf, cls):
                         if c in self._cell_phone_ids and sc >= self.cfg.phone_min_conf:
                             phone_boxes.append((int(x1), int(y1), int(x2), int(y2), float(sc)))
+
                     if phone_boxes:
                         phone_score = max(b[-1] for b in phone_boxes)
                         phone_detected_now = True
+                    else:
+                        phone_detected_now = False
 
-        if phone_detected_now:
+        # ✅ YOLO를 돌린 프레임에서만 카운트 갱신
+        if phone_detected_now is True:
             self._phone_count += 1
-        else:
-            self._phone_count = 0
+        elif phone_detected_now is False:
+            self._phone_count = max(0, self._phone_count - 1)
+        # YOLO를 안 돌린 프레임(None)은 유지
+
         # --- 3) 최종 판정 ---
         drowsy = self._drowsy_count >= self.cfg.drowsy_consec_frames
         left_seat = self._absence_count >= self.cfg.absence_consec_frames

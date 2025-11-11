@@ -294,6 +294,7 @@ function LearningScreenContent() {
             if (
               normalized.includes('phone') ||
               normalized.includes('휴대폰') ||
+              normalized.includes('스마트폰') ||
               normalized.includes('smart')
             ) {
               return 'PHONE';
