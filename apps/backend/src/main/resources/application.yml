@@ -13,8 +13,8 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGO_DB_URI}
-      # uri: mongodb://localhost:27017/alpha
+      # uri: ${MONGO_DB_URI}
+      uri: mongodb://localhost:27017/alpha
 
   mail:
     host: smtp.gmail.com
@@ -62,7 +62,7 @@ app:
 
 logging:
   level:
-    org.springframework.security: INFO
+    org.springframework.security: DEBUG
     org.springframework.web: INFO
 
 jwt:
