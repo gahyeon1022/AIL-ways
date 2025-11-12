@@ -200,3 +200,7 @@ hf_cache/
 
 # ===================== Frontend (Next.js / Vercel) =====================
 apps/frontend/.next/
+
+# IDE settings
+.idea/
+*.iml

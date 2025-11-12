@@ -63,18 +63,26 @@ logging:
   level:
     org.springframework.security: INFO
     org.springframework.web: INFO
+    report.service: DEBUG
 
 jwt:
   secret: ${JWT_PW}
 
 ai:
   api:
-    url: http://127.0.0.1:8000
-    key: dummy-key
+    url: http://127.0.0.1:8001
+    key: ${OPENAI_API_KEY}
+    timeout-seconds: 30
 
   vision: #추가
     enabled: true
     base-url: http://127.0.0.1:8000   # Vision AI 서버가 띄워진 주소/포트
+
+  weekly:
+    api:
+      url: http://127.0.0.1:8001
+      key: ${OPENAI_API_KEY}
+      timeout-seconds: 45
 
   #ai:
   #  api:
@@ -87,3 +95,14 @@ ai:
 
   # 발급받은 AI 서비스의 API 키를 입력하세요.
   #ai.api.key=여기에_발급받은_API_키를_입력하세요
+
+report:
+  weekly:
+    timezone: Asia/Seoul
+    focus-average: 75
+    cron-zone: Asia/Seoul
+    scheduler-enabled: true
+
+data:
+  migrations:
+    normalize-match-id: true
