@@ -2,8 +2,6 @@ package app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-//import org.springframework.data.mongodb.config.EnableMongoAuditing;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @SpringBootApplication (
         scanBasePackages = { "app", "auth", "user", "common", "board", "match", "report" , "session"}//app과 동등한 위치 패키지 생성시마다 추가필수
