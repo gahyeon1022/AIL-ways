@@ -48,7 +48,9 @@ export default function MentoringCurrentClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const intentFromQuery = searchParams.get("intent");
-  const showLearningCTA = (intentFromQuery ?? initialIntent ?? "").toLowerCase() === "study";
+  const normalizedIntent = (intentFromQuery ?? initialIntent ?? "").toLowerCase();
+  const showLearningCTA = normalizedIntent === "study";
+  const cardOptionsDisabled = normalizedIntent === "board";
   const [mentors, setMentors] = useState<MatchCard[]>(() => normalizeCards(initialMentors ?? []));
   const [mentees, setMentees] = useState<MatchCard[]>(() => normalizeCards(initialMentees ?? []));
   const [pendingMatches, setPendingMatches] = useState<PendingMatchCard[]>(initialPendingMatches);
@@ -73,6 +75,13 @@ export default function MentoringCurrentClient({
     const id = window.setTimeout(() => setError(null), 3500);
     return () => window.clearTimeout(id);
   }, [error]);
+
+  useEffect(() => {
+    if (cardOptionsDisabled) {
+      setActiveMentor(null);
+      setActiveMentee(null);
+    }
+  }, [cardOptionsDisabled]);
 
   useEffect(() => {
     setMentors(normalizeCards(initialMentors ?? []));
@@ -190,7 +199,7 @@ export default function MentoringCurrentClient({
   };
 
   const goLearningScreen = (mentor: MatchCard) => {
-    if (!showLearningCTA) return;
+    if (!showLearningCTA || cardOptionsDisabled) return;
     if (!mentor.matchId) {
       setError("선택한 멘토와의 매칭 정보가 없습니다.");
       return;
@@ -204,7 +213,7 @@ export default function MentoringCurrentClient({
   };
 
   return (
-    <div className="relative mx-auto h-[560px] w-full max-w-[1040px] overflow-hidden rounded-2xl bg-[#5a5a5a] p-8 text-white">
+    <div className="relative mx-auto h-[560px] w-full max-w-[1040px] overflow-hidden rounded-2xl bg-[#d6d4e6] p-8 text-white">
       <div className="space-y-2">
         {feedback && <div className="rounded-lg bg-emerald-500/20 px-4 py-2 text-sm text-emerald-100">{feedback}</div>}
         {error && <div className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-100">{error}</div>}
@@ -219,13 +228,14 @@ export default function MentoringCurrentClient({
                   <button
                     key={`${m.id}-${m.matchId ?? ""}`}
                     onClick={() => {
+                      if (cardOptionsDisabled) return;
                       setActiveMentor(m);
                       setActiveMentee(null);
                     }}
-                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-white/15 p-6 shadow-md transition hover:bg-white/30 hover:shadow-lg"
+                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-[#c4c0df] p-6 shadow-md transition hover:bg-[#d2cfea] hover:shadow-lg"
                   >
                     <div className="h-32 w-32 rounded-full bg-white shadow-inner" />
-                    <span className="mt-4 text-sm font-medium text-white/90">{`${m.name} 멘토`}</span>
+                    <span className="mt-4 text-sm font-medium text-[#1f1c2e]">{`${m.name} 멘토`}</span>
                   </button>
                 ))}
 
@@ -258,13 +268,14 @@ export default function MentoringCurrentClient({
                   <button
                     key={`${m.id}-${m.matchId ?? ""}`}
                     onClick={() => {
+                      if (cardOptionsDisabled) return;
                       setActiveMentee(m);
                       setActiveMentor(null);
                     }}
-                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-white/15 p-6 text-center shadow-md transition hover:bg-white/30 hover:shadow-lg"
+                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-[#c4c0df] p-6 text-center shadow-md transition hover:bg-[#d2cfea] hover:shadow-lg"
                   >
                     <div className="h-32 w-32 rounded-full bg-white shadow-inner" />
-                    <span className="mt-4 text-sm font-medium text-white/90">{`${m.name} 멘티`}</span>
+                    <span className="mt-4 text-sm font-medium text-[#1f1c2e]">{`${m.name} 멘티`}</span>
                   </button>
                 ))}
 
@@ -287,7 +298,7 @@ export default function MentoringCurrentClient({
       {role === "MENTEE" && (
         <button
           onClick={() => setShowAdd(true)}
-          className="absolute bottom-6 right-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#c9d5f4] text-4xl font-bold text-gray-900 shadow-lg transition hover:scale-105"
+          className="absolute bottom-6 right-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#b6b0d8] text-4xl font-bold text-[#1f1c2e] shadow-lg transition hover:bg-[#c6c1e6]"
         >
           +
         </button>
@@ -324,7 +335,7 @@ export default function MentoringCurrentClient({
         </div>
       )}
 
-      {role === "MENTEE" && activeMentor && (
+      {role === "MENTEE" && activeMentor && !cardOptionsDisabled && (
         <>
           <button
             onClick={() => setActiveMentor(null)}
@@ -336,7 +347,7 @@ export default function MentoringCurrentClient({
               {showLearningCTA ? (
                 <button
                   onClick={() => goLearningScreen(activeMentor)}
-                  className="rounded-lg bg-gradient-to-r from-[#f9a8d4] via-[#f472b6] to-[#ec4899] px-4 py-2 text-sm text-white shadow-lg transition hover:scale-[1.01] active:scale-95"
+                  className="rounded-lg bg-gradient-to-r from-[#f9a8d4] via-[#f472b6] to-[#ec4899] px-4 py-2 text-sm text-white shadow-lg transition duration-200 hover:from-[#fdd8e6] hover:via-[#f9a8d4] hover:to-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-inner"
                 >
                   학습 시작
                 </button>
@@ -367,7 +378,7 @@ export default function MentoringCurrentClient({
         </>
       )}
 
-      {role === "MENTOR" && activeMentee && (
+      {role === "MENTOR" && activeMentee && !cardOptionsDisabled && (
         <>
           <button
             onClick={() => setActiveMentee(null)}
