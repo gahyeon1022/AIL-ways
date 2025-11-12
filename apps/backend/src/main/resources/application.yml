@@ -13,11 +13,7 @@ spring:
 
   data:
     mongodb:
-<<<<<<< HEAD
       # uri: ${MONGO_DB_URI}
-=======
-#      uri: ${MONGO_DB_URI}
->>>>>>> origin/fix/backend/session-duplicate-fix
       uri: mongodb://localhost:27017/alpha
 
   mail:
