@@ -79,7 +79,11 @@ async function fetchIncomingForMentor(): Promise<PendingMatchCard[]> {
   }
 }
 
-export default async function MentoringCurrent() {
+type MentoringCurrentProps = {
+  initialIntent?: string | null;
+};
+
+export default async function MentoringCurrent({ initialIntent }: MentoringCurrentProps) {
   const jar = await cookies();
   if (!jar.get("AUTH_TOKEN")) redirect("/login");
 
@@ -100,6 +104,7 @@ export default async function MentoringCurrent() {
       initialMentors={role === "MENTEE" ? mentors : undefined}
       initialMentees={role === "MENTOR" ? mentees : undefined}
       initialPendingMatches={pending}
+      initialIntent={initialIntent ?? null}
     />
   );
 }
