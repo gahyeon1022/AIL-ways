@@ -1,11 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  addDistractionLog,
-  submitSelfFeedback,
-  type DistractionEventReq,
-} from '@/app/server-actions/session';
+import { useEffect, useMemo, useState } from 'react';
+import { submitSelfFeedback } from '@/app/server-actions/session';
 
 // 감지 이벤트 타입
 export type DetectedActivity = 'PHONE' | 'LEFT_SEAT' | 'DROWSY';
@@ -17,8 +13,8 @@ interface SelfFeedbackModalProps {
   sessionId: string;
   // AI 응답으로 전달되는 필드들(선택)
   detectedActivity?: DetectedActivity; // PHONE | LEFT_SEAT | DROWSY
-  detectedAt?: string;                  // ISO8601 문자열 (없으면 now)
-  confidence?: number;                  // 0~1 범위 (없으면 0.9)
+  detectedAt?: string; // ISO8601 문자열 (없으면 now)
+  confidence?: number; // 0~1 범위 (없으면 0.9)
 }
 
 export default function SelfFeedbackModal({
@@ -32,7 +28,12 @@ export default function SelfFeedbackModal({
 }: SelfFeedbackModalProps) {
   const [feedbackText, setFeedbackText] = useState('');
   const [posting, setPosting] = useState(false);
-  const hasLoggedRef = useRef(false); // 모달 열릴 때 1회만 로그 저장
+
+  useEffect(() => {
+    if (open) {
+      setFeedbackText('');
+    }
+  }, [open]);
 
   // 라벨/메시지 매핑
   const labelMap: Record<DetectedActivity, string> = {
@@ -52,32 +53,6 @@ export default function SelfFeedbackModal({
     if (typeof confidence !== 'number') return '—';
     return `${Math.round(confidence * 100)}%`;
   }, [confidence]);
-
-  // 모달이 열릴 때 딴짓 로그 1회 저장
-  useEffect(() => {
-    if (!open) {
-      hasLoggedRef.current = false;
-      return;
-    }
-    // activity가 없다면 서버 로그는 생략 (페이지에서 이미 기록했다면 중복 방지)
-    if (hasLoggedRef.current || !detectedActivity) return;
-    hasLoggedRef.current = true;
-
-    const payload: DistractionEventReq & { confidence?: number } = {
-      activity: detectedActivity,
-      detectedAt: detectedAt ?? new Date().toISOString(),
-      confidence: typeof confidence === 'number' ? confidence : 0.9,
-    };
-
-    (async () => {
-      try {
-        await addDistractionLog(sessionId, payload);
-        // console.log('딴짓 로그 기록 완료', payload);
-      } catch (e) {
-        console.error('딴짓 로그 기록 실패', e);
-      }
-    })();
-  }, [open, sessionId, detectedActivity, detectedAt, confidence]);
 
   if (!open) return null;
 
@@ -110,14 +85,13 @@ export default function SelfFeedbackModal({
               <span className="font-medium text-gray-700">시간</span>{' '}
               <span>{tsText}</span>
             </div>
-            <div className="text-right">
-              <span className="font-medium text-gray-700">신뢰도</span>{' '}
-              <span>{confText}</span>
-            </div>
           </div>
         </header>
 
-        <label htmlFor="self-feedback" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="self-feedback"
+          className="block text-sm font-medium text-gray-700"
+        >
           자가 피드백
         </label>
         <textarea
