@@ -1,7 +1,9 @@
 package report.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
@@ -10,17 +12,31 @@ import java.util.Map;
 public class ExternalApiAiSummaryService implements AiSummaryService {
 
     private final WebClient webClient;
+    private final boolean enabled;
 
     public ExternalApiAiSummaryService(WebClient.Builder webClientBuilder,
-                                       @Value("${ai.api.url}") String apiUrl) {
-        // application.yml 의 ai.api.url: http://127.0.0.1:8000
-        this.webClient = webClientBuilder.baseUrl(apiUrl).build();
+                                       @Value("${ai.api.url:}") String apiUrl,
+                                       @Value("${ai.api.key:}") String apiKey) {
+        this.enabled = StringUtils.hasText(apiUrl);
+
+        WebClient.Builder builder = webClientBuilder.clone();
+        if (StringUtils.hasText(apiUrl)) {
+            builder = builder.baseUrl(apiUrl.trim());
+        }
+        if (StringUtils.hasText(apiKey)) {
+            builder = builder.defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
+        }
+        this.webClient = builder.build();
     }
 
     @Override
     public String summarize(String text) {
         if (text == null || text.isBlank()) {
             return "요약할 학습 내용이 없습니다.";
+        }
+
+        if (!enabled) {
+            return "AI 요약 서비스가 비활성화되어 있습니다.";
         }
 
         try {

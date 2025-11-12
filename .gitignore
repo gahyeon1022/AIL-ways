@@ -2,6 +2,7 @@
 # 에디터(개인설정) - 팀 공유 불필요
 .vscode/
 **/.vscode/
+.env
 
 # OS
 .DS_Store
