@@ -49,6 +49,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/matches/**").authenticated() //match
                                 .requestMatchers("/api/boards/**").authenticated() //board
                                 .requestMatchers("/api/sessions/**").authenticated() // session
+                                .requestMatchers("/api/reports/**").authenticated() // reports
                                 .anyRequest().denyAll() // 화면은 3000이 담당, 허용된 경로 외 접근 금지
                 )
 
