@@ -133,4 +133,3 @@ public class BoardService {
         return boardRepository.save(board);
     }
 }
-

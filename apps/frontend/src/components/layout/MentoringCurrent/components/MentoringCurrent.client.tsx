@@ -198,6 +198,10 @@ export default function MentoringCurrentClient({
     router.push(`/reports/${type}?${target}=${targetId}`);
   };
 
+  const goBoard = (peerId: string) => {
+    router.push(`/qna-boards?peerId=${encodeURIComponent(peerId)}`);
+  };
+
   const goLearningScreen = (mentor: MatchCard) => {
     if (!showLearningCTA || cardOptionsDisabled) return;
     if (!mentor.matchId) {
@@ -228,7 +232,10 @@ export default function MentoringCurrentClient({
                   <button
                     key={`${m.id}-${m.matchId ?? ""}`}
                     onClick={() => {
-                      if (cardOptionsDisabled) return;
+                      if (cardOptionsDisabled) {
+                        goBoard(m.id);
+                        return;
+                      }
                       setActiveMentor(m);
                       setActiveMentee(null);
                     }}
@@ -268,7 +275,10 @@ export default function MentoringCurrentClient({
                   <button
                     key={`${m.id}-${m.matchId ?? ""}`}
                     onClick={() => {
-                      if (cardOptionsDisabled) return;
+                      if (cardOptionsDisabled) {
+                        goBoard(m.id);
+                        return;
+                      }
                       setActiveMentee(m);
                       setActiveMentor(null);
                     }}

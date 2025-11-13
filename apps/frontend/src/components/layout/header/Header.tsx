@@ -29,7 +29,7 @@ export default function Header() {
           <Link href="/home">
           <Button variant="ghost">홈</Button>
           </Link>
-          <Link href="/board-list">
+          <Link href="/mentoring-current?intent=board">
             <Button variant="ghost">게시판</Button>
           </Link>
         </nav>
