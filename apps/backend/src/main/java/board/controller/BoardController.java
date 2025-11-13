@@ -1,7 +1,7 @@
 package board.controller;
 
 import board.domain.Board;
-import board.dto.AddAnswerRequest;
+import board.dto.AddCommentRequest;
 import board.dto.AddEntryRequest;
 import board.service.BoardService;
 import common.dto.ApiResponse;
@@ -9,8 +9,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @Tag(name = "Board API", description = "멘토-멘티 Q&A 보드 및 게시글 관리")
 @RestController
@@ -47,14 +49,24 @@ public class BoardController {
         return ApiResponse.ok(boardService.addEntryToBoard(boardId, authorUserId, req.title(), req.questionNote()));
     }
 
-    @Operation(summary = "게시글에 답변 작성", description = "인증된 사용자가 Q&A 답변을 등록합니다.")
-    @PostMapping("/{boardId}/entries/{entryId}/answer")
-    public ApiResponse<Board> addAnswer(@PathVariable String boardId,
-                                        @PathVariable String entryId,
-                                        @RequestBody @Valid AddAnswerRequest req,
-                                        Authentication auth) {
+    @Operation(summary = "게시글에 댓글/대댓글 작성", description = "멘토와 멘티가 댓글 또는 대댓글 형태로 질의응답을 이어갑니다.")
+    @PostMapping("/{boardId}/entries/{entryId}/comments")
+    public ApiResponse<Board> addComment(@PathVariable String boardId,
+                                         @PathVariable String entryId,
+                                         @RequestBody @Valid AddCommentRequest req,
+                                         Authentication auth) {
         String authorUserId = auth.getName();
-        return ApiResponse.ok(boardService.addAnswerToEntry(boardId, entryId, authorUserId, req.comment()));
+        try {
+            return ApiResponse.ok(boardService.addCommentToEntry(
+                    boardId,
+                    entryId,
+                    authorUserId,
+                    req.comment(),
+                    req.parentCommentId()
+            ));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     // ✅ POST 대신 PATCH를 사용하여 리소스의 부분 수정을 명확하게 표현
@@ -64,7 +76,10 @@ public class BoardController {
                                             @PathVariable String entryId,
                                             Authentication auth) {
         String actingUserId = auth.getName();
-        return ApiResponse.ok(boardService.completeEntry(boardId, entryId, actingUserId));
+        try {
+            return ApiResponse.ok(boardService.completeEntry(boardId, entryId, actingUserId));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 }
-

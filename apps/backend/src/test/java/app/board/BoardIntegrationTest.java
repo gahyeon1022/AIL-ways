@@ -3,6 +3,7 @@ package app.board;
 import app.support.IntegrationTestSupport;
 import board.domain.Board;
 import board.domain.EntryStatus;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -79,19 +80,62 @@ class BoardIntegrationTest extends IntegrationTestSupport {
                         .andReturn()
         ).path("entries").get(0).path("entryId").asText();
 
-        mockMvc.perform(post("/api/boards/{boardId}/entries/{entryId}/answer", board.getId(), entryId)
+        JsonNode mentorCommentData = extractDataNode(
+                mockMvc.perform(post("/api/boards/{boardId}/entries/{entryId}/comments", board.getId(), entryId)
+                                .header("Authorization", bearer(mentorToken))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {"comment": "열심히 해봅시다!"}
+                                        """))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.data.entries[0].comments[0].content").value("열심히 해봅시다!"))
+                        .andReturn()
+        );
+        String mentorCommentId = mentorCommentData.path("entries").get(0).path("comments").get(0).path("commentId").asText();
+
+        JsonNode menteeReplyData = extractDataNode(
+                mockMvc.perform(post("/api/boards/{boardId}/entries/{entryId}/comments", board.getId(), entryId)
+                                .header("Authorization", bearer(menteeToken))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                          "comment": "이 부분은 더 궁금해요.",
+                                          "parentCommentId": "%s"
+                                        }
+                                        """.formatted(mentorCommentId)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.data.entries[0].comments[0].replies[0].content").value("이 부분은 더 궁금해요."))
+                        .andReturn()
+        );
+        String menteeReplyId = menteeReplyData.path("entries").get(0)
+                .path("comments").get(0)
+                .path("replies").get(0)
+                .path("commentId").asText();
+
+        mockMvc.perform(post("/api/boards/{boardId}/entries/{entryId}/comments", board.getId(), entryId)
                         .header("Authorization", bearer(mentorToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"comment": "열심히 해봅시다!"}
-                                """))
+                                {
+                                  "comment": "추가 설명도 정리했어요.",
+                                  "parentCommentId": "%s"
+                                }
+                                """.formatted(menteeReplyId)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.entries[0].boardAnswer.comment").value("열심히 해봅시다!"));
+                .andExpect(jsonPath("$.data.entries[0].comments[0].replies[0].replies[0].content").value("추가 설명도 정리했어요."));
 
         mockMvc.perform(patch("/api/boards/{boardId}/entries/{entryId}/complete", board.getId(), entryId)
-                        .header("Authorization", bearer(mentorToken)))
+                        .header("Authorization", bearer(menteeToken)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.entries[0].status").value("COMPLETED"));
+
+        mockMvc.perform(post("/api/boards/{boardId}/entries/{entryId}/comments", board.getId(), entryId)
+                        .header("Authorization", bearer(mentorToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"comment": "완료 후에는 더 달 수 없어요."}
+                                """))
+                .andExpect(status().is4xxClientError());
 
         Board updatedBoard = boardRepository.findById(board.getId())
                 .orElseThrow(() -> new AssertionError("보드를 다시 조회할 수 없습니다."));
@@ -102,7 +146,8 @@ class BoardIntegrationTest extends IntegrationTestSupport {
                 .ifPresentOrElse(
                         savedEntry -> {
                             assertThat(savedEntry.getStatus()).isEqualTo(EntryStatus.COMPLETED);
-                            assertThat(savedEntry.getBoardAnswer().getComment()).isEqualTo("열심히 해봅시다!");
+                            assertThat(savedEntry.getComments()).hasSize(1);
+                            assertThat(savedEntry.getComments().get(0).getContent()).isEqualTo("열심히 해봅시다!");
                         },
                         () -> {
                             throw new AssertionError("게시글이 보드에 존재하지 않습니다.");

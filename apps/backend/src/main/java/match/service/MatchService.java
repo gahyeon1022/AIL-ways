@@ -14,6 +14,7 @@ import user.domain.Role;
 import user.domain.User;
 import user.repository.UserRepository;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class MatchService {
     private final UserRepository userRepo;
     private final MatchRepository matchRepo;
     private final BoardRepository boardRepo;
+    private static final Duration RE_REQUEST_COOLDOWN = Duration.ofHours(24);
 
     @Transactional
     public Match requestMatch(String menteeUserId, String mentorUserId) {
@@ -58,20 +60,21 @@ public class MatchService {
         }
         String pairKey = id1 + "::" + id2;
 
-        matchRepo.findByPairKey(pairKey).ifPresent(m -> {
-            throw new IllegalStateException("이미 존재하는 매칭입니다.");
-        });
+        Instant now = Instant.now();
 
-        Match m = Match.builder()
-                .mentorUserId(mentorUserId)
-                .menteeUserId(menteeUserId)
-                .pairKey(pairKey)
-                .status(MatchStatus.PENDING)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build();
-
-        return matchRepo.save(m);
+        return matchRepo.findByPairKey(pairKey)
+                .map(existing -> reopenIfEligible(existing, menteeUserId, mentorUserId, now))
+                .orElseGet(() -> {
+                    Match m = Match.builder()
+                            .mentorUserId(mentorUserId)
+                            .menteeUserId(menteeUserId)
+                            .pairKey(pairKey)
+                            .status(MatchStatus.PENDING)
+                            .createdAt(now)
+                            .updatedAt(now)
+                            .build();
+                    return matchRepo.save(m);
+                });
     }
 
     @Transactional
@@ -110,6 +113,35 @@ public class MatchService {
         m.setStatus(MatchStatus.REJECTED);
         m.setUpdatedAt(Instant.now());
         matchRepo.save(m);
+    }
+
+    private Match reopenIfEligible(Match existing,
+                                   String menteeUserId,
+                                   String mentorUserId,
+                                   Instant now) {
+        if (!existing.getMenteeUserId().equals(menteeUserId) || !existing.getMentorUserId().equals(mentorUserId)) {
+            throw new IllegalStateException("이미 존재하는 매칭입니다.");
+        }
+
+        if (existing.getStatus() == MatchStatus.ACCEPTED) {
+            throw new IllegalStateException("이미 수락된 매칭입니다.");
+        }
+        if (existing.getStatus() == MatchStatus.PENDING) {
+            throw new IllegalStateException("이미 대기 중인 매칭입니다.");
+        }
+
+        Instant lastUpdated = existing.getUpdatedAt() != null ? existing.getUpdatedAt() : existing.getCreatedAt();
+        if (lastUpdated != null) {
+            Instant availableAt = lastUpdated.plus(RE_REQUEST_COOLDOWN);
+            if (availableAt.isAfter(now)) {
+                throw new IllegalStateException("거절된 요청은 24시간이 지난 후 다시 신청할 수 있습니다.");
+            }
+        }
+
+        existing.setStatus(MatchStatus.PENDING);
+        existing.setCreatedAt(now);
+        existing.setUpdatedAt(now);
+        return matchRepo.save(existing);
     }
 
     public List<MenteeInfoDTO> getMenteesForMentor(String mentorUserId) {

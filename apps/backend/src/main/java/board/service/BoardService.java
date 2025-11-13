@@ -1,7 +1,7 @@
 package board.service;
 
 import board.domain.Board;
-import board.domain.BoardAnswer;
+import board.domain.BoardComment;
 import board.domain.BoardEntry;
 import board.domain.EntryStatus;
 import board.repository.BoardRepository;
@@ -50,7 +50,7 @@ public class BoardService {
     }
 
     @Transactional
-    public Board addAnswerToEntry(String boardId, String entryId, String authorUserId, String comment) {
+    public Board addCommentToEntry(String boardId, String entryId, String authorUserId, String comment, String parentCommentId) {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found: " + boardId));
 
@@ -63,18 +63,31 @@ public class BoardService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Entry not found: " + entryId));
 
-        // 완료된 질문에는 답변을 달 수 없도록 체크
         if (entry.getStatus() == EntryStatus.COMPLETED) {
-            throw new IllegalStateException("This entry is already completed and cannot be answered.");
+            throw new IllegalStateException("This entry is already completed and cannot receive more comments.");
         }
 
-        BoardAnswer answer = BoardAnswer.builder()
+        if (entry.getComments() == null) {
+            entry.setComments(new ArrayList<>());
+        }
+
+        BoardComment newComment = BoardComment.builder()
+                .commentId(UUID.randomUUID().toString())
                 .authorUserId(authorUserId)
-                .comment(comment)
+                .content(comment)
                 .createdAt(Instant.now())
                 .build();
 
-        entry.setBoardAnswer(answer);
+        if (parentCommentId == null || parentCommentId.isBlank()) {
+            entry.getComments().add(newComment);
+        } else {
+            BoardComment parent = findComment(entry.getComments(), parentCommentId);
+            if (parent == null) {
+                throw new IllegalArgumentException("Comment not found: " + parentCommentId);
+            }
+            parent.getReplies().add(newComment);
+        }
+
         return boardRepository.save(board);
     }
 
@@ -129,8 +142,27 @@ public class BoardService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Entry not found: " + entryId));
 
+        if (!entry.getAuthorUserId().equals(actingUserId)) {
+            throw new IllegalStateException("Only the mentee who created this entry can complete it.");
+        }
+
         entry.setStatus(EntryStatus.COMPLETED);
         return boardRepository.save(board);
     }
-}
 
+    private BoardComment findComment(Iterable<BoardComment> comments, String commentId) {
+        if (comments == null) {
+            return null;
+        }
+        for (BoardComment comment : comments) {
+            if (comment.getCommentId().equals(commentId)) {
+                return comment;
+            }
+            BoardComment nested = findComment(comment.getReplies(), commentId);
+            if (nested != null) {
+                return nested;
+            }
+        }
+        return null;
+    }
+}
