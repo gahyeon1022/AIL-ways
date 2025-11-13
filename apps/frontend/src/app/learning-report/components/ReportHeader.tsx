@@ -17,7 +17,7 @@ export default function ReportHeader({
   onDateClick,
 }: ReportHeaderProps) {
   return (
-    <section className="flex-1 flex items-center justify-center">
+    <section className="flex-1 flex items-center justify-center mt-3">
       <div className="w-[80%] flex items-center justify-between">
         {/* 멘티 이름 */}
         <div className="inline-block bg-white/95 rounded-full px-10 py-3 shadow mb-4">

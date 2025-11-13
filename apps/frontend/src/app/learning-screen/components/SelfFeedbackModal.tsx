@@ -14,7 +14,6 @@ interface SelfFeedbackModalProps {
   // AI 응답으로 전달되는 필드들(선택)
   detectedActivity?: DetectedActivity; // PHONE | LEFT_SEAT | DROWSY
   detectedAt?: string; // ISO8601 문자열 (없으면 now)
-  confidence?: number; // 0~1 범위 (없으면 0.9)
 }
 
 export default function SelfFeedbackModal({
@@ -24,7 +23,6 @@ export default function SelfFeedbackModal({
   sessionId,
   detectedActivity,
   detectedAt,
-  confidence,
 }: SelfFeedbackModalProps) {
   const [feedbackText, setFeedbackText] = useState('');
   const [posting, setPosting] = useState(false);
@@ -48,11 +46,6 @@ export default function SelfFeedbackModal({
     // 사용자 시간대 표기
     return ts.toLocaleString();
   }, [detectedAt]);
-
-  const confText = useMemo(() => {
-    if (typeof confidence !== 'number') return '—';
-    return `${Math.round(confidence * 100)}%`;
-  }, [confidence]);
 
   if (!open) return null;
 
