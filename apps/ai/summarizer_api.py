@@ -24,7 +24,19 @@ app = FastAPI(
 class SummarizeRequest(BaseModel):
     textToSummarize: str
 
+
 class SummarizeResponse(BaseModel):
+    aisummary: str
+
+
+class WeeklyReportRequest(BaseModel):
+    study_hours: dict
+    focus_me: int
+    focus_avg: int
+    total_hours: float
+
+
+class WeeklyReportResponse(BaseModel):
     aisummary: str
 
 
@@ -60,3 +72,50 @@ async def summarize_text(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"요약 중 오류 발생: {str(e)}")
+
+
+@app.post("/analyze-weekly", response_model=WeeklyReportResponse)
+async def analyze_weekly(
+    req: WeeklyReportRequest,
+    authorization: str = Header(None)
+):
+    try:
+        prompt = f"""
+        아래는 사용자의 주간 학습 데이터입니다:
+        - 요일별 학습 시간: {req.study_hours}
+        - 총 학습 시간: {req.total_hours}시간
+        - 나의 집중도: {req.focus_me}%
+        - 또래 평균 집중도: {req.focus_avg}%
+
+        이 데이터를 바탕으로 아래 형식으로 작성하세요:
+        1. 학습 패턴 요약 (2줄)
+        2. 개선 제안 (1줄)
+
+        출력은 JSON 형식으로 반환:
+        {{
+            "summary": "이번 주에는 ~",
+            "suggestion": "다음 주에는 ~"
+        }}
+        """
+
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "너는 일주일간의 학습 데이터를 분석해 요약과 개선점을 제시하는 코치야."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.7,
+            max_tokens=300
+        )
+
+        summary_text = completion.choices[0].message.content.strip()
+        return {"aisummary": summary_text}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"주간 요약 중 오류 발생: {str(e)}")

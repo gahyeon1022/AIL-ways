@@ -236,6 +236,22 @@ typescript: "5"
 > 
 > $ uvicorn server:app --reload                   
 
+#ai 요약서버 실행
+> 루트에서 
+>
+> $ source venv/bin/activate
+> 
+> $ pip install openai
+> .env 파일 생성후 노션의 OPENAI_API_KEY = ~~ 넣기
+> 
+> env 파일을 읽기위해
+> 
+> $ pip install python-dotenv
+> 
+> $ uvicorn apps.ai.summarizer_api:app --host 0.0.0.0 --port 8001
+> 
+> 테스트 → http://localhost:8001/docs
+
 ---
 
 ## ⚠️ 테스트용 코드 주의 (Swagger 전용 감지 로직)
