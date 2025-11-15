@@ -3,10 +3,12 @@ import { callAPIWithAuth } from "@/app/lib/api/http";
 
 export const dynamic = "force-dynamic";
 
-type BoardAnswer = {
+type BoardComment = {
+  commentId?: string | null;
   authorUserId?: string | null;
-  comment?: string | null;
+  content?: string | null;
   createdAt?: string | null;
+  replies?: BoardComment[] | null;
 };
 
 type BoardEntry = {
@@ -16,7 +18,7 @@ type BoardEntry = {
   questionNote?: string | null;
   createdAt?: string | null;
   status?: string | null;
-  boardAnswer?: BoardAnswer | null;
+  comments?: BoardComment[] | null;
 };
 
 type BoardResponse = {
@@ -95,8 +97,8 @@ export default async function QnaEntryPage({ searchParams }: PageProps) {
     }
 
     const questionUser = resolveUser(targetEntry.authorUserId ?? undefined, userMap);
-    const answerUser = resolveUser(targetEntry.boardAnswer?.authorUserId ?? undefined, userMap);
     const actorUser = actor?.userId ? resolveUser(actor.userId, userMap) : null;
+    const participants = Array.from(userMap.values());
 
     return (
       <QnaUI
@@ -109,14 +111,11 @@ export default async function QnaEntryPage({ searchParams }: PageProps) {
         questionAuthorRole={questionUser?.role ?? undefined}
         questionCreatedAt={targetEntry.createdAt ?? undefined}
         status={targetEntry.status ?? "INCOMPLETE"}
-        answerAuthorId={answerUser?.userId ?? undefined}
-        answerAuthorName={answerUser?.userName ?? undefined}
-        answerAuthorRole={answerUser?.role ?? undefined}
-        answerComment={targetEntry.boardAnswer?.comment ?? undefined}
-        answerCreatedAt={targetEntry.boardAnswer?.createdAt ?? undefined}
         actorUserId={actorUser?.userId ?? undefined}
         actorUserName={actorUser?.userName ?? undefined}
         actorUserRole={actorUser?.role ?? undefined}
+        comments={targetEntry.comments ?? []}
+        participants={participants}
       />
     );
   } catch (err) {

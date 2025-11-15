@@ -9,7 +9,7 @@ export async function POST(
   const { boardId, entryId } = context.params;
 
   try {
-    const result = await callAPIWithAuth(`/api/boards/${encodeURIComponent(boardId)}/entries/${encodeURIComponent(entryId)}/answer`, {
+    const result = await callAPIWithAuth(`/api/boards/${encodeURIComponent(boardId)}/entries/${encodeURIComponent(entryId)}/comments`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body,

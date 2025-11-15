@@ -108,7 +108,7 @@ export default function QnaBoardClient({
                     <div className="flex items-center border-r border-gray-200 pl-8 pr-4">
                       <p className="font-semibold text-gray-900">{entry.title}</p>
                     </div>
-                    <p className="flex items-center border-r border-gray-200 px-4 line-clamp-3 whitespace-pre-wrap text-gray-600">{entry.question}</p>
+                    <p className="flex items-center border-r border-gray-200 px-4 line-clamp-1 whitespace-pre-wrap text-gray-600">{entry.question}</p>
                     <div className="flex w-full items-center justify-center px-8">
                       <span
                         className={`inline-flex h-8 w-[55px] items-center justify-center rounded-full text-xs font-semibold ${

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 type ThinCardProps = {
   title: string;
@@ -20,7 +20,7 @@ function ThinCard({ title, children, className = "" }: ThinCardProps) {
 
 const STATUS_LABEL: Record<string, string> = {
   COMPLETED: "해결",
-  INCOMPLETE: "진행 중",
+  INCOMPLETE: "진행중",
 };
 
 const STATUS_CLASS: Record<string, string> = {
@@ -41,6 +41,29 @@ function formatDate(value?: string) {
   });
 }
 
+type Participant = {
+  userId?: string | null;
+  userName?: string | null;
+  role?: string | null;
+};
+
+type BoardCommentDto = {
+  commentId?: string | null;
+  authorUserId?: string | null;
+  content?: string | null;
+  createdAt?: string | null;
+  replies?: BoardCommentDto[] | null;
+};
+
+type CommentView = {
+  commentId: string;
+  authorUserId?: string;
+  authorName: string;
+  authorRole?: string;
+  content: string;
+  createdAt?: string;
+};
+
 type Props = {
   boardId?: string | null;
   entryId?: string | null;
@@ -51,14 +74,11 @@ type Props = {
   questionAuthorRole?: string;
   questionCreatedAt?: string;
   status: string;
-  answerAuthorId?: string;
-  answerAuthorName?: string;
-  answerAuthorRole?: string;
-  answerComment?: string;
-  answerCreatedAt?: string;
   actorUserId?: string;
   actorUserName?: string;
   actorUserRole?: string;
+  comments?: BoardCommentDto[] | null;
+  participants?: Participant[];
 };
 
 function formatBadge(name?: string, role?: string | null) {
@@ -76,25 +96,73 @@ export default function QnaUI({
   questionAuthorRole,
   questionCreatedAt,
   status,
-  answerAuthorId,
-  answerAuthorName,
-  answerAuthorRole,
-  answerComment,
-  answerCreatedAt,
   actorUserId,
   actorUserName,
   actorUserRole,
+  comments,
+  participants,
 }: Props) {
   const [statusState, setStatusState] = useState(status);
   const statusLabel = STATUS_LABEL[statusState] ?? STATUS_LABEL.INCOMPLETE;
   const statusClass = STATUS_CLASS[statusState] ?? STATUS_CLASS.INCOMPLETE;
-  const [answerState, setAnswerState] = useState({
-    authorUserId: answerAuthorId,
-    authorName: answerAuthorName,
-    authorRole: answerAuthorRole,
-    comment: answerComment,
-    createdAt: answerCreatedAt,
-  });
+  const participantMap = useMemo(() => {
+    const map = new Map<string, Participant>();
+    participants?.forEach(participant => {
+      if (participant?.userId) {
+        map.set(participant.userId, participant);
+      }
+    });
+    return map;
+  }, [participants]);
+
+  const resolveParticipant = useCallback(
+    (userId?: string | null) => {
+      if (!userId) {
+        return { name: "알 수 없음", role: undefined };
+      }
+      const info = participantMap.get(userId);
+      return {
+        name: info?.userName ?? userId,
+        role: info?.role ?? undefined,
+      };
+    },
+    [participantMap]
+  );
+
+  const mapComments = useCallback(
+    (input?: BoardCommentDto[] | null) => {
+      if (!input) return [];
+      const rows: CommentView[] = [];
+      const append = (items: BoardCommentDto[]) => {
+        items.forEach(item => {
+          const id =
+            item.commentId ??
+            `comment-${globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
+          const info = resolveParticipant(item.authorUserId);
+          rows.push({
+            commentId: id,
+            authorUserId: item.authorUserId ?? undefined,
+            authorName: info.name,
+            authorRole: info.role,
+            content: item.content ?? "",
+            createdAt: item.createdAt ?? undefined,
+          });
+          if (item.replies && item.replies.length > 0) {
+            append(item.replies);
+          }
+        });
+      };
+      append(input);
+      return rows;
+    },
+    [resolveParticipant]
+  );
+
+  const initialComments = useMemo(() => mapComments(comments), [comments, mapComments]);
+  const [commentsState, setCommentsState] = useState<CommentView[]>(initialComments);
+  useEffect(() => {
+    setCommentsState(initialComments);
+  }, [initialComments]);
   const [commentInput, setCommentInput] = useState("");
   const [pending, setPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -127,19 +195,22 @@ export default function QnaUI({
       }
 
       const updatedEntry = payload?.data?.entries?.find((entry: { entryId: string }) => entry.entryId === entryId);
-      const updatedAnswer = updatedEntry?.boardAnswer ?? {
-        comment: trimmed,
-        authorUserId: updatedEntry?.boardAnswer?.authorUserId ?? actorUserId,
-        createdAt: updatedEntry?.boardAnswer?.createdAt ?? new Date().toISOString(),
-      };
-
-      setAnswerState({
-        authorUserId: updatedAnswer.authorUserId ?? actorUserId,
-        authorName: actorUserName ?? updatedAnswer.authorUserId ?? undefined,
-        authorRole: actorUserRole ?? answerAuthorRole,
-        comment: updatedAnswer.comment ?? trimmed,
-        createdAt: updatedAnswer.createdAt ?? new Date().toISOString(),
-      });
+      if (updatedEntry?.comments) {
+        setCommentsState(mapComments(updatedEntry.comments));
+      } else {
+        const info = resolveParticipant(actorUserId);
+        setCommentsState(prev => [
+          ...prev,
+          {
+            commentId: `temp-${globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)}`,
+            authorUserId: actorUserId ?? undefined,
+            authorName: actorUserName ?? info.name,
+            authorRole: actorUserRole ?? info.role,
+            content: trimmed,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      }
       setCommentInput("");
     } catch (error) {
       const message = error instanceof Error ? error.message : "답변 등록에 실패했습니다.";
@@ -147,7 +218,7 @@ export default function QnaUI({
     } finally {
       setPending(false);
     }
-  }, [actorUserId, actorUserName, actorUserRole, answerAuthorRole, boardId, canSubmit, commentInput, entryId]);
+  }, [actorUserId, actorUserName, actorUserRole, boardId, canSubmit, commentInput, entryId, mapComments, resolveParticipant]);
 
   const handleSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -168,7 +239,6 @@ export default function QnaUI({
   );
 
   const questionAuthorLabel = formatBadge(questionAuthorName ?? questionAuthorId, questionAuthorRole ?? "MENTEE");
-  const answerHeaderTitle = formatBadge(answerState.authorName ?? answerState.authorUserId, answerState.authorRole ?? "MENTOR");
 
   const handleComplete = useCallback(async () => {
     if (!boardId || !entryId || !canComplete) return;
@@ -194,12 +264,9 @@ export default function QnaUI({
 
   return (
     <main className="mx-auto w-full max-w-[960px] space-y-8 px-6 py-12 self-start">
-      <ThinCard title="멘티 질문" className="pt-[4px] -translate-y-4">
+      <ThinCard title={questionAuthorLabel || "질문"} className="pt-[4px] -translate-y-4">
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-            {questionAuthorLabel && <span className="font-semibold text-gray-700">{questionAuthorLabel}</span>}
-            {questionCreatedAt && <span>{formatDate(questionCreatedAt)}</span>}
-          </div>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">{questionCreatedAt && <span>{formatDate(questionCreatedAt)}</span>}</div>
           <p className="min-h-[180px] whitespace-pre-wrap text-[15px] leading-relaxed text-gray-800">{questionNote}</p>
         </div>
         <div className="absolute right-0 top-full translate-y-px">
@@ -213,9 +280,7 @@ export default function QnaUI({
               {completePending ? "처리 중..." : "진행중"}
             </button>
           ) : (
-            <span
-              className={`inline-flex h-8 w-[55px] items-center justify-center rounded-full text-xs font-semibold ${statusClass}`}
-            >
+            <span className={`inline-flex h-8 w-[55px] items-center justify-center rounded-full text-xs font-semibold ${statusClass}`}>
               {statusLabel}
             </span>
           )}
@@ -224,16 +289,18 @@ export default function QnaUI({
 
       {completeError && <p className="text-sm text-red-500">{completeError}</p>}
 
-      {answerState.comment && (
-        <ThinCard title={answerHeaderTitle}>
+      {commentsState.map(comment => (
+        <ThinCard
+          key={comment.commentId}
+          title={formatBadge(comment.authorName, comment.authorRole ?? undefined)}
+          className="bg-white/90"
+        >
           <div className="space-y-3">
-            <div className="text-sm text-gray-500">
-              {answerState.createdAt && <span>{formatDate(answerState.createdAt)}</span>}
-            </div>
-            <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-gray-800">{answerState.comment}</p>
+            <div className="text-sm text-gray-500">{comment.createdAt && <span>{formatDate(comment.createdAt)}</span>}</div>
+            <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-gray-800">{comment.content}</p>
           </div>
         </ThinCard>
-      )}
+      ))}
 
       <form onSubmit={handleSubmit}>
         <div className="flex items-center gap-3 rounded-2xl bg-white/100 p-4 shadow-inner">
