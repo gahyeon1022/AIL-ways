@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
   servlet: # 한글 깨짐 방지
     encoding:
       enabled: true
@@ -12,7 +12,7 @@ spring:
 
   data:
     mongodb:
-      # uri: ${MONGO_DB_URI}
+      #      uri: ${MONGO_DB_URI}
       uri: mongodb://localhost:27017/alpha
 
   mail:
@@ -61,7 +61,7 @@ app:
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: INFO
     org.springframework.web: INFO
     report.service: DEBUG
 
@@ -71,7 +71,7 @@ jwt:
 ai:
   api:
     url: http://127.0.0.1:8001
-    key: ${OPENAI_API_KEY}
+    key: dummy-key
     timeout-seconds: 30
 
   vision: #추가
@@ -81,7 +81,7 @@ ai:
   weekly:
     api:
       url: http://127.0.0.1:8001
-      key: ${OPENAI_API_KEY}
+      key: dummy-key
       timeout-seconds: 45
 
   #ai:
@@ -101,7 +101,7 @@ report:
     timezone: Asia/Seoul
     focus-average: 75
     cron-zone: Asia/Seoul
-    scheduler-enabled: true
+    scheduler-enabled: false
 
 data:
   migrations:
