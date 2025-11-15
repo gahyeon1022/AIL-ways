@@ -168,6 +168,7 @@ export default function QnaUI({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [completePending, setCompletePending] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const formDisabled = !boardId || !entryId;
   const isCompleted = statusState === "COMPLETED";
   const canSubmit = useMemo(
@@ -254,6 +255,7 @@ export default function QnaUI({
         throw new Error(payload?.error?.message ?? "완료 처리에 실패했습니다.");
       }
       setStatusState("COMPLETED");
+      setConfirmOpen(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : "완료 처리에 실패했습니다.";
       setCompleteError(message);
@@ -264,7 +266,7 @@ export default function QnaUI({
 
   return (
     <main className="mx-auto w-full max-w-[960px] space-y-8 px-6 py-12 self-start">
-      <ThinCard title={questionAuthorLabel || "질문"} className="pt-[4px] -translate-y-4">
+      <ThinCard title={questionAuthorLabel || "질문"} className="pt-[4px] -translate-y-4 bg-white/90">
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">{questionCreatedAt && <span>{formatDate(questionCreatedAt)}</span>}</div>
           <p className="min-h-[180px] whitespace-pre-wrap text-[15px] leading-relaxed text-gray-800">{questionNote}</p>
@@ -273,7 +275,7 @@ export default function QnaUI({
           {canComplete ? (
             <button
               type="button"
-              onClick={handleComplete}
+              onClick={() => setConfirmOpen(true)}
               disabled={completePending}
               className={`inline-flex h-8 w-[55px] items-center justify-center rounded-full text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200 disabled:cursor-not-allowed disabled:opacity-70 ${STATUS_CLASS.INCOMPLETE}`}
             >
@@ -324,6 +326,31 @@ export default function QnaUI({
         </div>
         {submitError && <p className="mt-2 text-sm text-red-500">{submitError}</p>}
       </form>
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
+            <h2 className="text-lg font-semibold text-gray-900">질문이 해결되셨습니까?</h2>
+            <p className="mt-2 text-sm text-gray-600">해결로 표시하면 더 이상 댓글을 작성할 수 없습니다.</p>
+            <div className="mt-6 flex justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(false)}
+                className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100"
+              >
+                아니요
+              </button>
+              <button
+                type="button"
+                onClick={handleComplete}
+                disabled={completePending}
+                className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-gray-300"
+              >
+                네
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
