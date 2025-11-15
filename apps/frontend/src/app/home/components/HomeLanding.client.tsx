@@ -4,7 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export default function HomeLanding() {
+type Props = {
+  actorRole?: "MENTOR" | "MENTEE" | null;
+};
+
+export default function HomeLanding({ actorRole }: Props) {
+  const isMentor = actorRole === "MENTOR";
+
+  const preventNavigation = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isMentor) {
+      event.preventDefault();
+    }
+  };
+
   return (
     <div className="text-center">
       <h1 className="relative -mt-[40px] top-[-10px] text-[15rem] font-extrabold tracking-tight text-white drop-shadow">
@@ -35,10 +47,14 @@ export default function HomeLanding() {
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
         >
           <Link
-            href="/mentoring-current?intent=study"
-            className="inline-block rounded-full bg-white/50 px-10 py-4 text-lg font-semibold text-gray-900 shadow-lg transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/70 active:scale-95"
+            href={isMentor ? "#" : "/mentoring-current?intent=study"}
+            onClick={preventNavigation}
+            aria-disabled={isMentor}
+            className={`inline-block rounded-full px-10 py-4 text-lg font-semibold text-gray-900 shadow-lg transition focus:outline-none focus:ring-2 focus:ring-white/70 active:scale-95 ${
+              isMentor ? "cursor-not-allowed bg-white/30 opacity-60" : "bg-white/50 hover:bg-white"
+            }`}
           >
-            학습하러가기
+            {isMentor ? "날개달아주기" : "학습하러가기"}
           </Link>
         </motion.div>
       </div>

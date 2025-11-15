@@ -18,10 +18,15 @@ export default async function HomePage({ searchParams }: PageProps) {
   const hasAuthToken = Boolean(authToken);
 
   let initialConsented = false;
+  let initialActorRole: "MENTOR" | "MENTEE" | null = null;
+  let initialProfileComplete: boolean | null = null;
   if (hasAuthToken) {
     try {
       const profile = await fetchMyProfileAction();
       initialConsented = Array.isArray(profile?.consents) && profile.consents.some(item => item?.agreed);
+      initialActorRole = (profile?.role === "MENTOR" || profile?.role === "MENTEE") ? profile.role : null;
+      initialProfileComplete =
+        Boolean(profile?.role) && Array.isArray(profile?.interests) && profile.interests.length > 0;
     } catch {
       initialConsented = false;
     }
@@ -32,6 +37,8 @@ export default async function HomePage({ searchParams }: PageProps) {
       tokenParam={tokenParam}
       hasAuthToken={hasAuthToken}
       initialConsented={initialConsented}
+      initialActorRole={initialActorRole}
+      initialProfileComplete={initialProfileComplete}
     />
   );
 }

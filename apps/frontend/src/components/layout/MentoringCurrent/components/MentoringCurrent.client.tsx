@@ -18,6 +18,7 @@ type MentoringCurrentClientProps = {
   initialMentors?: MatchCard[];
   initialMentees?: MatchCard[];
   initialPendingMatches: PendingMatchCard[];
+  initialIntent?: string | null; //서버에서 intent를 내려줘서 서버가 그릴때부터 intent가 있도록 함.
 };
 
 type PendingRequest = { matchId: string; mentorUserId: string; status: "PENDING" | "ACCEPTED" | "REJECTED" };
@@ -42,10 +43,14 @@ export default function MentoringCurrentClient({
   initialMentors,
   initialMentees,
   initialPendingMatches,
+  initialIntent,
 }: MentoringCurrentClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const showLearningCTA = searchParams.get("intent") === "study";
+  const intentFromQuery = searchParams.get("intent");
+  const normalizedIntent = (intentFromQuery ?? initialIntent ?? "").toLowerCase();
+  const showLearningCTA = normalizedIntent === "study";
+  const cardOptionsDisabled = normalizedIntent === "board";
   const [mentors, setMentors] = useState<MatchCard[]>(() => normalizeCards(initialMentors ?? []));
   const [mentees, setMentees] = useState<MatchCard[]>(() => normalizeCards(initialMentees ?? []));
   const [pendingMatches, setPendingMatches] = useState<PendingMatchCard[]>(initialPendingMatches);
@@ -70,6 +75,13 @@ export default function MentoringCurrentClient({
     const id = window.setTimeout(() => setError(null), 3500);
     return () => window.clearTimeout(id);
   }, [error]);
+
+  useEffect(() => {
+    if (cardOptionsDisabled) {
+      setActiveMentor(null);
+      setActiveMentee(null);
+    }
+  }, [cardOptionsDisabled]);
 
   useEffect(() => {
     setMentors(normalizeCards(initialMentors ?? []));
@@ -186,8 +198,12 @@ export default function MentoringCurrentClient({
     router.push(`/reports/${type}?${target}=${targetId}`);
   };
 
+  const goBoard = (peerId: string) => {
+    router.push(`/qna-boards?peerId=${encodeURIComponent(peerId)}`);
+  };
+
   const goLearningScreen = (mentor: MatchCard) => {
-    if (!showLearningCTA) return;
+    if (!showLearningCTA || cardOptionsDisabled) return;
     if (!mentor.matchId) {
       setError("선택한 멘토와의 매칭 정보가 없습니다.");
       return;
@@ -201,7 +217,7 @@ export default function MentoringCurrentClient({
   };
 
   return (
-    <div className="relative mx-auto h-[560px] w-full max-w-[1040px] overflow-hidden rounded-2xl bg-[#3a3a3a] p-8 text-white">
+    <div className="relative mx-auto h-[560px] w-full max-w-[1040px] overflow-hidden rounded-2xl bg-[#d6d4e6] p-8 text-white">
       <div className="space-y-2">
         {feedback && <div className="rounded-lg bg-emerald-500/20 px-4 py-2 text-sm text-emerald-100">{feedback}</div>}
         {error && <div className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-100">{error}</div>}
@@ -216,13 +232,17 @@ export default function MentoringCurrentClient({
                   <button
                     key={`${m.id}-${m.matchId ?? ""}`}
                     onClick={() => {
+                      if (cardOptionsDisabled) {
+                        goBoard(m.id);
+                        return;
+                      }
                       setActiveMentor(m);
                       setActiveMentee(null);
                     }}
-                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-white/5 p-6 shadow-inner transition hover:bg-white/10"
+                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-[#c4c0df] p-6 shadow-md transition hover:bg-[#d2cfea] hover:shadow-lg"
                   >
-                    <div className="h-32 w-32 rounded-full bg-gray-300 shadow-inner" />
-                    <span className="mt-4 text-sm font-medium text-white/90">{`${m.name} 멘토`}</span>
+                    <div className="h-32 w-32 rounded-full bg-white shadow-inner" />
+                    <span className="mt-4 text-sm font-medium text-[#1f1c2e]">{`${m.name} 멘토`}</span>
                   </button>
                 ))}
 
@@ -255,13 +275,17 @@ export default function MentoringCurrentClient({
                   <button
                     key={`${m.id}-${m.matchId ?? ""}`}
                     onClick={() => {
+                      if (cardOptionsDisabled) {
+                        goBoard(m.id);
+                        return;
+                      }
                       setActiveMentee(m);
                       setActiveMentor(null);
                     }}
-                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-white/5 p-6 text-center shadow-inner transition hover:bg-white/10"
+                    className="group flex w-full max-w-[180px] flex-col items-center rounded-2xl bg-[#c4c0df] p-6 text-center shadow-md transition hover:bg-[#d2cfea] hover:shadow-lg"
                   >
-                    <div className="h-32 w-32 rounded-full bg-gray-300 shadow-inner" />
-                    <span className="mt-4 text-sm font-medium text-white/90">{`${m.name} 멘티`}</span>
+                    <div className="h-32 w-32 rounded-full bg-white shadow-inner" />
+                    <span className="mt-4 text-sm font-medium text-[#1f1c2e]">{`${m.name} 멘티`}</span>
                   </button>
                 ))}
 
@@ -284,7 +308,7 @@ export default function MentoringCurrentClient({
       {role === "MENTEE" && (
         <button
           onClick={() => setShowAdd(true)}
-          className="absolute bottom-6 right-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#c9d5f4] text-4xl font-bold text-gray-900 shadow-lg transition hover:scale-105"
+          className="absolute bottom-6 right-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#b6b0d8] text-4xl font-bold text-[#1f1c2e] shadow-lg transition hover:bg-[#c6c1e6]"
         >
           +
         </button>
@@ -321,7 +345,7 @@ export default function MentoringCurrentClient({
         </div>
       )}
 
-      {role === "MENTEE" && activeMentor && (
+      {role === "MENTEE" && activeMentor && !cardOptionsDisabled && (
         <>
           <button
             onClick={() => setActiveMentor(null)}
@@ -330,25 +354,28 @@ export default function MentoringCurrentClient({
           <div className="absolute left-6 top-6 z-40 w-64 rounded-2xl bg-white p-6 text-gray-900 shadow-xl">
             <div className="mb-4 text-lg font-semibold">{`${activeMentor.name} 멘토`}</div>
             <div className="grid gap-2">
-              <button
-                onClick={() => goReport("weekly", activeMentor.id, "mentor")}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-sm"
-              >
-                주간 리포트
-              </button>
-              <button
-                onClick={() => goReport("study", activeMentor.id, "mentor")}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-sm"
-              >
-                학습 리포트
-              </button>
-              {showLearningCTA && (
+              {showLearningCTA ? (
                 <button
                   onClick={() => goLearningScreen(activeMentor)}
-                  className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white transition hover:bg-gray-800"
+                  className="rounded-lg bg-gradient-to-r from-[#f9a8d4] via-[#f472b6] to-[#ec4899] px-4 py-2 text-sm text-white shadow-lg transition duration-200 hover:from-[#fdd8e6] hover:via-[#f9a8d4] hover:to-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-inner"
                 >
                   학습 시작
                 </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => goReport("weekly", activeMentor.id, "mentor")}
+                    className="rounded-lg bg-[#fde2e4] px-4 py-2 text-sm text-[#7a3145] shadow-sm transition duration-200 hover:bg-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:bg-[#f9a8d4] active:translate-y-0 active:shadow-inner"
+                  >
+                    주간 리포트
+                  </button>
+                  <button
+                    onClick={() => goReport("study", activeMentor.id, "mentor")}
+                    className="rounded-lg bg-[#fde2e4] px-4 py-2 text-sm text-[#7a3145] shadow-sm transition duration-200 hover:bg-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:bg-[#f9a8d4] active:translate-y-0 active:shadow-inner"
+                  >
+                    학습 리포트
+                  </button>
+                </>
               )}
             </div>
             <button
@@ -361,7 +388,7 @@ export default function MentoringCurrentClient({
         </>
       )}
 
-      {role === "MENTOR" && activeMentee && (
+      {role === "MENTOR" && activeMentee && !cardOptionsDisabled && (
         <>
           <button
             onClick={() => setActiveMentee(null)}
@@ -372,13 +399,13 @@ export default function MentoringCurrentClient({
             <div className="grid gap-2">
               <button
                 onClick={() => goReport("weekly", activeMentee.id, "mentee")}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-sm"
+                className="rounded-lg bg-[#fde2e4] px-4 py-2 text-sm text-[#7a3145] shadow-sm transition duration-200 hover:bg-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:bg-[#f9a8d4] active:translate-y-0 active:shadow-inner"
               >
                 주간 리포트
               </button>
               <button
                 onClick={() => goReport("study", activeMentee.id, "mentee")}
-                className="rounded-lg bg-gray-100 px-4 py-2 text-sm"
+                className="rounded-lg bg-[#fde2e4] px-4 py-2 text-sm text-[#7a3145] shadow-sm transition duration-200 hover:bg-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:bg-[#f9a8d4] active:translate-y-0 active:shadow-inner"
               >
                 학습 리포트
               </button>
