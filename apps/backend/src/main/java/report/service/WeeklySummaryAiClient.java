@@ -24,7 +24,7 @@ public class WeeklySummaryAiClient {
     public WeeklySummaryAiClient(
             WebClient.Builder webClientBuilder,
             @Value("${ai.weekly.api.url:http://127.0.0.1:8001}") String apiUrl,
-            @Value("${ai.weekly.api.key:}") String apiKey,
+            @Value("${OPENAI_API_KEY}") String apiKey,
             @Value("${ai.weekly.api.timeout-seconds:30}") long timeoutSeconds
     ) {
         this.webClient = webClientBuilder

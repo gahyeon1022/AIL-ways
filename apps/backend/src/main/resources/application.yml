@@ -71,7 +71,7 @@ jwt:
 ai:
   api:
     url: http://127.0.0.1:8001
-    key: dummy-key
+    key: ${OPENAI API KEY}
     timeout-seconds: 30
 
   vision: #추가
@@ -81,7 +81,7 @@ ai:
   weekly:
     api:
       url: http://127.0.0.1:8001
-      key: dummy-key
+      key: ${OPENAI API KEY}
       timeout-seconds: 45
 
   #ai:
