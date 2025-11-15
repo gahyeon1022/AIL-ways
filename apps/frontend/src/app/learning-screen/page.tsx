@@ -63,7 +63,6 @@ function LearningScreenContent() {
     null | 'PHONE' | 'LEFT_SEAT' | 'DROWSY'
   >(null);
   const [detectedAt, setDetectedAt] = useState<string | null>(null);
-  const [detectedConf, setDetectedConf] = useState<number | null>(null);
 
   // refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -351,7 +350,6 @@ function LearningScreenContent() {
           if (!isFeedbackModalOpen) {
             setDetectedActivity(detection.hit);
             setDetectedAt(detection.ts);
-            setDetectedConf(detection.confidence);
             setIsFeedbackModalOpen(true);
             paused.current = true;
           }
@@ -396,6 +394,17 @@ function LearningScreenContent() {
     s?.getTracks().forEach((t) => t.stop());
     if (videoRef.current) videoRef.current.srcObject = null;
     setIsModalOpen(false);
+
+    if (sessionId && matchId) {
+      const dateParam = new Date().toISOString();
+      router.push(
+        `/learning-report?matchId=${encodeURIComponent(
+          matchId
+        )}&date=${dateParam}`
+      );
+    } else {
+      router.push('/learning-report');
+    }
   };
 
   const handleSubmitFeedback = (feedback: string) => {
@@ -406,7 +415,7 @@ function LearningScreenContent() {
 
   return (
     <main className="min-h-screen">
-      <section className="w-[80vw] h-[80vh] flex gap-5 mx-auto items-stretch">
+      <section className="w-[80vw] h-[80vh] flex gap-5 mx-auto items-stretch mt-3">
         <QuestionManager
           questions={questions}
           onQuestionsChange={setQuestions}
@@ -435,7 +444,7 @@ function LearningScreenContent() {
         <NoteEditor value={note} onChange={setNote} />
       </section>
 
-      <div className="mt-4 flex justify-center gap-4">
+      <div className="mt-3 flex justify-center">
         <button
           type="button"
           onClick={() => setIsModalOpen(true)}
@@ -461,7 +470,6 @@ function LearningScreenContent() {
         sessionId={sessionId}
         detectedActivity={detectedActivity ?? undefined}
         detectedAt={detectedAt ?? undefined}
-        confidence={detectedConf ?? undefined}
       />
     </main>
   );

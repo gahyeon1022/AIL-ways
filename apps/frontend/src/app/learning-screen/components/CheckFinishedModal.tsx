@@ -2,7 +2,11 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveStudyLog, addQuestionLog, endSession } from '@/app/server-actions/session';
+import {
+  saveStudyLog,
+  addQuestionLog,
+  endSession,
+} from '@/app/server-actions/session';
 
 type ModalProps = {
   open: boolean;
@@ -45,7 +49,6 @@ export default function Modal({
       console.log('세션 종료');
 
       onConfirm();
-      router.push('/learning-report');
     } catch (e) {
       console.error('모달 내 API 실패:', e);
     } finally {
