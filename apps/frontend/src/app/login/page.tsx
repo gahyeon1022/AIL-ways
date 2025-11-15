@@ -27,7 +27,7 @@ export default function LoginPage() {
 
         <button
           onClick={() => setOpen(true)}
-          className="relative item-center justify-center w-full rounded-xl px-4 py-3 font-medium bg-indigo-500 text-white hover:bg-indigo-500 transition inline-block">
+          className="relative item-center justify-center w-full rounded-xl px-4 py-3 font-medium bg-indigo-500 text-white hover:bg-indigo-600 transition inline-block">
           <Image src="/letter.png" alt="letter" width={23} height={23} className="absolute left-5 top-3"/>
           아이디로 로그인
         </button>
