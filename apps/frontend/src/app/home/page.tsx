@@ -29,6 +29,15 @@ export default async function HomePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const tokenParamRaw = params?.token;
   const tokenParam = Array.isArray(tokenParamRaw) ? tokenParamRaw[0] : tokenParamRaw || null;
+  const refreshTokenParamRaw = params?.refreshToken;
+  const refreshTokenParam = Array.isArray(refreshTokenParamRaw)
+    ? refreshTokenParamRaw[0]
+    : refreshTokenParamRaw || null;
+  const refreshExpiresRaw = params?.refreshTokenExpiresIn;
+  const refreshTokenExpiresIn =
+    refreshExpiresRaw !== undefined && refreshExpiresRaw !== null
+      ? Number(Array.isArray(refreshExpiresRaw) ? refreshExpiresRaw[0] : refreshExpiresRaw)
+      : null;
 
   const queryString = buildQueryString(params);
   const currentPath = `/home${queryString}`;
@@ -64,6 +73,12 @@ export default async function HomePage({ searchParams }: PageProps) {
   return (
     <HomeShell
       tokenParam={tokenParam}
+      refreshTokenParam={refreshTokenParam}
+      refreshTokenExpiresIn={
+        typeof refreshTokenExpiresIn === "number" && Number.isFinite(refreshTokenExpiresIn)
+          ? refreshTokenExpiresIn
+          : null
+      }
       hasAuthToken={hasAuthToken}
       initialConsented={initialConsented}
       initialActorRole={initialActorRole}

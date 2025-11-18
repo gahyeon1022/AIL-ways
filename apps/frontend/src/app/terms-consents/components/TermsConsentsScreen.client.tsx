@@ -17,6 +17,8 @@ type ConsentType = (typeof CONSENT_ITEMS)[number]["type"];
 
 type Props = {
   tokenParam: string | null;
+  refreshTokenParam?: string | null;
+  refreshTokenExpiresIn?: number | null;
   hasAuthToken: boolean;
   alreadyConsented: boolean;
 };
@@ -29,13 +31,19 @@ const INITIAL_STATE = CONSENT_ITEMS.reduce(
   {} as Record<ConsentType, boolean>
 );
 
-export default function TermsConsentsScreen({ tokenParam, hasAuthToken, alreadyConsented }: Props) {
+export default function TermsConsentsScreen({
+  tokenParam,
+  refreshTokenParam = null,
+  refreshTokenExpiresIn = null,
+  hasAuthToken,
+  alreadyConsented,
+}: Props) {
   const router = useRouter();
   const [checked, setChecked] = useState<Record<ConsentType, boolean>>(INITIAL_STATE);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitPending, setSubmitPending] = useState(false);
 
-  const [tokenReady, setTokenReady] = useState(hasAuthToken);
+  const [tokenReady, setTokenReady] = useState(hasAuthToken && !tokenParam);
   const [tokenPending, setTokenPending] = useState(false);
   const [tokenError, setTokenError] = useState<string | null>(null);
 
@@ -43,12 +51,15 @@ export default function TermsConsentsScreen({ tokenParam, hasAuthToken, alreadyC
   const [checkingConsent, setCheckingConsent] = useState(false);
 
   useEffect(() => {
-    if (!tokenParam || hasAuthToken || tokenReady) return;
+    if (!tokenParam || tokenReady) return;
     let cancelled = false;
     setTokenPending(true);
     (async () => {
       try {
-        const result = await persistAuthToken(tokenParam);
+        const result = await persistAuthToken(tokenParam, {
+          refreshToken: refreshTokenParam ?? undefined,
+          refreshTokenExpiresIn: refreshTokenExpiresIn ?? undefined,
+        });
         if (!cancelled && result?.ok) {
           setTokenReady(true);
           setTokenError(null);
@@ -69,7 +80,7 @@ export default function TermsConsentsScreen({ tokenParam, hasAuthToken, alreadyC
     return () => {
       cancelled = true;
     };
-  }, [tokenParam, hasAuthToken, tokenReady]);
+  }, [tokenParam, refreshTokenParam, refreshTokenExpiresIn, tokenReady]);
 
   useEffect(() => {
     if (!tokenReady || consented) return;

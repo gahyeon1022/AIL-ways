@@ -31,6 +31,13 @@ export default async function TermsConsentsPage({
   const params = await searchParams;
   const tokenParamRaw = params?.token;
   const tokenParam = Array.isArray(tokenParamRaw) ? tokenParamRaw[0] : tokenParamRaw || null;
+  const refreshTokenRaw = params?.refreshToken;
+  const refreshTokenParam = Array.isArray(refreshTokenRaw) ? refreshTokenRaw[0] : refreshTokenRaw || null;
+  const refreshExpiresRaw = params?.refreshTokenExpiresIn;
+  const refreshTokenExpiresIn =
+    refreshExpiresRaw !== undefined && refreshExpiresRaw !== null
+      ? Number(Array.isArray(refreshExpiresRaw) ? refreshExpiresRaw[0] : refreshExpiresRaw)
+      : null;
   const queryString = buildQueryString(params);
   const currentPath = `/terms-consents${queryString}`;
 
@@ -65,6 +72,12 @@ export default async function TermsConsentsPage({
   return (
     <TermsConsentsScreen
       tokenParam={tokenParam}
+      refreshTokenParam={refreshTokenParam}
+      refreshTokenExpiresIn={
+        typeof refreshTokenExpiresIn === "number" && Number.isFinite(refreshTokenExpiresIn)
+          ? refreshTokenExpiresIn
+          : null
+      }
       hasAuthToken={hasAuthToken}
       alreadyConsented={alreadyConsented}
     />
