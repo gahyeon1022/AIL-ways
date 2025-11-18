@@ -3,6 +3,7 @@ package board.controller;
 import board.domain.Board;
 import board.dto.AddCommentRequest;
 import board.dto.AddEntryRequest;
+import board.dto.UpdateCommentRequest;
 import board.service.BoardService;
 import common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,9 +36,11 @@ public class BoardController {
     @GetMapping("/by-users")
     public ApiResponse<Board> getBoardByUserIds(@RequestParam String userId1,
                                                 @RequestParam String userId2,
+                                                @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "10") int size,
                                                 Authentication auth) {
         String actingUserId = auth.getName();
-        return ApiResponse.ok(boardService.getBoardByUserIds(userId1, userId2, actingUserId));
+        return ApiResponse.ok(boardService.getBoardByUserIds(userId1, userId2, actingUserId, page, size));
     }
 
     @Operation(summary = "보드에 게시글 작성", description = "인증된 사용자가 Q&A 글을 등록합니다.")
@@ -64,6 +67,35 @@ public class BoardController {
                     req.comment(),
                     req.parentCommentId()
             ));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @Operation(summary = "댓글 수정", description = "자신이 작성한 댓글 내용을 수정합니다.")
+    @PatchMapping("/{boardId}/entries/{entryId}/comments/{commentId}")
+    public ApiResponse<Board> updateComment(@PathVariable String boardId,
+                                            @PathVariable String entryId,
+                                            @PathVariable String commentId,
+                                            @RequestBody @Valid UpdateCommentRequest req,
+                                            Authentication auth) {
+        String actingUserId = auth.getName();
+        try {
+            return ApiResponse.ok(boardService.updateCommentOnEntry(boardId, entryId, commentId, actingUserId, req.comment()));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @Operation(summary = "댓글 삭제", description = "자신이 작성한 댓글을 삭제합니다.")
+    @DeleteMapping("/{boardId}/entries/{entryId}/comments/{commentId}")
+    public ApiResponse<Board> deleteComment(@PathVariable String boardId,
+                                            @PathVariable String entryId,
+                                            @PathVariable String commentId,
+                                            Authentication auth) {
+        String actingUserId = auth.getName();
+        try {
+            return ApiResponse.ok(boardService.deleteCommentFromEntry(boardId, entryId, commentId, actingUserId));
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }

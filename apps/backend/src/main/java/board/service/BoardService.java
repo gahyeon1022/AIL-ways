@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -30,11 +33,12 @@ public class BoardService {
 
         // 새로운 질문 번호 계산
         int newEntryNo = (board.getEntries() == null) ? 1 : board.getEntries().size() + 1;
+        String normalizedTitle = stripWrappingBrackets(title);
 
         BoardEntry newEntry = BoardEntry.builder()
                 .entryId(UUID.randomUUID().toString())
                 .authorUserId(authorUserId)
-                .title(title)
+                .title(normalizedTitle)
                 .questionNote(questionNote)
                 .createdAt(Instant.now())
                 .entryNo(newEntryNo) // 질문 번호 설정
@@ -46,7 +50,7 @@ public class BoardService {
         }
         board.getEntries().add(newEntry);
 
-        return boardRepository.save(board);
+        return sanitizeBoard(boardRepository.save(board));
     }
 
     @Transactional
@@ -88,7 +92,63 @@ public class BoardService {
             parent.getReplies().add(newComment);
         }
 
-        return boardRepository.save(board);
+        return sanitizeBoard(boardRepository.save(board));
+    }
+
+    @Transactional
+    public Board updateCommentOnEntry(String boardId, String entryId, String commentId, String actingUserId, String updatedContent) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("Board not found: " + boardId));
+
+        if (!board.getMemberUserIds().contains(actingUserId)) {
+            throw new IllegalStateException("You are not a member of this board.");
+        }
+
+        BoardEntry entry = board.getEntries().stream()
+                .filter(e -> e.getEntryId().equals(entryId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Entry not found: " + entryId));
+
+        if (entry.getComments() == null || entry.getComments().isEmpty()) {
+            throw new IllegalArgumentException("No comments exist for this entry.");
+        }
+
+        BoardComment target = findComment(entry.getComments(), commentId);
+        if (target == null) {
+            throw new IllegalArgumentException("Comment not found: " + commentId);
+        }
+        if (!actingUserId.equals(target.getAuthorUserId())) {
+            throw new IllegalStateException("You can only edit your own comment.");
+        }
+
+        target.setContent(updatedContent);
+        return sanitizeBoard(boardRepository.save(board));
+    }
+
+    @Transactional
+    public Board deleteCommentFromEntry(String boardId, String entryId, String commentId, String actingUserId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("Board not found: " + boardId));
+
+        if (!board.getMemberUserIds().contains(actingUserId)) {
+            throw new IllegalStateException("You are not a member of this board.");
+        }
+
+        BoardEntry entry = board.getEntries().stream()
+                .filter(e -> e.getEntryId().equals(entryId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Entry not found: " + entryId));
+
+        if (entry.getComments() == null || entry.getComments().isEmpty()) {
+            throw new IllegalArgumentException("No comments exist for this entry.");
+        }
+
+        boolean removed = removeComment(entry.getComments(), commentId, actingUserId);
+        if (!removed) {
+            throw new IllegalArgumentException("Comment not found: " + commentId);
+        }
+
+        return sanitizeBoard(boardRepository.save(board));
     }
 
     @Transactional(readOnly = true)
@@ -100,7 +160,7 @@ public class BoardService {
             throw new IllegalStateException("You do not have permission to view this board.");
         }
 
-        return board;
+        return sanitizeBoard(board);
     }
 
     /**
@@ -108,7 +168,7 @@ public class BoardService {
      * 이 메서드에서 findByPairKey가 사용됩니다.
      */
     @Transactional(readOnly = true)
-    public Board getBoardByUserIds(String userId1, String userId2, String actingUserId) {
+    public Board getBoardByUserIds(String userId1, String userId2, String actingUserId, int page, int size) {
         // 요청자가 해당 게시판의 멤버인지 권한 확인
         if (!actingUserId.equals(userId1) && !actingUserId.equals(userId2)) {
             throw new IllegalStateException("You do not have permission to view this board.");
@@ -124,8 +184,11 @@ public class BoardService {
         }
         String pairKey = id1 + "::" + id2;
 
-        return boardRepository.findByPairKey(pairKey)
+        Board board = boardRepository.findByPairKey(pairKey)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found for the given users."));
+        Board sanitized = sanitizeBoard(board);
+        sanitized.setEntries(paginateEntries(sanitized.getEntries(), page, size));
+        return sanitized;
     }
 
     @Transactional
@@ -147,7 +210,7 @@ public class BoardService {
         }
 
         entry.setStatus(EntryStatus.COMPLETED);
-        return boardRepository.save(board);
+        return sanitizeBoard(boardRepository.save(board));
     }
 
     private BoardComment findComment(Iterable<BoardComment> comments, String commentId) {
@@ -164,5 +227,67 @@ public class BoardService {
             }
         }
         return null;
+    }
+
+    private boolean removeComment(List<BoardComment> comments, String commentId, String actingUserId) {
+        if (comments == null) {
+            return false;
+        }
+        Iterator<BoardComment> iterator = comments.iterator();
+        while (iterator.hasNext()) {
+            BoardComment comment = iterator.next();
+            if (comment.getCommentId().equals(commentId)) {
+                if (!actingUserId.equals(comment.getAuthorUserId())) {
+                    throw new IllegalStateException("You can only delete your own comment.");
+                }
+                iterator.remove();
+                return true;
+            }
+            if (removeComment(comment.getReplies(), commentId, actingUserId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Board sanitizeBoard(Board board) {
+        if (board == null) {
+            return null;
+        }
+        board.setTitle(stripWrappingBrackets(board.getTitle()));
+        if (board.getEntries() != null) {
+            board.getEntries().forEach(entry -> entry.setTitle(stripWrappingBrackets(entry.getTitle())));
+        }
+        return board;
+    }
+
+    private List<BoardEntry> paginateEntries(List<BoardEntry> entries, int page, int size) {
+        if (entries == null || entries.isEmpty()) {
+            return Collections.emptyList();
+        }
+        int safeSize = size > 0 ? size : DEFAULT_PAGE_SIZE;
+        int safePage = Math.max(page, 0);
+        int fromIndex = safePage * safeSize;
+        if (fromIndex >= entries.size()) {
+            return Collections.emptyList();
+        }
+        int toIndex = Math.min(entries.size(), fromIndex + safeSize);
+        return new ArrayList<>(entries.subList(fromIndex, toIndex));
+    }
+
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
+    private String stripWrappingBrackets(String input) {
+        if (input == null) {
+            return null;
+        }
+        String trimmed = input.trim();
+        if (trimmed.length() >= 2 && trimmed.startsWith("[") && trimmed.endsWith("]")) {
+            String unwrapped = trimmed.substring(1, trimmed.length() - 1).trim();
+            if (!unwrapped.isEmpty()) {
+                return unwrapped;
+            }
+        }
+        return trimmed;
     }
 }
