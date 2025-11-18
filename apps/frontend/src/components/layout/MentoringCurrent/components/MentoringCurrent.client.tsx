@@ -308,9 +308,9 @@ export default function MentoringCurrentClient({
       {role === "MENTEE" && (
         <button
           onClick={() => setShowAdd(true)}
-          className="absolute bottom-6 right-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#b6b0d8] text-4xl font-bold text-[#1f1c2e] shadow-lg transition hover:bg-[#c6c1e6]"
+          className="absolute bottom-6 right-6 flex h-20 w-20 items-center justify-center rounded-full bg-[#b6b0d8] text-[#1f1c2e] shadow-lg transition hover:bg-[#c6c1e6]"
         >
-          +
+          <span className="text-5xl font-semibold leading-none -translate-y-[3px]">+</span>
         </button>
       )}
 
