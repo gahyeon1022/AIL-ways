@@ -9,6 +9,7 @@ import report.domain.MentorFeedback;
 import report.domain.Report;
 import report.repository.ReportRepository;
 import session.domain.StudySession;
+import session.service.StudySessionMetrics;
 import java.util.stream.Collectors;
 
 
@@ -43,11 +44,16 @@ public class ReportService {
                 .collect(Collectors.toList());
 
         // 5. 변환된 데이터를 바탕으로 새로운 Report 객체를 생성합니다.
+        DurationSnapshot durationSnapshot = calculateDurations(endedSession);
+
         Report report = Report.builder()
                 .matchId(endedSession.getMatchId())
                 .menteeUserId(endedSession.getMenteeUserId())
                 .aiSummary(summary) // AI가 생성한 요약문을 저장
                 .distractionLogs(reportDistractionLogs)
+                .totalStudyMinutes(durationSnapshot.totalMinutes())
+                .distractionMinutes(durationSnapshot.distractionMinutes())
+                .netStudyMinutes(durationSnapshot.netMinutes())
                 .createdAt(Instant.now())
                 .build();
 
@@ -141,5 +147,23 @@ public class ReportService {
                 .detectionType(sessionLog.getDetectionType())
                 .selfFeedback(reportSelfFeedback)
                 .build();
+    }
+
+    private DurationSnapshot calculateDurations(StudySession session) {
+        double totalMinutes = roundToOneDecimal(StudySessionMetrics.calculateTotalMinutes(session));
+        if (totalMinutes <= 0) {
+            return new DurationSnapshot(null, null, null);
+        }
+
+        double distractionMinutes = roundToOneDecimal(StudySessionMetrics.calculateDistractionMinutes(session));
+        double netMinutes = roundToOneDecimal(Math.max(0.0, totalMinutes - distractionMinutes));
+        return new DurationSnapshot(totalMinutes, distractionMinutes, netMinutes);
+    }
+
+    private double roundToOneDecimal(double value) {
+        return Math.round(value * 10.0) / 10.0;
+    }
+
+    private record DurationSnapshot(Double totalMinutes, Double distractionMinutes, Double netMinutes) {
     }
 }
