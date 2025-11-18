@@ -23,7 +23,7 @@ export default function HomeLanding({ actorRole }: Props) {
         AIL-ways
       </h1>
 
-      <div className="relative -top-5 mt-3 flex items-baseline justify-center gap-2 text-2xl text-white/90">
+      <div className="relative -top-5 mt-3 flex items-baseline justify-center gap-2 text-2xl text-white/90 font-medium">
         <Image
           src="/wing_left.png"
           alt="왼쪽 날개"
@@ -31,7 +31,7 @@ export default function HomeLanding({ actorRole }: Props) {
           height={100}
           className="relative left-3 top-4"
         />
-        학습에 날개를 달아보세요!
+        학습에 날개를 달아보세요
         <Image
           src="/wing_right.png"
           alt="오른쪽 날개"
@@ -54,7 +54,7 @@ export default function HomeLanding({ actorRole }: Props) {
               isMentor ? "cursor-not-allowed bg-white/30 opacity-60" : "bg-white/50 hover:bg-white"
             }`}
           >
-            {isMentor ? "날개달아주기" : "학습하러가기"}
+            {isMentor ? "날개달아주기" : "날개달러가기"}
           </Link>
         </motion.div>
       </div>
