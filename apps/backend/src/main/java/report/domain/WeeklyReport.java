@@ -31,6 +31,7 @@ public class WeeklyReport {
 
     private Map<String, Double> studyHours;
     private double totalHours;
+    private double netStudyHours;
     private int focusMe;
     private int focusAvg;
 

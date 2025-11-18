@@ -22,5 +22,10 @@ public class BoardComment {
     private Instant createdAt;
 
     @Builder.Default
+    private boolean deleted = false;
+
+    private Instant deletedAt;
+
+    @Builder.Default
     private List<BoardComment> replies = new ArrayList<>();
 }
