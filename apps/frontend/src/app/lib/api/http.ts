@@ -119,10 +119,94 @@ export function callAPI<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 /** 보호 API(인증 필요). Authorization만 부여해 callAPI로 위임 */
+type AuthTokenBundle = {
+  accessToken: string;
+  refreshToken?: string;
+  refreshTokenExpiresIn?: number;
+};
+
+const ACCESS_COOKIE_MAX_AGE = 60 * 60; // 1시간
+
+function persistAccessCookie(jar: ReturnType<typeof cookies>, token: string) {
+  jar.set({
+    name: "AUTH_TOKEN",
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: ACCESS_COOKIE_MAX_AGE,
+  });
+}
+
+function persistRefreshCookie(
+  jar: ReturnType<typeof cookies>,
+  refreshToken: string,
+  refreshTokenExpiresIn?: number
+) {
+  const maxAge =
+    typeof refreshTokenExpiresIn === "number" && refreshTokenExpiresIn > 0
+      ? refreshTokenExpiresIn
+      : 60 * 60 * 24 * 7;
+
+  jar.set({
+    name: "REFRESH_TOKEN",
+    value: refreshToken,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge,
+  });
+}
+
+async function refreshAuthToken(jar: ReturnType<typeof cookies>): Promise<string | null> {
+  const refreshToken = jar.get("REFRESH_TOKEN")?.value;
+  if (!refreshToken) {
+    return null;
+  }
+
+  try {
+    const data = await callAPI<AuthTokenBundle>("/api/auth/token/refresh", {
+      method: "POST",
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!data?.accessToken) {
+      throw new BackendError(500, "토큰 재발급 실패");
+    }
+    persistAccessCookie(jar, data.accessToken);
+    if (data.refreshToken) {
+      persistRefreshCookie(jar, data.refreshToken, data.refreshTokenExpiresIn);
+    }
+    return data.accessToken;
+  } catch {
+    jar.delete("AUTH_TOKEN");
+    jar.delete("REFRESH_TOKEN");
+    return null;
+  }
+}
+
 export async function callAPIWithAuth<T>(path: string, init?: RequestInit): Promise<T> {
   const jar = await cookies(); //
-  const token = jar.get("AUTH_TOKEN")?.value;
-  if (!token) throw new BackendError(401, "인증 필요(로그인하세요)", "UNAUTHORIZED");
+  let token = jar.get("AUTH_TOKEN")?.value;
 
-  return request<T>(path, init, token);
+  if (!token) {
+    token = await refreshAuthToken(jar);
+  }
+
+  if (!token) {
+    throw new BackendError(401, "인증 필요(로그인하세요)", "UNAUTHORIZED");
+  }
+
+  try {
+    return await request<T>(path, init, token);
+  } catch (err) {
+    if (err instanceof BackendError && err.status === 401) {
+      const refreshed = await refreshAuthToken(jar);
+      if (refreshed) {
+        return request<T>(path, init, refreshed);
+      }
+    }
+    throw err;
+  }
 }

@@ -30,6 +30,11 @@ type LoginDTO = {
   refreshTokenExpiresIn?: number; // (초)
 };
 
+type PersistOptions = {
+  refreshToken?: string;
+  refreshTokenExpiresIn?: number;
+};
+
 // 로그인
 export async function loginAction(formData: FormData) {
   const userId = String(formData.get("userId") ?? "");
@@ -47,36 +52,10 @@ export async function loginAction(formData: FormData) {
       throw new Error(`지원하지 않는 토큰 타입: ${data.tokenType}`);
     }
 
-    const jar = await cookies();
-
-    // access token (HttpOnly 쿠키로 Next 서버가 관리)
-    jar.set({
-      name: "AUTH_TOKEN",
-      value: data.accessToken,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60, // 1시간
+    await persistAuthToken(data.accessToken, {
+      refreshToken: data.refreshToken,
+      refreshTokenExpiresIn: data.refreshTokenExpiresIn,
     });
-
-    // refresh token (있을 때만)
-    if (data.refreshToken) {
-      const rtMaxAge =
-        typeof data.refreshTokenExpiresIn === "number" && data.refreshTokenExpiresIn > 0
-          ? data.refreshTokenExpiresIn
-          : 60 * 60 * 24 * 30; // 기본 30일
-
-      jar.set({
-        name: "REFRESH_TOKEN",
-        value: data.refreshToken,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: rtMaxAge,
-      });
-    }
 
     return { ok: true, msg: "로그인 성공", data: { userId: data.userId } };
   } catch (e: unknown) {
@@ -104,7 +83,7 @@ export async function logoutAction() {
   return { ok: true, msg: "로그아웃 완료" };
 }
 
-export async function persistAuthToken(token: string) {
+export async function persistAuthToken(token: string, options?: PersistOptions) {
   if (!token) throw new Error("토큰이 필요합니다.");
   const jar = await cookies();
   jar.set({
@@ -116,6 +95,23 @@ export async function persistAuthToken(token: string) {
     path: "/",
     maxAge: 60 * 60,
   });
+
+  if (options?.refreshToken) {
+    const refreshMaxAge =
+      typeof options.refreshTokenExpiresIn === "number" && options.refreshTokenExpiresIn > 0
+        ? options.refreshTokenExpiresIn
+        : 60 * 60 * 24 * 7;
+    jar.set({
+      name: "REFRESH_TOKEN",
+      value: options.refreshToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: refreshMaxAge,
+    });
+  }
+
   return { ok: true };
 }
 
