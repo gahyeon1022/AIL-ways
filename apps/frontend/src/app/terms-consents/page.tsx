@@ -7,6 +7,22 @@ type SearchParamsPromise = Promise<Record<string, string | string[] | undefined>
 
 export const dynamic = "force-dynamic";
 
+function buildQueryString(params?: Record<string, string | string[] | undefined>) {
+  if (!params) return "";
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach(v => {
+        if (typeof v === "string") qs.append(key, v);
+      });
+    } else if (typeof value === "string") {
+      qs.set(key, value);
+    }
+  });
+  const result = qs.toString();
+  return result ? `?${result}` : "";
+}
+
 export default async function TermsConsentsPage({
   searchParams,
 }: {
@@ -15,9 +31,24 @@ export default async function TermsConsentsPage({
   const params = await searchParams;
   const tokenParamRaw = params?.token;
   const tokenParam = Array.isArray(tokenParamRaw) ? tokenParamRaw[0] : tokenParamRaw || null;
+  const refreshTokenRaw = params?.refreshToken;
+  const refreshTokenParam = Array.isArray(refreshTokenRaw) ? refreshTokenRaw[0] : refreshTokenRaw || null;
+  const refreshExpiresRaw = params?.refreshTokenExpiresIn;
+  const refreshTokenExpiresIn =
+    refreshExpiresRaw !== undefined && refreshExpiresRaw !== null
+      ? Number(Array.isArray(refreshExpiresRaw) ? refreshExpiresRaw[0] : refreshExpiresRaw)
+      : null;
+  const queryString = buildQueryString(params);
+  const currentPath = `/terms-consents${queryString}`;
 
   const cookieStore = await cookies();
   const authToken = cookieStore.get("AUTH_TOKEN")?.value ?? null;
+  const refreshToken = cookieStore.get("REFRESH_TOKEN")?.value ?? null;
+
+  if (!authToken && !tokenParam && refreshToken) {
+    const next = encodeURIComponent(currentPath);
+    redirect(`/refresh-session?next=${next}`);
+  }
   const hasAuthToken = Boolean(authToken);
 
   let alreadyConsented = false;
@@ -41,6 +72,12 @@ export default async function TermsConsentsPage({
   return (
     <TermsConsentsScreen
       tokenParam={tokenParam}
+      refreshTokenParam={refreshTokenParam}
+      refreshTokenExpiresIn={
+        typeof refreshTokenExpiresIn === "number" && Number.isFinite(refreshTokenExpiresIn)
+          ? refreshTokenExpiresIn
+          : null
+      }
       hasAuthToken={hasAuthToken}
       alreadyConsented={alreadyConsented}
     />

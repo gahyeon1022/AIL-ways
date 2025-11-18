@@ -78,8 +78,8 @@ public class SecurityConfig {
                             DefaultOAuth2User oAuth2User = (DefaultOAuth2User) auth.getPrincipal();
                             // ✅ 신규 유저 여부 확인
                             boolean isNewUser = kakaoService.upsertUser(oAuth2User);
-                            // ✅ 이메일 추출
-                            Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
+                            Map<String, Object> attributes = oAuth2User.getAttributes();
+                            Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
                             String email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
                             // ✅ JWT 생성
                             String accessToken = jwtUtil.generateToken(email);

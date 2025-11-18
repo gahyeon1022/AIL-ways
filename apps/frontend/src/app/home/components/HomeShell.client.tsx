@@ -8,6 +8,8 @@ import { fetchMyProfileAction } from "@/app/server-actions/select";
 
 type Props = {
   tokenParam: string | null;
+  refreshTokenParam?: string | null;
+  refreshTokenExpiresIn?: number | null;
   hasAuthToken: boolean;
   initialConsented: boolean;
   initialActorRole?: "MENTOR" | "MENTEE" | null;
@@ -16,13 +18,15 @@ type Props = {
 
 export default function HomeShell({
   tokenParam,
+  refreshTokenParam = null,
+  refreshTokenExpiresIn = null,
   hasAuthToken,
   initialConsented,
   initialActorRole,
   initialProfileComplete,
 }: Props) {
   const router = useRouter();
-  const [tokenReady, setTokenReady] = useState(hasAuthToken);
+  const [tokenReady, setTokenReady] = useState(hasAuthToken && !tokenParam);
   const [tokenPending, setTokenPending] = useState(false);
   const [consented, setConsented] = useState(initialConsented);
   const [actorRole, setActorRole] = useState<"MENTOR" | "MENTEE" | null>(initialActorRole ?? null);
@@ -31,12 +35,15 @@ export default function HomeShell({
   );
 
   useEffect(() => {
-    if (!tokenParam || hasAuthToken || tokenReady) return;
+    if (!tokenParam || tokenReady) return;
     let cancelled = false;
     setTokenPending(true);
     (async () => {
       try {
-        const result = await persistAuthToken(tokenParam);
+        const result = await persistAuthToken(tokenParam, {
+          refreshToken: refreshTokenParam ?? undefined,
+          refreshTokenExpiresIn: refreshTokenExpiresIn ?? undefined,
+        });
         if (!cancelled && result?.ok) {
           setTokenReady(true);
         }
@@ -52,7 +59,7 @@ export default function HomeShell({
     return () => {
       cancelled = true;
     };
-  }, [tokenParam, hasAuthToken, tokenReady, router]);
+  }, [tokenParam, refreshTokenParam, refreshTokenExpiresIn, tokenReady, router]);
 
   useEffect(() => {
     if (!tokenReady || consented) return;

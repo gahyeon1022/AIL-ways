@@ -10,12 +10,8 @@ type Props = {
 
 export default function HomeLanding({ actorRole }: Props) {
   const isMentor = actorRole === "MENTOR";
-
-  const preventNavigation = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isMentor) {
-      event.preventDefault();
-    }
-  };
+  const buttonClass =
+    "inline-block rounded-full px-10 py-4 text-lg font-semibold text-gray-900 shadow-lg transition focus:outline-none focus:ring-2 focus:ring-white/70 active:scale-95 bg-white/50 hover:bg-white";
 
   return (
     <div className="text-center">
@@ -23,7 +19,7 @@ export default function HomeLanding({ actorRole }: Props) {
         AIL-ways
       </h1>
 
-      <div className="relative -top-5 mt-3 flex items-baseline justify-center gap-2 text-2xl text-white/90">
+      <div className="relative -top-5 mt-3 flex items-baseline justify-center gap-2 text-2xl text-white/90 font-medium">
         <Image
           src="/wing_left.png"
           alt="왼쪽 날개"
@@ -31,7 +27,7 @@ export default function HomeLanding({ actorRole }: Props) {
           height={100}
           className="relative left-3 top-4"
         />
-        학습에 날개를 달아보세요!
+        {isMentor ? "학습에 날개를 달아주세요" : "학습에 날개를 달아보세요"}
         <Image
           src="/wing_right.png"
           alt="오른쪽 날개"
@@ -47,14 +43,10 @@ export default function HomeLanding({ actorRole }: Props) {
           transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
         >
           <Link
-            href={isMentor ? "#" : "/mentoring-current?intent=study"}
-            onClick={preventNavigation}
-            aria-disabled={isMentor}
-            className={`inline-block rounded-full px-10 py-4 text-lg font-semibold text-gray-900 shadow-lg transition focus:outline-none focus:ring-2 focus:ring-white/70 active:scale-95 ${
-              isMentor ? "cursor-not-allowed bg-white/30 opacity-60" : "bg-white/50 hover:bg-white"
-            }`}
+            href={isMentor ? "/mentoring-current?intent=feedback" : "/mentoring-current?intent=study"}
+            className={buttonClass}
           >
-            {isMentor ? "날개달아주기" : "학습하러가기"}
+            {isMentor ? "날개달아주기" : "날개달러가기"}
           </Link>
         </motion.div>
       </div>

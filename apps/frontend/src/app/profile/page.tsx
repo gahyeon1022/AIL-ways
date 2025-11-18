@@ -27,7 +27,14 @@ export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
   const jar = await cookies();
-  if (!jar.get("AUTH_TOKEN")) redirect("/login");
+  const authToken = jar.get("AUTH_TOKEN")?.value ?? null;
+  const refreshToken = jar.get("REFRESH_TOKEN")?.value ?? null;
+  if (!authToken) {
+    if (refreshToken) {
+      redirect(`/refresh-session?next=${encodeURIComponent("/profile")}`);
+    }
+    redirect("/login");
+  }
 
   let profile: ProfileDTO | null = null;
   try {
