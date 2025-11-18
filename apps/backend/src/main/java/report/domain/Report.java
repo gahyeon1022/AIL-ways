@@ -25,5 +25,9 @@ public class Report {
     private List<DistractionLog> distractionLogs; // '딴짓 로그' 목록
     private MentorFeedback mentorFeedback;        // 이 보고서에 대한 멘토의 최종 피드백
 
+    private Double totalStudyMinutes;   // 전체 학습 시간(분)
+    private Double distractionMinutes;  // 딴짓에 소비한 시간(분)
+    private Double netStudyMinutes;     // 순 공부 시간(분)
+
     private Instant createdAt;   // 학습 종료 및 보고서 생성 시각
 }

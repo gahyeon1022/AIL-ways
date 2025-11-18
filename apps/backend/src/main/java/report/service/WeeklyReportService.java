@@ -12,9 +12,9 @@ import report.repository.WeeklyReportRepository;
 import session.domain.DistractionLog;
 import session.domain.StudySession;
 import session.repository.StudySessionRepository;
+import session.service.StudySessionMetrics;
 
 import java.time.DayOfWeek;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -160,6 +160,7 @@ public class WeeklyReportService {
                     .weekEnd(endInstant)
                     .studyHours(aggregate.studyHours())
                     .totalHours(aggregate.totalHours())
+                    .netStudyHours(aggregate.totalHours())
                     .focusMe(aggregate.focusMe())
                     .focusAvg(aggregate.focusAvg())
                     .aiSummary(aiSummary)
@@ -194,17 +195,16 @@ public class WeeklyReportService {
         int distractionCount = 0;
 
         for (StudySession session : sessions) {
-            Duration duration = Duration.between(session.getStartedAt(), session.getEndedAt());
-            if (duration.isNegative() || duration.isZero()) {
+            double effectiveMinutes = StudySessionMetrics.calculateNetMinutes(session);
+            if (effectiveMinutes <= 0) {
                 continue;
             }
-            double durationMinutes = duration.toMillis() / 60000.0;
-            totalMinutes += durationMinutes;
+            totalMinutes += effectiveMinutes;
 
             ZonedDateTime localStart = session.getStartedAt().atZone(zoneId);
             String dayLabel = DAY_LABELS.get(localStart.getDayOfWeek());
             if (dayLabel != null) {
-                studyHours.merge(dayLabel, durationMinutes / 60.0, Double::sum);
+                studyHours.merge(dayLabel, effectiveMinutes / 60.0, Double::sum);
             }
 
             distractionCount += countDistractions(session);
@@ -231,6 +231,7 @@ public class WeeklyReportService {
         List<DistractionLog> logs = session.getDistractionLogs();
         return logs == null ? 0 : logs.size();
     }
+
 
     private double roundToOneDecimal(double value) {
         return Math.round(value * 10.0) / 10.0;

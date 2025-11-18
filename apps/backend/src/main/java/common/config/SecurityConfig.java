@@ -2,6 +2,7 @@ package common.config; //social + local integration
 
 
 
+import auth.local.service.RefreshTokenService;
 import auth.social.kakao.service.KakaoService;
 import common.security.jwt.JwtAuthenticationFilter;
 import common.security.jwt.JwtUtil;
@@ -17,8 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder; // [ADD]
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 @Configuration
@@ -28,6 +31,7 @@ public class SecurityConfig {
     private final KakaoService kakaoService; //
     private final JwtUtil jwtUtil;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RefreshTokenService refreshTokenService;
 
     @Bean
 
@@ -78,13 +82,27 @@ public class SecurityConfig {
                             Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
                             String email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
                             // ✅ JWT 생성
-                            String token = jwtUtil.generateToken(email);
-                            // ✅ 신규 / 기존 유저에 따라 리다이렉트 분기
-                            if (isNewUser) {
-                                res.sendRedirect("http://localhost:3000/terms-consents?token=" + token);
-                            } else {
-                                res.sendRedirect("http://localhost:3000/home?token=" + token);
-                            }
+                            String accessToken = jwtUtil.generateToken(email);
+                            String refreshToken = jwtUtil.generateRefreshToken(email);
+                            refreshTokenService.storeRefreshToken(refreshToken, email);
+
+                            Long refreshTtl = jwtUtil.getRemainingTime(refreshToken);
+                            long refreshExpiresIn = refreshTtl != null && refreshTtl > 0
+                                    ? TimeUnit.MILLISECONDS.toSeconds(refreshTtl)
+                                    : 0L;
+
+                            String redirectBase = isNewUser
+                                    ? "http://localhost:3000/terms-consents"
+                                    : "http://localhost:3000/home";
+
+                            String redirectUrl = UriComponentsBuilder.fromHttpUrl(redirectBase)
+                                    .queryParam("token", accessToken)
+                                    .queryParam("refreshToken", refreshToken)
+                                    .queryParam("refreshTokenExpiresIn", refreshExpiresIn)
+                                    .build()
+                                    .toUriString();
+
+                            res.sendRedirect(redirectUrl);
                         })
                 )
 

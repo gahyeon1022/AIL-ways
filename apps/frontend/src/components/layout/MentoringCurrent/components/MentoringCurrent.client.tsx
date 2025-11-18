@@ -194,9 +194,18 @@ export default function MentoringCurrentClient({
     }
   };
 
-  const goReport = (type: "weekly" | "study", targetId: string, target: "mentor" | "mentee") => {
-    router.push(`/reports/${type}?${target}=${targetId}`);
-  };
+  const goReport = (type: "weekly" | "study", card: MatchCard, target: "mentor" | "mentee") => {
+  if (type === "study") {
+    if (!card.matchId) {
+      setError("연결된 매칭 정보를 찾을 수 없습니다.");
+      return;
+    }
+    router.push(`/learning-report?matchId=${encodeURIComponent(card.matchId)}`);
+    return;
+  }
+
+  router.push(`/weekly-report?${target}=${encodeURIComponent(card.id)}`);
+};
 
   const goBoard = (peerId: string) => {
     router.push(`/qna-boards?peerId=${encodeURIComponent(peerId)}`);
@@ -364,13 +373,13 @@ export default function MentoringCurrentClient({
               ) : (
                 <>
                   <button
-                    onClick={() => goReport("weekly", activeMentor.id, "mentor")}
+                    onClick={() => goReport("weekly", activeMentor, "mentor")}
                     className="rounded-lg bg-[#fde2e4] px-4 py-2 text-sm text-[#7a3145] shadow-sm transition duration-200 hover:bg-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:bg-[#f9a8d4] active:translate-y-0 active:shadow-inner"
                   >
                     주간 리포트
                   </button>
                   <button
-                    onClick={() => goReport("study", activeMentor.id, "mentor")}
+                    onClick={() => goReport("study", activeMentor, "mentor")}
                     className="rounded-lg bg-[#fde2e4] px-4 py-2 text-sm text-[#7a3145] shadow-sm transition duration-200 hover:bg-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:bg-[#f9a8d4] active:translate-y-0 active:shadow-inner"
                   >
                     학습 리포트
@@ -398,13 +407,13 @@ export default function MentoringCurrentClient({
             <div className="mb-4 text-lg font-semibold">{`${activeMentee.name} 멘티`}</div>
             <div className="grid gap-2">
               <button
-                onClick={() => goReport("weekly", activeMentee.id, "mentee")}
+                onClick={() => goReport("weekly", activeMentee, "mentee")}
                 className="rounded-lg bg-[#fde2e4] px-4 py-2 text-sm text-[#7a3145] shadow-sm transition duration-200 hover:bg-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:bg-[#f9a8d4] active:translate-y-0 active:shadow-inner"
               >
                 주간 리포트
               </button>
               <button
-                onClick={() => goReport("study", activeMentee.id, "mentee")}
+                onClick={() => goReport("study", activeMentee, "mentee")}
                 className="rounded-lg bg-[#fde2e4] px-4 py-2 text-sm text-[#7a3145] shadow-sm transition duration-200 hover:bg-[#fbcfe8] hover:-translate-y-0.5 hover:shadow-lg active:bg-[#f9a8d4] active:translate-y-0 active:shadow-inner"
               >
                 학습 리포트
