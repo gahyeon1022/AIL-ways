@@ -160,6 +160,7 @@ public class WeeklyReportService {
                     .weekEnd(endInstant)
                     .studyHours(aggregate.studyHours())
                     .totalHours(aggregate.totalHours())
+                    .netStudyHours(aggregate.totalHours())
                     .focusMe(aggregate.focusMe())
                     .focusAvg(aggregate.focusAvg())
                     .aiSummary(aiSummary)
