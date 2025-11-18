@@ -31,7 +31,7 @@ export default function HomeLanding({ actorRole }: Props) {
           height={100}
           className="relative left-3 top-4"
         />
-        학습에 날개를 달아보세요
+        {isMentor ? "학습에 날개를 달아주세요" : "학습에 날개를 달아보세요"}
         <Image
           src="/wing_right.png"
           alt="오른쪽 날개"
