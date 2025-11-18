@@ -81,25 +81,10 @@ public class SecurityConfig {
                             Map<String, Object> attributes = oAuth2User.getAttributes();
                             Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
                             String email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
-<<<<<<< ours
-                            Object idAttr = attributes.get("id");
-
-                            String principalId = StringUtils.hasText(email)
-                                    ? email
-                                    : (idAttr != null ? String.valueOf(idAttr) : null);
-                            if (!StringUtils.hasText(principalId)) {
-                                throw new IllegalStateException("카카오 사용자 식별자를 확인할 수 없습니다.");
-                            }
-
-                            String accessToken = jwtUtil.generateToken(principalId);
-                            String refreshToken = jwtUtil.generateRefreshToken(principalId);
-                            refreshTokenService.storeRefreshToken(refreshToken, principalId);
-=======
                             // ✅ JWT 생성
                             String accessToken = jwtUtil.generateToken(email);
                             String refreshToken = jwtUtil.generateRefreshToken(email);
                             refreshTokenService.storeRefreshToken(refreshToken, email);
->>>>>>> theirs
 
                             Long refreshTtl = jwtUtil.getRemainingTime(refreshToken);
                             long refreshExpiresIn = refreshTtl != null && refreshTtl > 0
