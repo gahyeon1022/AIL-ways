@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -117,6 +116,9 @@ public class BoardService {
         if (target == null) {
             throw new IllegalArgumentException("Comment not found: " + commentId);
         }
+        if (target.isDeleted()) {
+            throw new IllegalStateException("This comment has already been deleted.");
+        }
         if (!actingUserId.equals(target.getAuthorUserId())) {
             throw new IllegalStateException("You can only edit your own comment.");
         }
@@ -143,9 +145,17 @@ public class BoardService {
             throw new IllegalArgumentException("No comments exist for this entry.");
         }
 
-        boolean removed = removeComment(entry.getComments(), commentId, actingUserId);
-        if (!removed) {
+        BoardComment target = findComment(entry.getComments(), commentId);
+        if (target == null) {
             throw new IllegalArgumentException("Comment not found: " + commentId);
+        }
+        if (!actingUserId.equals(target.getAuthorUserId())) {
+            throw new IllegalStateException("You can only delete your own comment.");
+        }
+        if (!target.isDeleted()) {
+            target.setDeleted(true);
+            target.setDeletedAt(Instant.now());
+            target.setContent("삭제된 댓글입니다.");
         }
 
         return sanitizeBoard(boardRepository.save(board));
@@ -227,27 +237,6 @@ public class BoardService {
             }
         }
         return null;
-    }
-
-    private boolean removeComment(List<BoardComment> comments, String commentId, String actingUserId) {
-        if (comments == null) {
-            return false;
-        }
-        Iterator<BoardComment> iterator = comments.iterator();
-        while (iterator.hasNext()) {
-            BoardComment comment = iterator.next();
-            if (comment.getCommentId().equals(commentId)) {
-                if (!actingUserId.equals(comment.getAuthorUserId())) {
-                    throw new IllegalStateException("You can only delete your own comment.");
-                }
-                iterator.remove();
-                return true;
-            }
-            if (removeComment(comment.getReplies(), commentId, actingUserId)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private Board sanitizeBoard(Board board) {
