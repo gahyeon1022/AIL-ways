@@ -118,6 +118,30 @@ export default function LearingReportPage() {
     };
   }, [matchId, selectedDate]);
 
+  const activityCounts = useMemo(() => {
+    if (!report)
+      return [
+        { activity: '스마트폰 사용', count: 0 },
+        { activity: '자리 이탈', count: 0 },
+        { activity: '졸음', count: 0 },
+      ];
+    const counts = new Map<string, number>([
+      ['스마트폰 사용', 0],
+      ['자리 이탈', 0],
+      ['졸음 감지', 0],
+    ]);
+
+    report.distractionLogs.forEach((log) => {
+      const key = log.activity;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+
+    return Array.from(counts.entries()).map(([activity, count]) => ({
+      activity,
+      count,
+    }));
+  }, [report]);
+
   useEffect(() => {
     setReport(dailyReports[dailyReportIndex] ?? null);
   }, [dailyReports, dailyReportIndex]);
@@ -194,38 +218,26 @@ export default function LearingReportPage() {
 
             <ReportSection title="학습 행동 분석">
               <div className="w-full min-h-[150px] rounded-lg border bg-white/85 p-5 px-5 py-5">
-                {report?.distractionLogs.length === 0 ? (
-                  <p className="text-gray-500">
-                    분석 가능한 딴짓 로그가 없습니다.
-                  </p>
-                ) : (
+                {
                   <ul className="space-y-3 text-sm text-gray-700">
-                    {report?.distractionLogs.map((log) => (
+                    {activityCounts.map(({ activity, count }) => (
                       <li
-                        key={`${log.detectedAt}-${log.activity}`}
-                        className="rounded-md border border-gray-200 p-3"
+                        key={activity}
+                        className="flex items-center justify-between rounded-md border border-gray-200 px-4 py-3"
                       >
-                        <p className="font-medium">{log.activity}</p>
-                        <p className="text-xs text-gray-500">
-                          감지 시각: {new Date(log.detectedAt).toLocaleString()}
-                        </p>
-                        {log.selfFeedback && (
-                          <p className="mt-1 text-xs text-gray-600">
-                            자기 피드백: {log.selfFeedback.comment}
-                          </p>
-                        )}
+                        <span className="font-medium">
+                          {activity} - {count}회
+                        </span>
                       </li>
                     ))}
                   </ul>
-                )}
+                }
               </div>
             </ReportSection>
 
             <ReportSection title="자기 피드백">
               <div className="w-full min-h-[150px] rounded-lg border bg-white/85 p-5">
-                {selfFeedbacks.length === 0 ? (
-                  <p className="text-gray-500">자기 피드백 기록이 없습니다.</p>
-                ) : (
+                {
                   <ul className="space-y-3 text-gray-700 text-sm">
                     {selfFeedbacks.map((item) => (
                       <li
@@ -240,7 +252,7 @@ export default function LearingReportPage() {
                       </li>
                     ))}
                   </ul>
-                )}
+                }
               </div>
             </ReportSection>
 
