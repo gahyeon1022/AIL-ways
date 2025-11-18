@@ -2,11 +2,13 @@ package auth.local.controller;
 
 import auth.local.dto.LoginRequest;
 import auth.local.dto.LoginResponse;
+import auth.local.dto.RefreshTokenRequest;
 import auth.local.dto.SignUpRequest;
 import auth.local.dto.SignUpResponse;
 import auth.local.service.EmailVerificationService;
 import auth.local.service.LoginService;
 import auth.local.service.LogoutService;
+import auth.local.service.RefreshTokenService;
 import auth.local.service.SignUpService;
 
 import common.security.jwt.JwtUtil;
@@ -20,15 +22,19 @@ import common.dto.ApiResponse;
 import common.dto.ApiError;
 import common.dto.ErrorCode;
 import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import user.dto.ConsentDTO;
 import user.service.UserService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Tag(name = "Auth API", description = "회원가입 / 로그인 / 이메일 인증 등 인증 관련 API")
 @RestController
@@ -41,14 +47,16 @@ public class AuthController {
     private final LoginService loginSvc; // <<< 1. LoginService 필드 추가
     private final JwtUtil jwtUtil; // <<< Add jwtUtil field
     private final LogoutService logoutSvc;
+    private final RefreshTokenService refreshTokenSvc;
     private final UserService userSvc;
     // <<< 2. 생성자 파라미터에 LoginService, JwtUtil 추가
-    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc, JwtUtil jwtUtil,  LogoutService logoutSvc, UserService userSvc) {
+    public AuthController(EmailVerificationService emailVerifSvc, SignUpService signUpSvc, LoginService loginSvc, JwtUtil jwtUtil, LogoutService logoutSvc, RefreshTokenService refreshTokenSvc, UserService userSvc) {
         this.emailVerifSvc = emailVerifSvc;
         this.signUpSvc = signUpSvc;
         this.loginSvc = loginSvc; // <<< 3. 주입받은 loginSvc를 필드에 할당.
         this.jwtUtil = jwtUtil; // <<< Assign jwtUtil
         this.logoutSvc = logoutSvc;
+        this.refreshTokenSvc = refreshTokenSvc;
         this.userSvc = userSvc;
     }
 
@@ -86,10 +94,48 @@ public class AuthController {
     public ApiResponse<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
         LoginResponse result = loginSvc.login(req);
         Map<String, Object> body = new HashMap<>();
-        body.put("accessToken", jwtUtil.generateToken(result.getUserId()));
-        body.put("refreshToken", jwtUtil.generateRefreshToken(result.getUserId()));
+        body.put("accessToken", result.getAccessToken());
+        body.put("refreshToken", result.getRefreshToken());
         body.put("tokenType", "Bearer");
         body.put("userId", result.getUserId());
+        Long refreshTtl = jwtUtil.getRemainingTime(result.getRefreshToken());
+        long refreshExpiresIn = refreshTtl != null && refreshTtl > 0
+                ? TimeUnit.MILLISECONDS.toSeconds(refreshTtl)
+                : TimeUnit.DAYS.toSeconds(7);
+        body.put("refreshTokenExpiresIn", refreshExpiresIn);
+        return ApiResponse.ok(body);
+    }
+
+    @Operation(summary = "토큰 갱신", description = "리프레시 토큰으로 새 액세스/리프레시 토큰을 발급합니다.")
+    @PostMapping("/token/refresh")
+    public ApiResponse<Map<String, Object>> refreshToken(@RequestBody @Valid RefreshTokenRequest req) {
+        String refreshToken = req.refreshToken();
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        String userId = jwtUtil.getUserId(refreshToken);
+        if (!refreshTokenSvc.isRefreshTokenValid(refreshToken, userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이미 사용되었거나 만료된 리프레시 토큰입니다.");
+        }
+
+        refreshTokenSvc.revokeRefreshToken(refreshToken);
+        String newAccessToken = jwtUtil.generateToken(userId);
+        String newRefreshToken = jwtUtil.generateRefreshToken(userId);
+        refreshTokenSvc.storeRefreshToken(newRefreshToken, userId);
+
+        Long refreshTtl = jwtUtil.getRemainingTime(newRefreshToken);
+        long refreshExpiresIn = refreshTtl != null && refreshTtl > 0
+                ? TimeUnit.MILLISECONDS.toSeconds(refreshTtl)
+                : TimeUnit.DAYS.toSeconds(7);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("accessToken", newAccessToken);
+        body.put("refreshToken", newRefreshToken);
+        body.put("tokenType", "Bearer");
+        body.put("userId", userId);
+        body.put("refreshTokenExpiresIn", refreshExpiresIn);
+
         return ApiResponse.ok(body);
     }
 
@@ -120,6 +166,10 @@ public class AuthController {
 
         // LogoutService를 호출하여 토큰을 블랙리스트에 추가
         logoutSvc.logout(token);
+        String refreshToken = extractRefreshToken(request);
+        if (refreshToken != null) {
+            refreshTokenSvc.revokeRefreshToken(refreshToken);
+        }
 
         return ApiResponse.ok(Map.of("message", "성공적으로 로그아웃되었습니다."));
     }
@@ -127,5 +177,18 @@ public class AuthController {
     // DTO (record)
     public record SendCodeReq(@NotBlank @Email String email) {}
     public record VerifyCodeReq(@NotBlank @Email String email, @NotBlank String code) {}
+
+    private String extractRefreshToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if ("REFRESH_TOKEN".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
 
 }
