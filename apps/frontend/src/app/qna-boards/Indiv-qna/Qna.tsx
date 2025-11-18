@@ -19,13 +19,13 @@ function ThinCard({ title, children, className = "" }: ThinCardProps) {
 }
 
 const STATUS_LABEL: Record<string, string> = {
-  COMPLETED: "해결",
-  INCOMPLETE: "진행중",
+  COMPLETED: "해결완료",
+  INCOMPLETE: "해결완료",
 };
 
 const STATUS_CLASS: Record<string, string> = {
-  COMPLETED: "bg-emerald-500 text-white/90",
-  INCOMPLETE: "bg-amber-300 text-white/90",
+  COMPLETED: "bg-slate-600 text-white",
+  INCOMPLETE: "bg-emerald-500 text-white",
 };
 
 function formatDate(value?: string) {
@@ -271,22 +271,6 @@ export default function QnaUI({
           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">{questionCreatedAt && <span>{formatDate(questionCreatedAt)}</span>}</div>
           <p className="min-h-[180px] whitespace-pre-wrap text-[15px] leading-relaxed text-gray-800">{questionNote}</p>
         </div>
-        <div className="absolute right-0 top-full translate-y-px">
-          {canComplete ? (
-            <button
-              type="button"
-              onClick={() => setConfirmOpen(true)}
-              disabled={completePending}
-              className={`inline-flex h-8 w-[55px] items-center justify-center rounded-full text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200 disabled:cursor-not-allowed disabled:opacity-70 ${STATUS_CLASS.INCOMPLETE}`}
-            >
-              {completePending ? "처리 중..." : "진행중"}
-            </button>
-          ) : (
-            <span className={`inline-flex h-8 w-[55px] items-center justify-center rounded-full text-xs font-semibold ${statusClass}`}>
-              {statusLabel}
-            </span>
-          )}
-        </div>
       </ThinCard>
 
       {completeError && <p className="text-sm text-red-500">{completeError}</p>}
@@ -303,6 +287,8 @@ export default function QnaUI({
           </div>
         </ThinCard>
       ))}
+
+    
 
       <form onSubmit={handleSubmit}>
         <div className="flex items-center gap-3 rounded-2xl bg-white/100 p-4 shadow-inner">
@@ -326,6 +312,23 @@ export default function QnaUI({
         </div>
         {submitError && <p className="mt-2 text-sm text-red-500">{submitError}</p>}
       </form>
+
+        <div className="flex justify-center pr-1">
+        {canComplete ? (
+        <button
+            type="button"
+            onClick={() => setConfirmOpen(true)}
+            disabled={completePending}
+            className={`inline-flex h-11 w-[100px] items-center justify-center rounded-full text-s font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200 disabled:cursor-not-allowed disabled:opacity-70 ${STATUS_CLASS.INCOMPLETE}`}
+          >
+            {completePending ? "처리 중..." : "해결완료"}
+          </button>
+        ) : (
+          <span className={`inline-flex h-11 w-[100px] items-center justify-center rounded-full text-s font-semibold ${statusClass}`}>
+            {statusLabel}
+          </span>
+        )}
+      </div>
       {confirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
