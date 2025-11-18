@@ -19,6 +19,7 @@ public class LoginService {
     private final LocalCredentialsRepository credRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     public LoginResponse login(LoginRequest req) {
         // 1) 자격 증명 먼저 조회
@@ -37,6 +38,7 @@ public class LoginService {
         // 4) JWT 발급 (userId 기반)
         String accessToken = jwtUtil.generateToken(user.getUserId());
         String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
+        refreshTokenService.storeRefreshToken(refreshToken, user.getUserId());
 
         return new LoginResponse(accessToken, refreshToken, "Bearer", user.getUserId());
     }
