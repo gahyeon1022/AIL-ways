@@ -57,7 +57,7 @@ export async function loginAction(formData: FormData) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 15, // 15분
+      maxAge: 60 * 60, // 1시간
     });
 
     // refresh token (있을 때만)
@@ -114,7 +114,7 @@ export async function persistAuthToken(token: string) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 15,
+    maxAge: 60 * 60,
   });
   return { ok: true };
 }
