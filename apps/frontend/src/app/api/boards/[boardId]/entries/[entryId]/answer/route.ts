@@ -3,10 +3,10 @@ import { callAPIWithAuth } from "@/app/lib/api/http";
 
 export async function POST(
   request: NextRequest,
-  context: { params: { boardId: string; entryId: string } }
+  { params }: { params: { boardId: string; entryId: string } }
 ) {
   const body = await request.text();
-  const { boardId, entryId } = context.params;
+  const { boardId, entryId } = params;
 
   try {
     const result = await callAPIWithAuth(`/api/boards/${encodeURIComponent(boardId)}/entries/${encodeURIComponent(entryId)}/comments`, {
