@@ -31,7 +31,16 @@ public enum ErrorCode {
     SESSION_ALREADY_ENDED("SESSION_ALREADY_ENDED", "스터디 세션이 이미 종료되었습니다."),
     INVALID_SESSION_STATE("INVALID_SESSION_STATE", "유효하지 않은 세션 상태입니다."),
     STUDY_LOG_NOT_FOUND("STUDY_LOG_NOT_FOUND", "스터디 로그를 찾을 수 없습니다."),
-    DISTRACTION_LOG_NOT_FOUND("DISTRACTION_LOG_NOT_FOUND", "집중 방해 로그를 찾을 수 없습니다.");
+    DISTRACTION_LOG_NOT_FOUND("DISTRACTION_LOG_NOT_FOUND", "집중 방해 로그를 찾을 수 없습니다."),
+
+    // 매칭 관련
+    MATCH_NOT_FOUND("MATCH_NOT_FOUND", "매칭을 찾을 수 없습니다."),
+    MATCH_INVALID_ROLE("MATCH_INVALID_ROLE", "매칭 요청 권한이 없습니다."),
+    MATCH_ALREADY_EXISTS("MATCH_ALREADY_EXISTS", "이미 존재하는 매칭입니다."),
+    MATCH_ALREADY_ACCEPTED("MATCH_ALREADY_ACCEPTED", "이미 수락된 매칭입니다."),
+    MATCH_ALREADY_PENDING("MATCH_ALREADY_PENDING", "이미 대기 중인 매칭입니다."),
+    MATCH_REQUEST_COOLDOWN("MATCH_REQUEST_COOLDOWN", "거절된 요청은 일정 시간이 지난 후 다시 신청할 수 있습니다."),
+    MATCH_SELF_REQUEST("MATCH_SELF_REQUEST", "본인에게 매칭을 보낼 수 없습니다.");
 
     private final String code;
     private final String defaultMessage;

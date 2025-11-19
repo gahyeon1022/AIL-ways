@@ -2,12 +2,14 @@ package match.service;
 
 import board.domain.Board;
 import board.repository.BoardRepository;
+import common.dto.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import match.domain.Match;
 import match.domain.MatchStatus;
 import match.dto.MenteeInfoDTO;
 import match.dto.MentorInfoDTO;
+import match.exception.MatchException;
 import match.repository.MatchRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import user.domain.Role;
@@ -33,22 +35,22 @@ public class MatchService {
     @Transactional
     public Match requestMatch(String menteeUserId, String mentorUserId) {
         if (menteeUserId == null || mentorUserId == null) {
-            throw new IllegalArgumentException("userId가 비어있습니다.");
+            throw new MatchException(ErrorCode.INVALID_REQUEST, "userId가 비어있습니다.");
         }
         if (menteeUserId.equals(mentorUserId)) {
-            throw new IllegalArgumentException("본인에게는 매칭을 보낼 수 없습니다.");
+            throw new MatchException(ErrorCode.MATCH_SELF_REQUEST, "본인에게는 매칭을 보낼 수 없습니다.");
         }
 
         User mentee = userRepo.findByUserId(menteeUserId)
-                .orElseThrow(() -> new IllegalArgumentException("멘티가 존재하지 않습니다."));
+                .orElseThrow(() -> new MatchException(ErrorCode.USER_NOT_FOUND, "존재하지 않는 멘티 아이디입니다."));
         User mentor = userRepo.findByUserId(mentorUserId)
-                .orElseThrow(() -> new IllegalArgumentException("멘토가 존재하지 않습니다."));
+                .orElseThrow(() -> new MatchException(ErrorCode.USER_NOT_FOUND, "존재하지 않는 멘토 아이디입니다."));
 
         if (mentee.getRole() != Role.MENTEE) {
-            throw new IllegalStateException("요청자는 MENTEE 역할이어야 합니다.");
+            throw new MatchException(ErrorCode.MATCH_INVALID_ROLE, "멘티만 매칭을 요청할 수 있습니다.");
         }
         if (mentor.getRole() != Role.MENTOR) {
-            throw new IllegalStateException("대상자는 MENTOR 역할이어야 합니다.");
+            throw new MatchException(ErrorCode.MATCH_INVALID_ROLE, "입력한 아이디는 멘토가 아닙니다.");
         }
 
         String id1 = menteeUserId;
@@ -80,9 +82,9 @@ public class MatchService {
     @Transactional
     public void accept(String matchId, String actingUserId) {
         Match m = matchRepo.findById(matchId)
-                .orElseThrow(() -> new IllegalArgumentException("매칭이 존재하지 않습니다."));
+                .orElseThrow(() -> new MatchException(ErrorCode.MATCH_NOT_FOUND, "매칭이 존재하지 않습니다."));
         if (!m.getMentorUserId().equals(actingUserId)) {
-            throw new IllegalStateException("이 매칭을 수락할 권한이 없습니다.");
+            throw new MatchException(ErrorCode.FORBIDDEN, "이 매칭을 수락할 권한이 없습니다.");
         }
         if (m.getStatus() == MatchStatus.ACCEPTED) return;
 
@@ -105,9 +107,9 @@ public class MatchService {
     @Transactional
     public void reject(String matchId, String actingUserId) {
         Match m = matchRepo.findById(matchId)
-                .orElseThrow(() -> new IllegalArgumentException("매칭이 존재하지 않습니다."));
+                .orElseThrow(() -> new MatchException(ErrorCode.MATCH_NOT_FOUND, "매칭이 존재하지 않습니다."));
         if (!m.getMentorUserId().equals(actingUserId)) {
-            throw new IllegalStateException("이 매칭을 거절할 권한이 없습니다.");
+            throw new MatchException(ErrorCode.FORBIDDEN, "이 매칭을 거절할 권한이 없습니다.");
         }
         if (m.getStatus() == MatchStatus.REJECTED) return;
         m.setStatus(MatchStatus.REJECTED);
@@ -120,21 +122,21 @@ public class MatchService {
                                    String mentorUserId,
                                    Instant now) {
         if (!existing.getMenteeUserId().equals(menteeUserId) || !existing.getMentorUserId().equals(mentorUserId)) {
-            throw new IllegalStateException("이미 존재하는 매칭입니다.");
+            throw new MatchException(ErrorCode.MATCH_ALREADY_EXISTS, "이미 존재하는 매칭입니다.");
         }
 
         if (existing.getStatus() == MatchStatus.ACCEPTED) {
-            throw new IllegalStateException("이미 수락된 매칭입니다.");
+            throw new MatchException(ErrorCode.MATCH_ALREADY_ACCEPTED, "이미 수락된 매칭입니다.");
         }
         if (existing.getStatus() == MatchStatus.PENDING) {
-            throw new IllegalStateException("이미 대기 중인 매칭입니다.");
+            throw new MatchException(ErrorCode.MATCH_ALREADY_PENDING, "이미 대기 중인 매칭입니다.");
         }
 
         Instant lastUpdated = existing.getUpdatedAt() != null ? existing.getUpdatedAt() : existing.getCreatedAt();
         if (lastUpdated != null) {
             Instant availableAt = lastUpdated.plus(RE_REQUEST_COOLDOWN);
             if (availableAt.isAfter(now)) {
-                throw new IllegalStateException("거절된 요청은 24시간이 지난 후 다시 신청할 수 있습니다.");
+                throw new MatchException(ErrorCode.MATCH_REQUEST_COOLDOWN, "거절된 요청은 24시간이 지난 후 다시 신청할 수 있습니다.");
             }
         }
 
