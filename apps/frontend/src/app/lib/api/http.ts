@@ -125,9 +125,11 @@ type AuthTokenBundle = {
   refreshTokenExpiresIn?: number;
 };
 
+type CookieStore = Awaited<ReturnType<typeof cookies>>;
+
 const ACCESS_COOKIE_MAX_AGE = 60 * 60; // 1시간
 
-function persistAccessCookie(jar: ReturnType<typeof cookies>, token: string) {
+function persistAccessCookie(jar: CookieStore, token: string) {
   jar.set({
     name: "AUTH_TOKEN",
     value: token,
@@ -139,11 +141,7 @@ function persistAccessCookie(jar: ReturnType<typeof cookies>, token: string) {
   });
 }
 
-function persistRefreshCookie(
-  jar: ReturnType<typeof cookies>,
-  refreshToken: string,
-  refreshTokenExpiresIn?: number
-) {
+function persistRefreshCookie(jar: CookieStore, refreshToken: string, refreshTokenExpiresIn?: number) {
   const maxAge =
     typeof refreshTokenExpiresIn === "number" && refreshTokenExpiresIn > 0
       ? refreshTokenExpiresIn
@@ -160,7 +158,7 @@ function persistRefreshCookie(
   });
 }
 
-async function refreshAuthToken(jar: ReturnType<typeof cookies>): Promise<string | null> {
+async function refreshAuthToken(jar: CookieStore): Promise<string | null> {
   const refreshToken = jar.get("REFRESH_TOKEN")?.value;
   if (!refreshToken) {
     return null;
@@ -188,7 +186,7 @@ async function refreshAuthToken(jar: ReturnType<typeof cookies>): Promise<string
 
 export async function callAPIWithAuth<T>(path: string, init?: RequestInit): Promise<T> {
   const jar = await cookies(); //
-  let token = jar.get("AUTH_TOKEN")?.value;
+  let token: string | null = jar.get("AUTH_TOKEN")?.value ?? null;
 
   if (!token) {
     token = await refreshAuthToken(jar);
@@ -202,9 +200,9 @@ export async function callAPIWithAuth<T>(path: string, init?: RequestInit): Prom
     return await request<T>(path, init, token);
   } catch (err) {
     if (err instanceof BackendError && err.status === 401) {
-      const refreshed = await refreshAuthToken(jar);
-      if (refreshed) {
-        return request<T>(path, init, refreshed);
+      const refreshedToken = await refreshAuthToken(jar);
+      if (refreshedToken) {
+        return request<T>(path, init, refreshedToken);
       }
     }
     throw err;
