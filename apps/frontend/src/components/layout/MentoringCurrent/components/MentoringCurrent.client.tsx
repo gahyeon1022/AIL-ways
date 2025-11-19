@@ -116,7 +116,7 @@ export default function MentoringCurrentClient({
 
   useEffect(() => {
     if (!error) return;
-    const id = window.setTimeout(() => setError(null), 3500);
+    const id = window.setTimeout(() => setError(null), 6000);
     setShowAdd(false); // hide mentor request modal when showing error banner
     return () => window.clearTimeout(id);
   }, [error]);
@@ -311,7 +311,7 @@ export default function MentoringCurrentClient({
           </div>
         )}
         {error && (
-          <div className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-100">
+          <div className="rounded-lg bg-red-600/80 px-4 py-2 text-sm text-white shadow-lg shadow-red-900/30">
             {error}
           </div>
         )}
