@@ -99,13 +99,6 @@ export default function SelfFeedbackModal({
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
-            onClick={onClose}
-            className="rounded-md px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            닫기
-          </button>
-          <button
-            type="button"
             onClick={handleSubmit}
             disabled={posting || !feedbackText.trim()}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
