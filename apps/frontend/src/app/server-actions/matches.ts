@@ -15,6 +15,7 @@ type ActionSuccess<T> = { ok: true; data: T };
 export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
 
 const UNKNOWN_ERROR_MESSAGE = "요청 처리 중 문제가 발생했습니다.";
+const GENERIC_NETWORK_ERRORS = new Set(["fetch failed", "network error"]);
 
 function toActionFailure(err: unknown, fallback = UNKNOWN_ERROR_MESSAGE): ActionFailure {
   if (err instanceof BackendError) {
@@ -22,10 +23,18 @@ function toActionFailure(err: unknown, fallback = UNKNOWN_ERROR_MESSAGE): Action
     return { ok: false, message, code: err.code };
   }
   if (err instanceof Error && err.message) {
-    return { ok: false, message: err.message };
+    const message = err.message.trim();
+    if (!message || GENERIC_NETWORK_ERRORS.has(message.toLowerCase())) {
+      return { ok: false, message: fallback };
+    }
+    return { ok: false, message };
   }
   if (typeof err === "string" && err.trim()) {
-    return { ok: false, message: err.trim() };
+    const trimmed = err.trim();
+    if (GENERIC_NETWORK_ERRORS.has(trimmed.toLowerCase())) {
+      return { ok: false, message: fallback };
+    }
+    return { ok: false, message: trimmed };
   }
   return { ok: false, message: fallback };
 }

@@ -10,7 +10,20 @@ function formatError(e: unknown, fallback: string) {
     return `[${e.status}] ${e.message}${e.code ? ` (${e.code})` : ""}`;
   }
   if (e instanceof Error) {
-    return e.message || fallback;
+    const message = e.message?.trim();
+    if (!message) return fallback;
+    const lowered = message.toLowerCase();
+    if (lowered === "fetch failed" || lowered === "network error") {
+      return fallback;
+    }
+    return message;
+  }
+  if (typeof e === "string" && e.trim()) {
+    const lowered = e.trim().toLowerCase();
+    if (lowered === "fetch failed" || lowered === "network error") {
+      return fallback;
+    }
+    return e.trim();
   }
   return fallback;
 }
