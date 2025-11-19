@@ -39,14 +39,24 @@ type PendingRequest = {
 const POLL_INTERVAL_MS = 15000;
 
 const errorMessage = (err: unknown) => {
-  if (typeof err === 'string') return err;
-  if (
-    err &&
-    typeof err === 'object' &&
-    'message' in err &&
-    typeof (err as { message?: unknown }).message === 'string'
-  ) {
-    return (err as { message: string }).message;
+  if (typeof err === 'string' && err.trim()) return err.trim();
+  if (err && typeof err === 'object') {
+    if ('message' in err && typeof (err as { message?: unknown }).message === 'string') {
+      const message = (err as { message: string }).message.trim();
+      if (message) return message;
+    }
+    if ('payload' in err) {
+      const payload = (err as { payload?: unknown }).payload;
+      if (payload && typeof payload === 'object' && 'error' in payload) {
+        const envelopeError = (payload as { error?: unknown }).error;
+        if (envelopeError && typeof envelopeError === 'object' && 'message' in envelopeError) {
+          const nestedMessage = (envelopeError as { message?: unknown }).message;
+          if (typeof nestedMessage === 'string' && nestedMessage.trim()) {
+            return nestedMessage.trim();
+          }
+        }
+      }
+    }
   }
   return '요청 처리 중 문제가 발생했습니다.';
 };
@@ -222,7 +232,6 @@ export default function MentoringCurrentClient({
     setProcessingMatchId(match.matchId);
     setError(null);
     try {
-<<<<<<< HEAD
       const result = await respondMatchAction(match.matchId, decision);
       if (!result.ok) {
         setError(result.message);
@@ -231,16 +240,6 @@ export default function MentoringCurrentClient({
       setPendingMatches(prev => prev.filter(item => item.matchId !== match.matchId));
       setFeedback(decision === "accept" ? "매칭을 수락했습니다." : "매칭을 거절했습니다.");
       if (decision === "accept") {
-=======
-      await respondMatchAction(match.matchId, decision);
-      setPendingMatches((prev) =>
-        prev.filter((item) => item.matchId !== match.matchId)
-      );
-      setFeedback(
-        decision === 'accept' ? '매칭을 수락했습니다.' : '매칭을 거절했습니다.'
-      );
-      if (decision === 'accept') {
->>>>>>> origin/fix/backend/match/error
         await refreshMentees();
       }
       setActiveMentor(null);

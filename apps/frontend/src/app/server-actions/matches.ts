@@ -10,15 +10,16 @@ type MatchDTO = {
   status: "PENDING" | "ACCEPTED" | "REJECTED";
 };
 
-type ActionFailure = { ok: false; message: string };
+type ActionFailure = { ok: false; message: string; code?: string };
 type ActionSuccess<T> = { ok: true; data: T };
 export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
 
 const UNKNOWN_ERROR_MESSAGE = "요청 처리 중 문제가 발생했습니다.";
 
 function toActionFailure(err: unknown, fallback = UNKNOWN_ERROR_MESSAGE): ActionFailure {
-  if (err instanceof BackendError && err.message) {
-    return { ok: false, message: err.message };
+  if (err instanceof BackendError) {
+    const message = err.message?.trim() || fallback;
+    return { ok: false, message, code: err.code };
   }
   if (err instanceof Error && err.message) {
     return { ok: false, message: err.message };
