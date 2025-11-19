@@ -52,6 +52,7 @@ type BoardCommentDto = {
   authorUserId?: string | null;
   content?: string | null;
   createdAt?: string | null;
+  deleted?: boolean | null;
   replies?: BoardCommentDto[] | null;
 };
 
@@ -135,6 +136,9 @@ export default function QnaUI({
       const rows: CommentView[] = [];
       const append = (items: BoardCommentDto[]) => {
         items.forEach(item => {
+          if (item.deleted) {
+            return;
+          }
           const id =
             item.commentId ??
             `comment-${globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
@@ -166,6 +170,7 @@ export default function QnaUI({
   const [commentInput, setCommentInput] = useState("");
   const [pending, setPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [completePending, setCompletePending] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -185,6 +190,35 @@ export default function QnaUI({
     setPending(true);
     setSubmitError(null);
     try {
+      if (editingCommentId) {
+        const res = await fetch(
+          `/api/boards/${encodeURIComponent(boardId)}/entries/${encodeURIComponent(entryId)}/comments/${encodeURIComponent(editingCommentId)}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ comment: trimmed }),
+          }
+        );
+        const payload = await res.json();
+        if (!res.ok || payload?.success === false) {
+          throw new Error(payload?.error?.message ?? "댓글을 수정할 수 없습니다.");
+        }
+        const entries = payload?.data?.data?.entries ?? payload?.data?.entries ?? payload?.entries ?? null;
+        if (entries) {
+          const updatedEntry = entries.find((entry: { entryId: string }) => entry.entryId === entryId);
+          if (updatedEntry?.comments) {
+            setCommentsState(mapComments(updatedEntry.comments));
+          }
+        } else {
+          setCommentsState(prev =>
+            prev.map(comment => (comment.commentId === editingCommentId ? { ...comment, content: trimmed } : comment))
+          );
+        }
+        setEditingCommentId(null);
+        setCommentInput("");
+        return;
+      }
+
       const res = await fetch(`/api/boards/${encodeURIComponent(boardId)}/entries/${encodeURIComponent(entryId)}/answer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -195,7 +229,8 @@ export default function QnaUI({
         throw new Error(payload?.error?.message ?? "답변을 저장할 수 없습니다.");
       }
 
-      const updatedEntry = payload?.data?.entries?.find((entry: { entryId: string }) => entry.entryId === entryId);
+      const entries = payload?.data?.data?.entries ?? payload?.data?.entries ?? payload?.entries ?? null;
+      const updatedEntry = entries?.find((entry: { entryId: string }) => entry.entryId === entryId);
       if (updatedEntry?.comments) {
         setCommentsState(mapComments(updatedEntry.comments));
       } else {
@@ -219,7 +254,7 @@ export default function QnaUI({
     } finally {
       setPending(false);
     }
-  }, [actorUserId, actorUserName, actorUserRole, boardId, canSubmit, commentInput, entryId, mapComments, resolveParticipant]);
+  }, [actorUserId, actorUserName, actorUserRole, boardId, canSubmit, commentInput, editingCommentId, entryId, mapComments, resolveParticipant]);
 
   const handleSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -240,6 +275,46 @@ export default function QnaUI({
   );
 
   const questionAuthorLabel = formatBadge(questionAuthorName ?? questionAuthorId, questionAuthorRole ?? "MENTEE");
+
+  const handleDeleteComment = useCallback(
+    async (commentId: string) => {
+      if (!boardId || !entryId) return;
+      if (typeof window !== "undefined" && !window.confirm("해당 댓글을 삭제하시겠습니까?")) {
+        return;
+      }
+      setPending(true);
+      setSubmitError(null);
+      try {
+        const res = await fetch(
+          `/api/boards/${encodeURIComponent(boardId)}/entries/${encodeURIComponent(entryId)}/comments/${encodeURIComponent(commentId)}`,
+          { method: "DELETE" }
+        );
+        const payload = await res.json();
+        if (!res.ok || payload?.success === false) {
+          throw new Error(payload?.error?.message ?? "댓글을 삭제할 수 없습니다.");
+        }
+        const entries = payload?.data?.data?.entries ?? payload?.data?.entries ?? payload?.entries ?? null;
+        if (entries) {
+          const updatedEntry = entries.find((entry: { entryId: string }) => entry.entryId === entryId);
+          if (updatedEntry?.comments) {
+            setCommentsState(mapComments(updatedEntry.comments));
+          }
+        } else {
+          setCommentsState(prev => prev.filter(comment => comment.commentId !== commentId));
+        }
+        if (editingCommentId === commentId) {
+          setEditingCommentId(null);
+          setCommentInput("");
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "댓글 삭제에 실패했습니다.";
+        setSubmitError(message);
+      } finally {
+        setPending(false);
+      }
+    },
+    [boardId, entryId, editingCommentId, mapComments]
+  );
 
   const handleComplete = useCallback(async () => {
     if (!boardId || !entryId || !canComplete) return;
@@ -275,18 +350,45 @@ export default function QnaUI({
 
       {completeError && <p className="text-sm text-red-500">{completeError}</p>}
 
-      {commentsState.map(comment => (
-        <ThinCard
-          key={comment.commentId}
-          title={formatBadge(comment.authorName, comment.authorRole ?? undefined)}
-          className="bg-white/90"
-        >
-          <div className="space-y-3">
-            <div className="text-sm text-gray-500">{comment.createdAt && <span>{formatDate(comment.createdAt)}</span>}</div>
-            <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-gray-800">{comment.content}</p>
-          </div>
-        </ThinCard>
-      ))}
+      <div className="space-y-2">
+        {commentsState.map(comment => (
+          <ThinCard
+            key={comment.commentId}
+            title={formatBadge(comment.authorName, comment.authorRole ?? undefined)}
+            className="bg-white/90"
+          >
+            <div className="space-y-3">
+              <div className="text-sm text-gray-500">{comment.createdAt && <span>{formatDate(comment.createdAt)}</span>}</div>
+              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-gray-800">{comment.content}</p>
+            <div className="flex min-h-[24px] justify-end gap-2 text-xs font-semibold">
+              {actorUserId && actorUserId === comment.authorUserId ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingCommentId(comment.commentId);
+                      setCommentInput(comment.content);
+                    }}
+                    className="text-blue-600 hover:underline disabled:text-blue-300"
+                    disabled={pending || isCompleted}
+                  >
+                    수정
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteComment(comment.commentId)}
+                    className="text-red-600 hover:underline disabled:text-red-300"
+                    disabled={pending || isCompleted}
+                  >
+                    삭제
+                  </button>
+                </>
+              ) : null}
+            </div>
+            </div>
+          </ThinCard>
+        ))}
+      </div>
 
     
 
@@ -307,7 +409,7 @@ export default function QnaUI({
             disabled={!canSubmit}
             className="rounded-full bg-gray-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
           >
-            {pending ? "등록 중..." : "등록"}
+            {pending ? "등록 중..." : editingCommentId ? "수정" : "등록"}
           </button>
         </div>
         {submitError && <p className="mt-2 text-sm text-red-500">{submitError}</p>}
