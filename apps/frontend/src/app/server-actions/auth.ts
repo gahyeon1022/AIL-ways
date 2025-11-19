@@ -39,7 +39,7 @@ type PersistOptions = {
 export async function loginAction(formData: FormData) {
   const userId = String(formData.get("userId") ?? "");
   const userPw = String(formData.get("userPw") ?? "");
-  if (!userId || !userPw) return { ok: false, msg: "아이디/비밀번호 입력 필요" };
+  if (!userId || !userPw) return { ok: false, msg: "아이디 또는 비밀번호 입력이 필요합니다." };
 
   try {
     const data = await callAPI<LoginDTO>(`/api/auth/local/login`, {
@@ -64,7 +64,7 @@ export async function loginAction(formData: FormData) {
         return { ok: false, msg: "존재하지 않는 아이디입니다." };
       }
       if (e.status === 401) {
-        return { ok: false, msg: "비밀번호가 틀렸습니다." };
+        return { ok: false, msg: "틀린 비밀번호입니다." };
       }
     }
     return { ok: false, msg: formatError(e, "로그인 실패") };
@@ -187,7 +187,7 @@ export async function sendEmailCodeAction(email: string) {
     });
     return { ok: true, ttl: data?.ttl, msg: "인증번호를 전송했습니다." };
   } catch (e: unknown) {
-    return { ok: false, msg: formatError(e, "요청 실패") };
+    return { ok: false, msg: formatError(e, "요청에 실패했습니다.") };
   }
 }
 
@@ -199,7 +199,7 @@ export async function verifyEmailCodeAction(email: string, code: string) {
       method: "POST",
       body: JSON.stringify({ email, code }),
     });
-    return { ok: true, msg: "인증 성공" };
+    return { ok: true, msg: "인증을 성공하였습니다." };
   } catch (e: unknown) {
     return { ok: false, msg: formatError(e, "오류") };
   }
@@ -237,9 +237,9 @@ export async function signupAction(formData: FormData) {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    return { ok: true, msg: "회원가입 성공" };
+    return { ok: true, msg: "회원가입에 성공하였습니다." };
   } catch (e: unknown) {
-    return { ok: false, msg: formatError(e, "회원가입 실패") };
+    return { ok: false, msg: formatError(e, "회원가입에 실패하였습니다.") };
   }
 }
 

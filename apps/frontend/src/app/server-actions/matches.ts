@@ -10,6 +10,25 @@ type MatchDTO = {
   status: "PENDING" | "ACCEPTED" | "REJECTED";
 };
 
+type ActionFailure = { ok: false; message: string };
+type ActionSuccess<T> = { ok: true; data: T };
+export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
+
+const UNKNOWN_ERROR_MESSAGE = "요청 처리 중 문제가 발생했습니다.";
+
+function toActionFailure(err: unknown, fallback = UNKNOWN_ERROR_MESSAGE): ActionFailure {
+  if (err instanceof BackendError && err.message) {
+    return { ok: false, message: err.message };
+  }
+  if (err instanceof Error && err.message) {
+    return { ok: false, message: err.message };
+  }
+  if (typeof err === "string" && err.trim()) {
+    return { ok: false, message: err.trim() };
+  }
+  return { ok: false, message: fallback };
+}
+
 export type MentorInfoDTO = {
   userId: string;
   userName: string;
@@ -22,18 +41,35 @@ export type MenteeInfoDTO = {
   matchId: string;
 };
 
-export async function requestMatchAction(mentorUserId: string): Promise<MatchDTO> {
-  if (!mentorUserId?.trim()) throw new Error("멘토 아이디가 필요합니다.");
-  return callAPIWithAuth<MatchDTO>("/api/matches/request", {
-    method: "POST",
-    body: JSON.stringify({ mentorUserId }),
-  });
+export async function requestMatchAction(mentorUserId: string): Promise<ActionResult<MatchDTO>> {
+  const trimmed = mentorUserId?.trim();
+  if (!trimmed) {
+    return { ok: false, message: "멘토 아이디가 필요합니다." };
+  }
+
+  try {
+    const match = await callAPIWithAuth<MatchDTO>("/api/matches/request", {
+      method: "POST",
+      body: JSON.stringify({ mentorUserId: trimmed }),
+    });
+    return { ok: true, data: match };
+  } catch (err) {
+    return toActionFailure(err);
+  }
 }
 
-export async function respondMatchAction(matchId: string, response: "accept" | "reject"): Promise<void> {
-  if (!matchId) throw new Error("matchId가 필요합니다.");
-  const path = `/api/matches/${encodeURIComponent(matchId)}/${response}`;
-  await callAPIWithAuth<void>(path, { method: "POST" });
+export async function respondMatchAction(matchId: string, response: "accept" | "reject"): Promise<ActionResult<void>> {
+  const trimmed = matchId?.trim();
+  if (!trimmed) {
+    return { ok: false, message: "matchId가 필요합니다." };
+  }
+  const path = `/api/matches/${encodeURIComponent(trimmed)}/${response}`;
+  try {
+    await callAPIWithAuth<void>(path, { method: "POST" });
+    return { ok: true, data: undefined };
+  } catch (err) {
+    return toActionFailure(err);
+  }
 }
 
 export async function fetchMentorsForMentee(): Promise<MentorInfoDTO[]> {

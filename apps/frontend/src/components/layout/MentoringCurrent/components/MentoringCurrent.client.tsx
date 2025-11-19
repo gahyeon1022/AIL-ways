@@ -74,6 +74,7 @@ export default function MentoringCurrentClient({
   useEffect(() => {
     if (!error) return;
     const id = window.setTimeout(() => setError(null), 3500);
+    setShowAdd(false); // hide mentor request modal when showing error banner
     return () => window.clearTimeout(id);
   }, [error]);
 
@@ -161,7 +162,12 @@ export default function MentoringCurrentClient({
     setIsSubmitting(true);
     setError(null);
     try {
-      const match = await requestMatchAction(trimmed);
+      const result = await requestMatchAction(trimmed);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      const match = result.data;
       setPendingRequests(prev => [...prev, { matchId: match.matchId, mentorUserId: trimmed, status: match.status }]);
       setFeedback("매칭 요청을 전송했습니다.");
       setCode("");
@@ -180,7 +186,11 @@ export default function MentoringCurrentClient({
     setProcessingMatchId(match.matchId);
     setError(null);
     try {
-      await respondMatchAction(match.matchId, decision);
+      const result = await respondMatchAction(match.matchId, decision);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
       setPendingMatches(prev => prev.filter(item => item.matchId !== match.matchId));
       setFeedback(decision === "accept" ? "매칭을 수락했습니다." : "매칭을 거절했습니다.");
       if (decision === "accept") {

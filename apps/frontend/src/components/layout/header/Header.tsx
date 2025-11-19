@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import clsx from "clsx";
@@ -8,10 +8,9 @@ import { Bell } from "lucide-react";
 
 import { Button } from "../../ui/Button";
 import UserMenu from "./components/ProfileDropdown";
-import NotificationDropdown from "./components/NotificationDropdown";
+// import NotificationDropdown from "./components/NotificationDropdown";
 
 export default function Header() {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const intent = searchParams?.get("intent");
@@ -76,10 +75,13 @@ export default function Header() {
         {/* Right side actions */}
         <div className="flex items-center justify-self-end gap-3">
           <div className="relative">
-            <Button variant="ghost" onClick={() => setOpen(v => !v)}>
+            <Button variant="ghost">
               <Bell className="h-6 w-6" />
             </Button>
-            <NotificationDropdown open={open} onClose={() => setOpen(false)} count={3} />
+            {/*
+              <NotificationDropdown open={open} onClose={() => setOpen(false)} count={3} />
+              종 아이콘은 유지하되 클릭 시 드롭다운은 당분간 사용하지 않기 위해 주석 처리
+            */}
           </div>
           <UserMenu />
         </div>
