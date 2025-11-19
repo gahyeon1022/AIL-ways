@@ -2,13 +2,14 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import CalendarModal from './components/CalendarModal';
-import ReportHeader from './components/ReportHeader'; // 1. 헤더 임포트
-import ReportSection from './components/ReportSection'; // 2. 섹션 임포트
+import CalendarModal from '@/app/learning-report/components/CalendarModal';
+import ReportHeader from '@/app/learning-report/components/ReportHeader';
+import ReportSection from '@/app/learning-report/components/ReportSection';
 import {
   getReportsByMatchId,
+  saveMentorFeedback,
   type Report,
   type ReportDistractionLog,
 } from '@/app/server-actions/sessionReport';
@@ -22,10 +23,9 @@ const isSameDay = (a: Date, b: Date) =>
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate();
 
-export default function LearingReportPage() {
+export default function MentorFeedbackPage() {
   const searchParams = useSearchParams();
   const matchId = searchParams.get('matchId') ?? '';
-  const role = searchParams.get('role');
   const dateParam = searchParams.get('date');
   const parsedDate = dateParam ? new Date(dateParam) : null;
   const hasValidDate =
@@ -41,6 +41,10 @@ export default function LearingReportPage() {
   const [preferLatest, setPreferLatest] = useState(hasValidDate);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const mentorFeedbackRef = useRef<HTMLTextAreaElement>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const hasReport = Boolean(report);
 
@@ -70,6 +74,24 @@ export default function LearingReportPage() {
     setOpen(false);
   };
 
+  const handleMentorFeedbackSubmit = async () => {
+    const feedback = mentorFeedbackRef.current?.value.trim() || '';
+    if (!report) return;
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      await saveMentorFeedback(report.id, feedback);
+      alert('멘토 피드백이 저장되었습니다.');
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      setSaveError('멘토 피드백 저장에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
 
@@ -85,7 +107,11 @@ export default function LearingReportPage() {
       try {
         const reports = await getReportsByMatchId(matchId);
         const sameDayReports = reports
-          .filter((item) => isSameDay(new Date(item.createdAt), selectedDate))
+          .filter(
+            (item) =>
+              isSameDay(new Date(item.createdAt), selectedDate) &&
+              !item.mentorFeedback // mentorFeedback이 없는 리포트만 필터링
+          )
           .sort(
             (a, b) =>
               new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
@@ -166,7 +192,6 @@ export default function LearingReportPage() {
 
   return (
     <main className="min-h-screen">
-      {/* === 1. ReportHeader 컴포넌트로 교체 === */}
       <ReportHeader
         dateStr={dateStr}
         onPrevClick={handlePrevDay}
@@ -207,11 +232,9 @@ export default function LearingReportPage() {
           </div>
         )}
 
-        {/* === 2. ReportSection 컴포넌트로 교체 === */}
         {hasReport && (
           <>
             <ReportSection title="학습 내용 요약">
-              {/* 자식(children)으로 기존 내부 컨텐츠를 그대로 넣어줍니다 */}
               <div className="w-full h-[150px] rounded-lg border bg-white/85 px-5 py-5">
                 {report?.aiSummary ?? 'AI 요약이 없습니다.'}
               </div>
@@ -258,25 +281,25 @@ export default function LearingReportPage() {
             </ReportSection>
 
             <ReportSection title="멘토 피드백">
-              <div className="w-full h-[150px] rounded-lg border bg-white/85">
-                <p
-                  className={`leading-relaxed px-5 py-5 ${
-                    !report?.mentorFeedback ? 'text-gray-500' : 'text-black'
-                  }`}
+              <textarea
+                className="w-full min-h-[100px] rounded-lg border bg-white/85 p-5 flex flex-col gap-3"
+                placeholder="멘토 피드백을 입력하세요."
+                ref={mentorFeedbackRef}
+              />
+              <div className="flex justify-end mt-3">
+                <button
+                  className="self-end px-4 py-2 rounded bg-emerald-500 text-white text-sm"
+                  onClick={handleMentorFeedbackSubmit}
+                  disabled={saving}
                 >
-                  {!report?.mentorFeedback
-                    ? role === 'MENTOR'
-                      ? '피드백을 입력해주세요.'
-                      : '피드백이 입력되지 않았습니다.'
-                    : `${report.mentorFeedback.comment}`}
-                </p>
+                  {saving ? '저장 중...' : '피드백 저장'}
+                </button>
               </div>
             </ReportSection>
           </>
         )}
       </section>
 
-      {/* 캘린더 모달은 페이지 레벨에 둡니다 */}
       <CalendarModal
         open={open}
         onClose={() => setOpen(false)}
