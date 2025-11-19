@@ -243,18 +243,32 @@ export default function MentoringCurrentClient({
     card: MatchCard,
     target: 'mentor' | 'mentee'
   ) => {
-    if (type === 'study') {
-      if (!card.matchId) {
-        setError('연결된 매칭 정보를 찾을 수 없습니다.');
+    if (card.matchId) {
+      if (type === 'study') {
+        router.push(
+          `/learning-report?matchId=${encodeURIComponent(card.matchId)}`
+        );
         return;
       }
-      router.push(
-        `/learning-report?matchId=${encodeURIComponent(card.matchId)}&role=${role}`
-      );
+
+      router.push(`/weekly-report?matchId=${encodeURIComponent(card.matchId)}`);
       return;
     }
 
-    router.push(`/weekly-report?${target}=${encodeURIComponent(card.id)}`);
+    setError('연결된 매칭 정보를 찾을 수 없습니다.');
+    return;
+    // if (type === 'study') {
+    //   if (!card.matchId) {
+    //     setError('연결된 매칭 정보를 찾을 수 없습니다.');
+    //     return;
+    //   }
+    //   router.push(
+    //     `/learning-report?matchId=${encodeURIComponent(card.matchId)}&role=${role}`
+    //   );
+    //   return;
+    // }
+
+    // router.push(`/weekly-report?${target}=${encodeURIComponent(card.id)}`);
   };
 
   const goBoard = (peerId: string) => {
