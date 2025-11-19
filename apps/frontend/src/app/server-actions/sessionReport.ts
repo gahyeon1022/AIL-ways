@@ -41,3 +41,22 @@ export async function getReportsByMatchId(matchId: string): Promise<Report[]> {
   );
 }
 
+export async function saveMentorFeedback(
+  reportId: string,
+  comment: string
+): Promise<void> {
+  const trimmedReportId = reportId?.trim();
+  const trimmedFeedback = comment?.trim();
+
+  if (!trimmedReportId) throw new Error('유효하지 않은 reportId');
+  if (!trimmedFeedback) throw new Error('유효하지 않은 feedback');
+
+  await callAPIWithAuth<void>(
+    `/api/reports/${encodeURIComponent(trimmedReportId)}/feedback`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comment: trimmedFeedback }),
+    }
+  );
+}
