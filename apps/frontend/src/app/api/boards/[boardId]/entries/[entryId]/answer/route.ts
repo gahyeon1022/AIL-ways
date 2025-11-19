@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { callAPIWithAuth } from "@/app/lib/api/http";
 
 export async function POST(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { boardId: string; entryId: string } }
 ) {
   const body = await request.text();
