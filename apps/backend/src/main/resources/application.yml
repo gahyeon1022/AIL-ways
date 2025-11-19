@@ -1,5 +1,6 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
   servlet: # 한글 깨짐 방지
     encoding:
       enabled: true
@@ -12,8 +13,8 @@ spring:
 
   data:
     mongodb:
-      #      uri: ${MONGO_DB_URI}
-      uri: mongodb://localhost:27017/alpha
+      uri: ${MONGO_DB_URI}
+      # uri: mongodb://localhost:27017/alpha
 
   mail:
     host: smtp.gmail.com
@@ -61,7 +62,7 @@ app:
 
 logging:
   level:
-    org.springframework.security: INFO
+    org.springframework.security: DEBUG
     org.springframework.web: INFO
     report.service: DEBUG
 
