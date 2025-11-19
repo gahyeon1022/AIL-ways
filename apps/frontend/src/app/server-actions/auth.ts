@@ -7,6 +7,9 @@ import { BE } from "@/app/lib/server/env";
 
 function formatError(e: unknown, fallback: string) {
   if (e instanceof BackendError) {
+    if (e.status === 401) {
+      return "인증이 필요합니다.";
+    }
     return `[${e.status}] ${e.message}${e.code ? ` (${e.code})` : ""}`;
   }
   if (e instanceof Error) {

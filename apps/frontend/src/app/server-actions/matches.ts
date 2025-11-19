@@ -19,6 +19,9 @@ const GENERIC_NETWORK_ERRORS = new Set(["fetch failed", "network error"]);
 
 function toActionFailure(err: unknown, fallback = UNKNOWN_ERROR_MESSAGE): ActionFailure {
   if (err instanceof BackendError) {
+    if (err.status === 401) {
+      return { ok: false, message: "인증이 필요합니다.", code: err.code };
+    }
     const message = err.message?.trim() || fallback;
     return { ok: false, message, code: err.code };
   }
