@@ -1,11 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { callAPIWithAuth } from "@/app/lib/api/http";
 
-export async function PATCH(
-  _request: NextRequest,
-  context: { params: { boardId: string; entryId: string } }
-) {
-  const { boardId, entryId } = context.params;
+type RouteHandlerContext = {
+  params: Promise<{
+    boardId: string;
+    entryId: string;
+  }>;
+};
+
+export async function PATCH(_request: Request, context: RouteHandlerContext) {
+  const { boardId, entryId } = await context.params;
   try {
     const result = await callAPIWithAuth(
       `/api/boards/${encodeURIComponent(boardId)}/entries/${encodeURIComponent(entryId)}/complete`,

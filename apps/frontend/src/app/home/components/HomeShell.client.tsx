@@ -26,10 +26,13 @@ export default function HomeShell({
   initialProfileComplete,
 }: Props) {
   const router = useRouter();
+  const normalizeRole = (role: unknown): "MENTOR" | "MENTEE" | null =>
+    role === "MENTOR" || role === "MENTEE" ? role : null;
+
   const [tokenReady, setTokenReady] = useState(hasAuthToken && !tokenParam);
   const [tokenPending, setTokenPending] = useState(false);
   const [consented, setConsented] = useState(initialConsented);
-  const [actorRole, setActorRole] = useState<"MENTOR" | "MENTEE" | null>(initialActorRole ?? null);
+  const [actorRole, setActorRole] = useState<"MENTOR" | "MENTEE" | null>(normalizeRole(initialActorRole));
   const [profileComplete, setProfileComplete] = useState<boolean | null>(
     typeof initialProfileComplete === "boolean" ? initialProfileComplete : null
   );
@@ -72,8 +75,9 @@ export default function HomeShell({
           if (hasConsents) {
             setConsented(true);
           }
-          if (profile?.role && profile.role !== actorRole) {
-            setActorRole(profile.role);
+          const nextRole = normalizeRole(profile?.role);
+          if (nextRole && nextRole !== actorRole) {
+            setActorRole(nextRole);
           }
           const completed = Boolean(profile?.role) && Array.isArray(profile?.interests) && profile.interests.length > 0;
           setProfileComplete(completed);
@@ -115,8 +119,9 @@ export default function HomeShell({
       try {
         const profile = await fetchMyProfileAction();
         if (!cancelled && profile) {
-          if (profile.role) {
-            setActorRole(profile.role);
+          const nextRole = normalizeRole(profile.role);
+          if (nextRole && nextRole !== actorRole) {
+            setActorRole(nextRole);
           }
           const completed = Boolean(profile.role) && Array.isArray(profile.interests) && profile.interests.length > 0;
           setProfileComplete(completed);

@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { callAPIWithAuth } from "@/app/lib/api/http";
 
-export async function POST(
-  request: Request,
-  { params }: { params: { boardId: string; entryId: string } }
-) {
+type RouteHandlerContext = {
+  params: Promise<{
+    boardId: string;
+    entryId: string;
+  }>;
+};
+
+export async function POST(request: Request, context: RouteHandlerContext) {
   const body = await request.text();
-  const { boardId, entryId } = params;
+  const { boardId, entryId } = await context.params;
 
   try {
     const result = await callAPIWithAuth(`/api/boards/${encodeURIComponent(boardId)}/entries/${encodeURIComponent(entryId)}/comments`, {
