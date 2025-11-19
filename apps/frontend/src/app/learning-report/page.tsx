@@ -188,7 +188,7 @@ export default function LearingReportPage() {
         }
       />
 
-      <section className="w-[100vw] min-h-[80vh] mx-auto space-y-6">
+      <section className="w-full min-h-[80vh] mx-auto space-y-6">
         {loading && (
           <div className="relative mx-auto h-[100px] w-[350px] max-w-[1040px] overflow-hidden rounded-2xl bg-[#d6d4e6] p-8 flex items-center justify-center text-center">
             데이터를 불러오는 중입니다.
