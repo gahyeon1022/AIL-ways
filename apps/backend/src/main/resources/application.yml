@@ -1,5 +1,6 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
   servlet: # 한글 깨짐 방지
     encoding:
       enabled: true
@@ -12,8 +13,8 @@ spring:
 
   data:
     mongodb:
-      #      uri: ${MONGO_DB_URI}
-      uri: mongodb://localhost:27017/alpha
+    uri: ${MONGO_DB_URI}
+#      uri: mongodb://localhost:27017/alpha
 
   mail:
     host: smtp.gmail.com
@@ -55,13 +56,17 @@ app:
     allowed-origins:
       - "http://localhost:3000"
       - "http://127.0.0.1:3000"
+      - "https://ail-ways.vercel.app"
     allowed-methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
     allowed-headers: "*"
     allow-credentials: true
 
+  frontend-url: "https://ail-ways.vercel.app"
+
+
 logging:
   level:
-    org.springframework.security: INFO
+    org.springframework.security: DEBUG
     org.springframework.web: INFO
     report.service: DEBUG
 

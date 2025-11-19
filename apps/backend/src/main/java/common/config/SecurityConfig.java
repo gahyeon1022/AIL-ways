@@ -6,6 +6,7 @@ import auth.local.service.RefreshTokenService;
 import auth.social.kakao.service.KakaoService;
 import common.security.jwt.JwtAuthenticationFilter;
 import common.security.jwt.JwtUtil;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,8 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RefreshTokenService refreshTokenService;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @Bean
 
@@ -92,8 +95,8 @@ public class SecurityConfig {
                                     : 0L;
 
                             String redirectBase = isNewUser
-                                    ? "http://localhost:3000/terms-consents"
-                                    : "http://localhost:3000/home";
+                                    ? frontendUrl + "/terms-consents"
+                                    : frontendUrl + "/home";
 
                             String redirectUrl = UriComponentsBuilder.fromHttpUrl(redirectBase)
                                     .queryParam("token", accessToken)

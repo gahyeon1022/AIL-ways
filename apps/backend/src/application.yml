@@ -55,9 +55,11 @@ app:
     allowed-origins:
       - "http://localhost:3000"
       - "http://127.0.0.1:3000"
+      - "https://ail-ways.vercel.app"
     allowed-methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS"
     allowed-headers: "*"
     allow-credentials: true
+  frontend-url: "http://localhost:3000"
 
 logging:
   level:
