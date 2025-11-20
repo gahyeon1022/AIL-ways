@@ -1,5 +1,6 @@
 import QnaBoardClient, { QnaEntry } from "./QnaBoardClient";
 import { callAPIWithAuth } from "@/app/lib/api/http";
+import { requireAuthSession } from "@/app/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,22 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
+function buildQueryString(params?: Record<string, string | string[] | undefined>) {
+  if (!params) return "";
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach(item => {
+        if (typeof item === "string") qs.append(key, item);
+      });
+    } else if (typeof value === "string") {
+      qs.set(key, value);
+    }
+  });
+  const result = qs.toString();
+  return result ? `?${result}` : "";
+}
+
 async function fetchProfile() {
   return callAPIWithAuth<UserProfile>("/api/users/me", { cache: "no-store" });
 }
@@ -61,6 +78,8 @@ export default async function QnaBoardPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : undefined;
   const peerUserId = normalizeParam(params?.peerId);
   let actorRole: "MENTOR" | "MENTEE" | null = null;
+
+  await requireAuthSession(`/qna-boards${buildQueryString(params)}`);
 
   if (!peerUserId) {
     return (

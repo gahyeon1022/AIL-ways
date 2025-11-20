@@ -10,9 +10,9 @@ export default function HomePage() {
         AIL-ways
       </h1>
 
-        <div className="relative -top-5 flex items-baseline justify-center text-2xl mt-3 text-white/90 gap-2">
+        <div className="relative -top-5 flex items-baseline justify-center text-2xl mt-3 text-white/90 gap-2 font-medium">
           <Image src="/wing_left.png" alt="왼쪽 날개" width={100} height={100} className="relative top-4 left-3"/>
-              학습에 날개를 달아보세요!
+              학습에 날개를 달아보세요
           <Image src="/wing_right.png" alt="오른쪽 날개" width={100} height={100} className="relative top-4 right-3" />
         </div>
 

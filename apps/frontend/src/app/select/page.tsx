@@ -10,11 +10,30 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
+function buildQueryString(params?: Record<string, string | string[] | undefined>) {
+  if (!params) return "";
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach(v => {
+        if (typeof v === "string") qs.append(key, v);
+      });
+    } else if (typeof value === "string") {
+      qs.set(key, value);
+    }
+  });
+  const result = qs.toString();
+  return result ? `?${result}` : "";
+}
+
 export default async function Page({ searchParams }: PageProps) {
   const jar = await cookies();
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const tokenQuery = resolvedSearchParams?.token;
   const tokenParam = Array.isArray(tokenQuery) ? tokenQuery[0] : tokenQuery || null;
+  const queryString = buildQueryString(resolvedSearchParams);
+  const currentPath = `/select${queryString}`;
+  const refreshToken = jar.get("REFRESH_TOKEN")?.value ?? null;
 
   if (tokenParam) {
     redirect(`/terms-consents?token=${encodeURIComponent(tokenParam)}`);
@@ -22,7 +41,9 @@ export default async function Page({ searchParams }: PageProps) {
 
   const token = jar.get("AUTH_TOKEN")?.value ?? null;
   if (!token) {
-    // 토큰이 없다 = 로그인 미완료 → 로그인 화면으로
+    if (refreshToken) {
+      redirect(`/refresh-session?next=${encodeURIComponent(currentPath)}`);
+    }
     redirect("/login");
   }
 

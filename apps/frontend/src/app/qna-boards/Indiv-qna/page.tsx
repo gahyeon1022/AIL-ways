@@ -1,5 +1,6 @@
 import QnaUI from "@/app/qna-boards/Indiv-qna/Qna";
 import { callAPIWithAuth } from "@/app/lib/api/http";
+import { requireAuthSession } from "@/app/lib/server/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,12 @@ export default async function QnaEntryPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : undefined;
   const boardId = normalize(params?.boardId);
   const entryId = normalize(params?.entryId);
+
+  const qs = new URLSearchParams();
+  if (boardId) qs.set("boardId", encodeURIComponent(boardId));
+  if (entryId) qs.set("entryId", encodeURIComponent(entryId));
+  const currentPath = `/qna-boards/Indiv-qna${qs.toString() ? `?${qs.toString()}` : ""}`;
+  await requireAuthSession(currentPath);
 
   if (!boardId || !entryId) {
     return (
