@@ -31,21 +31,15 @@ async function loadWeeklyReports(matchId: string): Promise<WeeklyReportPayload> 
   }
 }
 
-type SearchParams =
-  | Promise<Record<string, string | string[] | undefined>>
-  | Record<string, string | string[] | undefined>
-  | undefined;
-
-async function resolveSearchParams(params: SearchParams) {
-  return (await params) ?? {};
-}
-
 export default async function WeeklyReportPage({
   searchParams,
 }: {
-  searchParams?: SearchParams;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const resolved = await resolveSearchParams(searchParams);
+  const resolved = ((await searchParams) ?? {}) as Record<
+    string,
+    string | string[] | undefined
+  >;
   const matchIdParam = resolved.matchId;
   const matchId = Array.isArray(matchIdParam)
     ? matchIdParam[0] ?? ''
