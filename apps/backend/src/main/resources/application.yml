@@ -13,7 +13,8 @@ spring:
 
   data:
     mongodb:
-    uri: ${MONGO_DB_URI}
+      uri: ${MONGO_DB_URI}
+
 #      uri: mongodb://localhost:27017/alpha
 
   mail:
@@ -75,18 +76,19 @@ jwt:
 
 ai:
   api:
-    url: http://127.0.0.1:8001
-    key: ${OPENAI API KEY}
+    url: http://172.31.32.109:8001
+    key: ${OPENAI_API_KEY}
     timeout-seconds: 30
 
-  vision: #추가
+
+  vision:
     enabled: true
-    base-url: http://127.0.0.1:8000   # Vision AI 서버가 띄워진 주소/포트
+    base-url: http://172.31.32.109:8000   # Vision AI 서버가 띄워진 주소/포트
 
   weekly:
     api:
-      url: http://127.0.0.1:8001
-      key: ${OPENAI API KEY}
+      url: http://172.31.32.109:8001
+      key: ${OPENAI_API_KEY}
       timeout-seconds: 45
 
   #ai:
