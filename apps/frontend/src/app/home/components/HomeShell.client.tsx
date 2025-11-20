@@ -136,5 +136,21 @@ export default function HomeShell({
     };
   }, [tokenReady, actorRole, profileComplete]);
 
-  return <HomeLanding actorRole={actorRole} />;
+  const awaitingPostLoginSetup =
+    Boolean(tokenParam) &&
+    (!tokenReady || tokenPending || profileComplete === null || !consented);
+
+  return (
+    <>
+      <HomeLanding actorRole={actorRole} />
+      {awaitingPostLoginSetup && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 text-gray-700">
+            <span className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
+            <p className="text-sm font-medium">계정을 불러오고 있습니다…</p>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
