@@ -17,13 +17,6 @@ export default function LoginPage() {
           <Image src="/kakao_logo.png" alt="Kakao" width={23} height={23} className="absolute left-5 top-3.5"/>
           <span className="leading-none">카카오로 로그인</span>
         </Link>
- 
-        <Link
-          href="/auth/google" // /api/auth/signin/google 로 변경
-          className="relative item-center justify-center w-full rounded-xl px-4 py-3 font-medium bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 transition inline-block">
-          <Image src="/google_logo.png" alt="google" width={20} height={20} className="absolute left-5 top-4"/>
-          <span className="leading-none">구글로 로그인</span>
-        </Link>
 
         <button
           onClick={() => setOpen(true)}
