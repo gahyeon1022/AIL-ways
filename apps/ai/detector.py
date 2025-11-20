@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import mediapipe as mp
 import torch
-torch.serialization.add_safe_globals([__import__('ultralytics').nn.modules.block.DFL])
+# torch.serialization.add_safe_globals([__import__('ultralytics').nn.modules.block.DFL])
 from ultralytics import YOLO
 
 # --- YOLO 내부 클래스 ---
@@ -29,11 +29,11 @@ from torch.nn import (
     Upsample,
 )
 
-# ✅ PyTorch 2.6+ weights_only 대응
-torch.serialization.add_safe_globals([
-    DetectionModel, Conv, C2f, SPPF, Bottleneck, Detect, Concat,
-    Sequential, ModuleList, Conv2d, BatchNorm2d, SiLU, MaxPool2d, Upsample
-])
+# # ✅ PyTorch 2.6+ weights_only 대응
+# torch.serialization.add_safe_globals([
+#     DetectionModel, Conv, C2f, SPPF, Bottleneck, Detect, Concat,
+#     Sequential, ModuleList, Conv2d, BatchNorm2d, SiLU, MaxPool2d, Upsample
+# ])
 
 
 # ---------- 설정 데이터클래스 ----------
