@@ -1,12 +1,10 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import CalendarModal from './components/CalendarModal';
-import ReportHeader from './components/ReportHeader';
-import ReportSection from './components/ReportSection';
+import ReportHeader from './components/ReportHeader'; // 1. 헤더 임포트
+import ReportSection from './components/ReportSection'; // 2. 섹션 임포트
 import {
   getReportsByMatchId,
   type Report,
@@ -25,6 +23,7 @@ const isSameDay = (a: Date, b: Date) =>
 export default function LearningReportClient() {
   const searchParams = useSearchParams();
   const matchId = searchParams.get('matchId') ?? '';
+  const role = searchParams.get('role');
   const dateParam = searchParams.get('date');
   const parsedDate = dateParam ? new Date(dateParam) : null;
   const hasValidDate =
@@ -40,6 +39,8 @@ export default function LearningReportClient() {
   const [preferLatest, setPreferLatest] = useState(hasValidDate);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const hasReport = Boolean(report);
 
   const dateStr = `${selectedDate.getFullYear()}-${pad(
     selectedDate.getMonth() + 1
@@ -114,7 +115,7 @@ export default function LearningReportClient() {
     return () => {
       cancelled = true;
     };
-  }, [matchId, selectedDate, preferLatest]);
+  }, [matchId, selectedDate]);
 
   const activityCounts = useMemo(() => {
     if (!report)
@@ -155,40 +156,132 @@ export default function LearningReportClient() {
         } => !!log.selfFeedback
       )
       .map((log) => ({
-        ...log.selfFeedback!,
+        comment: log.selfFeedback!.comment,
+        createdAt: log.selfFeedback!.createdAt,
         activity: log.activity,
       }));
   }, [report]);
 
   return (
-    <main className="flex h-full w-full flex-col">
+    <main className="w-full min-h-[80vh] mx-auto space-y-6">
+      {/* === 1. ReportHeader 컴포넌트로 교체 === */}
       <ReportHeader
         dateStr={dateStr}
         onPrevClick={handlePrevDay}
         onNextClick={handleNextDay}
         onDateClick={() => setOpen(true)}
+        reportNav={
+          dailyReports.length > 0
+            ? {
+                index: dailyReportIndex,
+                total: dailyReports.length,
+                onPrev: () =>
+                  setDailyReportIndex((prev) => Math.max(prev - 1, 0)),
+                onNext: () =>
+                  setDailyReportIndex((prev) =>
+                    Math.min(prev + 1, dailyReports.length - 1)
+                  ),
+              }
+            : undefined
+        }
       />
 
+      <section className="w-full min-h-[80vh] mx-auto space-y-6">
+        {loading && (
+          <div className="relative mx-auto h-[100px] w-[350px] max-w-[1040px] overflow-hidden rounded-2xl bg-[#d6d4e6] p-8 flex items-center justify-center text-center">
+            데이터를 불러오는 중입니다.
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-center text-red-600">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && !hasReport && (
+          <div className="relative mx-auto h-[100px] w-[350px] max-w-[1040px] overflow-hidden rounded-2xl bg-[#d6d4e6] p-8 flex items-center justify-center text-center">
+            선택한 날짜에 대한 보고서가 없습니다.
+          </div>
+        )}
+
+        {/* === 2. ReportSection 컴포넌트로 교체 === */}
+        {hasReport && (
+          <>
+            <ReportSection title="학습 내용 요약">
+              {/* 자식(children)으로 기존 내부 컨텐츠를 그대로 넣어줍니다 */}
+              <div className="w-full h-[150px] rounded-lg border bg-white/85 px-5 py-5">
+                {report?.aiSummary ?? 'AI 요약이 없습니다.'}
+              </div>
+            </ReportSection>
+
+            <ReportSection title="학습 행동 분석">
+              <div className="w-full min-h-[150px] rounded-lg border bg-white/85 p-5 px-5 py-5">
+                {
+                  <ul className="space-y-3 text-sm text-gray-700">
+                    {activityCounts.map(({ activity, count }) => (
+                      <li
+                        key={activity}
+                        className="flex items-center justify-between rounded-md border border-gray-200 px-4 py-3"
+                      >
+                        <span className="font-medium">
+                          {activity} - {count}회
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                }
+              </div>
+            </ReportSection>
+
+            <ReportSection title="자기 피드백">
+              <div className="w-full min-h-[150px] rounded-lg border bg-white/85 p-5">
+                {
+                  <ul className="space-y-3 text-gray-700 text-sm">
+                    {selfFeedbacks.map((item) => (
+                      <li
+                        key={`${item.createdAt}-${item.activity}`}
+                        className="rounded-md border border-gray-200 p-3"
+                      >
+                        <p className="font-medium">{item.comment}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(item.createdAt).toLocaleString()} · 관련
+                          이벤트: {item.activity}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                }
+              </div>
+            </ReportSection>
+
+            <ReportSection title="멘토 피드백">
+              <div className="w-full h-[150px] rounded-lg border bg-white/85">
+                <p
+                  className={`leading-relaxed px-5 py-5 ${
+                    !report?.mentorFeedback ? 'text-gray-500' : 'text-black'
+                  }`}
+                >
+                  {!report?.mentorFeedback
+                    ? role === 'MENTOR'
+                      ? '피드백을 입력해주세요.'
+                      : '피드백이 입력되지 않았습니다.'
+                    : `${report.mentorFeedback.comment}`}
+                </p>
+              </div>
+            </ReportSection>
+          </>
+        )}
+      </section>
+
+      {/* 캘린더 모달은 페이지 레벨에 둡니다 */}
       <CalendarModal
         open={open}
         onClose={() => setOpen(false)}
         onPick={handleCalendarPick}
         initialMonth={selectedDate}
+        title="날짜 선택"
       />
-
-      <section className="flex-1 overflow-y-auto py-6">
-        <ReportSection
-          selectedDate={selectedDate}
-          report={report}
-          reports={dailyReports}
-          dailyReportIndex={dailyReportIndex}
-          onSelectIndex={setDailyReportIndex}
-          activityCounts={activityCounts}
-          selfFeedbacks={selfFeedbacks}
-          loading={loading}
-          error={error}
-        />
-      </section>
     </main>
   );
 }
