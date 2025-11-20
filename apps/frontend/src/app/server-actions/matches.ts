@@ -15,6 +15,10 @@ type ActionSuccess<T> = { ok: true; data: T };
 export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
 
 const UNKNOWN_ERROR_MESSAGE = "요청 처리 중 문제가 발생했습니다.";
+const MATCH_REQUEST_ERROR =
+  "멘토에게 매칭 요청을 보내지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.";
+const MATCH_RESPONSE_ERROR =
+  "매칭 요청에 대한 응답을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.";
 const GENERIC_NETWORK_ERRORS = new Set(["fetch failed", "network error"]);
 
 function toActionFailure(err: unknown, fallback = UNKNOWN_ERROR_MESSAGE): ActionFailure {
@@ -67,7 +71,7 @@ export async function requestMatchAction(mentorUserId: string): Promise<ActionRe
     });
     return { ok: true, data: match };
   } catch (err) {
-    return toActionFailure(err);
+    return toActionFailure(err, MATCH_REQUEST_ERROR);
   }
 }
 
@@ -81,7 +85,7 @@ export async function respondMatchAction(matchId: string, response: "accept" | "
     await callAPIWithAuth<void>(path, { method: "POST" });
     return { ok: true, data: undefined };
   } catch (err) {
-    return toActionFailure(err);
+    return toActionFailure(err, MATCH_RESPONSE_ERROR);
   }
 }
 

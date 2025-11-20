@@ -80,7 +80,11 @@ export default async function QnaEntryPage({ searchParams }: PageProps) {
 
   if (!boardId || !entryId) {
     return (
-      <QnaUI questionTitle="질문을 불러올 수 없어요" questionNote="멘토링 현황에서 다시 시도해 주세요." status="INCOMPLETE" />
+      <QnaUI
+        questionTitle="질문을 불러올 수 없어요"
+        questionNote="필요한 정보가 없습니다. 멘토링 현황에서 질문을 다시 선택해 주세요."
+        status="INCOMPLETE"
+      />
     );
   }
 
@@ -128,7 +132,11 @@ export default async function QnaEntryPage({ searchParams }: PageProps) {
   } catch (err) {
     console.error("[qna-board-entry] failed", err);
     return (
-      <QnaUI questionTitle="게시판을 불러올 수 없습니다" questionNote="잠시 후 다시 시도해 주세요." status="INCOMPLETE" />
+      <QnaUI
+        questionTitle="게시판을 불러올 수 없습니다"
+        questionNote="질문/답변 데이터를 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요."
+        status="INCOMPLETE"
+      />
     );
   }
 }

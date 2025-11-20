@@ -75,7 +75,10 @@ export default async function Page({ searchParams }: PageProps) {
     roleOptions = opts.roles ?? [];
     interestOptions = opts.interests ?? [];
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "옵션 조회 실패";
+    const message =
+      error instanceof Error
+        ? error.message
+        : '역할/관심사 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
     loadError = message;
   }
 

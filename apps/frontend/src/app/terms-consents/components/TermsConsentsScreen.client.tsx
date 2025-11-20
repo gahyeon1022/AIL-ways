@@ -119,7 +119,7 @@ export default function TermsConsentsScreen({
 
   const handleSubmit = async () => {
     if (!tokenReady) {
-      setSubmitError("로그인 상태를 확인하고 다시 시도해주세요.");
+    setSubmitError("약관 동의를 저장하려면 먼저 로그인 상태를 확인해 주세요.");
       return;
     }
     if (!allChecked) {
@@ -134,11 +134,16 @@ export default function TermsConsentsScreen({
         CONSENT_ITEMS.map(item => ({ type: item.type, agreed: true }))
       );
       if (!result.ok) {
-        throw new Error(result.msg || "동의 정보를 저장하지 못했습니다.");
+        throw new Error(
+          result.msg || "약관 동의를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."
+        );
       }
       setConsented(true);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "처리 중 오류가 발생했습니다.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "약관 동의 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.";
       setSubmitError(message);
     } finally {
       setSubmitPending(false);

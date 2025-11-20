@@ -20,12 +20,18 @@ export default function LocalLoginModal({ open, onClose }: Props) {
     try {
       const fd = new FormData(e.currentTarget);
       const r = await loginAction(fd);
-      if (!r?.ok) throw new Error(r?.msg ?? "로그인 실패");
+      if (!r?.ok)
+        throw new Error(
+          r?.msg ?? '로그인에 실패했습니다. 입력 정보를 확인하고 다시 시도해 주세요.'
+        );
 
       router.replace("/select");
       onClose();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "문제가 발생했습니다.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : '로그인 요청을 처리하지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.';
       alert(message);
     } finally {
       setLoading(false);

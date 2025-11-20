@@ -50,7 +50,10 @@ export default function Modal({
 
       onConfirm();
     } catch (e) {
-      console.error('모달 내 API 실패:', e);
+      console.error(
+        '학습 종료 절차 중 요청을 완료하지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.',
+        e
+      );
     } finally {
       setWorking(false);
     }

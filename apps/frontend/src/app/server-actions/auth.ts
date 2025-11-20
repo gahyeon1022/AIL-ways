@@ -189,7 +189,7 @@ export async function checkUserIdAction(userId: string) {
       msg: available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.",
     };
   } catch (e: unknown) {
-    return { ok: false, msg: formatError(e, "요청 실패") };
+    return { ok: false, msg: formatError(e, "아이디 중복 확인 중 문제가 발생했습니다.") };
   }
 }
 
@@ -203,7 +203,7 @@ export async function sendEmailCodeAction(email: string) {
     });
     return { ok: true, ttl: data?.ttl, msg: "인증번호를 전송했습니다." };
   } catch (e: unknown) {
-    return { ok: false, msg: formatError(e, "요청에 실패했습니다.") };
+    return { ok: false, msg: formatError(e, "인증번호를 전송하지 못했습니다. 잠시 후 다시 시도해 주세요.") };
   }
 }
 
@@ -217,7 +217,7 @@ export async function verifyEmailCodeAction(email: string, code: string) {
     });
     return { ok: true, msg: "인증을 성공하였습니다." };
   } catch (e: unknown) {
-    return { ok: false, msg: formatError(e, "오류") };
+    return { ok: false, msg: formatError(e, "인증번호 확인 중 문제가 발생했습니다.") };
   }
 }
 

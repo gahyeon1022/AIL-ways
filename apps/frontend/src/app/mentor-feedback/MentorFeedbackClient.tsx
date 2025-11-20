@@ -84,7 +84,9 @@ export default function MentorFeedbackClient() {
       window.location.reload();
     } catch (err) {
       console.error(err);
-      setSaveError('멘토 피드백 저장에 실패했습니다. 다시 시도해주세요.');
+      setSaveError(
+        '멘토 피드백을 저장하지 못했습니다. 네트워크를 확인하고 다시 시도해 주세요.'
+      );
     } finally {
       setSaving(false);
     }

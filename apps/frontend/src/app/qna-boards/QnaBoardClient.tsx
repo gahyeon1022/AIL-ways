@@ -51,7 +51,10 @@ export default function QnaBoardClient({
     return (
       <FallbackCard
         title="게시판을 불러올 수 없어요"
-        description={errorMessage || "잠시 후 다시 시도해 주세요."}
+        description={
+          errorMessage ||
+          '질문 목록을 불러오지 못했습니다. 네트워크 상태를 확인한 뒤 다시 시도해 주세요.'
+        }
       />
     );
   }

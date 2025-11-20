@@ -59,7 +59,7 @@ export default function SelfFeedbackModal({
       await submitSelfFeedback(sessionId, text);
       onSubmit(text); // 상위에서 모달 닫기 및 세션 재개 등 처리
     } catch (e) {
-      console.error('피드백 저장 실패:', e);
+      console.error('자가 피드백을 저장하지 못했습니다. 네트워크를 확인한 뒤 다시 시도해 주세요.', e);
     } finally {
       setPosting(false);
     }
@@ -97,13 +97,6 @@ export default function SelfFeedbackModal({
         />
 
         <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
-          >
-            닫기
-          </button>
           <button
             type="button"
             onClick={handleSubmit}

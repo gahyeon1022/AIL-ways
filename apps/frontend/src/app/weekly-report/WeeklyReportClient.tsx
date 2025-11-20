@@ -1,14 +1,6 @@
-/* eslint-disable import/first */
-// apps/frontend/src/app/weekly-report/WeeklyReportClient.tsx
-'use client';
-
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import type { ReactNode } from 'react';
 import ReportSection from '@/app/learning-report/components/ReportSection';
-import {
-  getWeeklyReportsByMatchId,
-  type WeeklyReport,
-} from '@/app/server-actions/weeklyReport';
+import type { WeeklyReport } from '@/app/types/weekly-report';
 
 const WEEK_ORDER = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -50,64 +42,29 @@ const prettifyAiSummary = (raw?: string | null) => {
   return raw;
 };
 
-export default function WeeklyReportClient() {
-  const params = useSearchParams();
-  const matchId = params.get('matchId') ?? '';
+const extractStudyHours = (report: WeeklyReport | null) => {
+  if (!report) return [];
+  return Object.entries(report.studyHours ?? {}).sort(
+    ([a], [b]) => WEEK_ORDER.indexOf(a) - WEEK_ORDER.indexOf(b)
+  );
+};
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [reports, setReports] = useState<WeeklyReport[]>([]);
+type WeeklyReportClientProps = {
+  reports: WeeklyReport[];
+  error: string | null;
+};
 
+export default function WeeklyReportClient({
+  reports,
+  error,
+}: WeeklyReportClientProps) {
   const currentReport = reports[0] ?? null;
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      if (!matchId) {
-        setError('matchId 쿼리 파라미터가 필요합니다.');
-        setReports([]);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-      try {
-        const list = await getWeeklyReportsByMatchId(matchId);
-        if (!cancelled) setReports(list);
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : '주간 리포트를 불러오지 못했습니다.'
-          );
-          setReports([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [matchId]);
-
-  const studyHours = useMemo(() => {
-    if (!currentReport) return [];
-    const entries = Object.entries(currentReport.studyHours ?? {});
-    return entries.sort(
-      ([a], [b]) => WEEK_ORDER.indexOf(a) - WEEK_ORDER.indexOf(b)
-    );
-  }, [currentReport]);
+  const studyHours = extractStudyHours(currentReport);
 
   const renderContent = (
-    render: (report: WeeklyReport) => React.ReactNode,
-    fallback: React.ReactNode
+    render: (report: WeeklyReport) => ReactNode,
+    fallback: ReactNode
   ) => {
-    if (loading) return <p className="text-gray-500">불러오는 중입니다…</p>;
     if (error) return <p className="text-red-600">{error}</p>;
     if (!currentReport) return fallback;
     return render(currentReport);

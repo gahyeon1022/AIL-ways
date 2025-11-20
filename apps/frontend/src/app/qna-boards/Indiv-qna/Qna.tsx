@@ -249,7 +249,10 @@ export default function QnaUI({
       }
       setCommentInput("");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "답변 등록에 실패했습니다.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : '답변을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';
       setSubmitError(message);
     } finally {
       setPending(false);
@@ -307,7 +310,10 @@ export default function QnaUI({
           setCommentInput("");
         }
       } catch (error) {
-        const message = error instanceof Error ? error.message : "댓글 삭제에 실패했습니다.";
+        const message =
+          error instanceof Error
+            ? error.message
+            : '댓글을 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.';
         setSubmitError(message);
       } finally {
         setPending(false);
@@ -327,12 +333,18 @@ export default function QnaUI({
       );
       const payload = await res.json();
       if (!res.ok || payload?.success === false) {
-        throw new Error(payload?.error?.message ?? "완료 처리에 실패했습니다.");
+        throw new Error(
+          payload?.error?.message ??
+            '질문을 완료 상태로 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.'
+        );
       }
       setStatusState("COMPLETED");
       setConfirmOpen(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "완료 처리에 실패했습니다.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : '질문 완료 상태 변경에 실패했습니다. 새로고침 후 다시 시도해 주세요.';
       setCompleteError(message);
     } finally {
       setCompletePending(false);

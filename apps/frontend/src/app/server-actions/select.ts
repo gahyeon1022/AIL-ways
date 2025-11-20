@@ -22,7 +22,7 @@ export async function fetchProfileOptionsAction(): Promise<ProfileOptionsDTO> {
   const raw = await res.text();
 
   if (!res.ok) {
-    throw new BackendError(res.status, raw?.slice(0, 200) || "요청 실패");
+    throw new BackendError(res.status, raw?.slice(0, 200) || "프로필 옵션을 불러오지 못했습니다.");
   }
 
   return parseEnvelopeBody<ProfileOptionsDTO>(raw, res.status);
@@ -45,7 +45,7 @@ export async function fetchMyProfileAction(): Promise<UserProfileDTO> { //role, 
   const raw = await res.text();
 
   if (!res.ok) {
-    throw new BackendError(res.status, raw?.slice(0, 200) || "요청 실패");
+    throw new BackendError(res.status, raw?.slice(0, 200) || "내 프로필 정보를 불러오지 못했습니다.");
   }
 
   return parseEnvelopeBody<UserProfileDTO>(raw, res.status);

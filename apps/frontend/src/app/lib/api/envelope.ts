@@ -45,11 +45,11 @@ export function extractEnvelopeError(error: EnvelopeErrorPayload): { message: st
   }
   if (error && typeof error === "object") {
     return {
-      message: error.message || "요청 실패",
+      message: error.message || "서버 처리 중 문제가 발생했습니다.",
       code: error.code,
     };
   }
-  return { message: "요청 실패", code: undefined };
+  return { message: "서버 처리 중 문제가 발생했습니다.", code: undefined };
 }
 
  //응답 본문을 JSON으로 바꾸고 규약에 맞으면 data 반환, 아니면 에러 던짐

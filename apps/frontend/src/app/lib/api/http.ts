@@ -90,7 +90,18 @@ function buildErrorFromBody(res: Response, raw: string): BackendError {
     }
   }
 
-  return new BackendError(res.status, `요청 실패 - ${preview(raw)}`, undefined, raw);
+  const hint =
+    res.status >= 500
+      ? '서버에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+      : '요청을 처리하지 못했습니다. 계속되면 관리자에게 문의해 주세요.';
+
+  const message = preview(raw);
+  return new BackendError(
+    res.status,
+    message ? `요청 실패: ${message}` : hint,
+    undefined,
+    raw
+  );
 }
 
 //fetch 결과를 받아 성공이면 데이터를 꺼내고 실패면 예외 던짐

@@ -43,7 +43,10 @@ export default function SelectAfterLogin({
       });
       router.replace("/home");
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "저장 중 오류가 발생했습니다.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : '역할/관심사 선택을 저장하지 못했습니다. 잠시 후 다시 저장해 주세요.';
       alert(message);
     } finally {
       setLoading(false);
