@@ -4,12 +4,6 @@ import type { WeeklyReport } from '@/app/types/weekly-report';
 
 export const dynamic = 'force-dynamic';
 
-type WeeklyReportPageProps = {
-  searchParams?: {
-    matchId?: string | string[];
-  };
-};
-
 type WeeklyReportPayload = {
   reports: WeeklyReport[];
   error: string | null;
@@ -37,10 +31,22 @@ async function loadWeeklyReports(matchId: string): Promise<WeeklyReportPayload> 
   }
 }
 
+type SearchParams =
+  | Promise<Record<string, string | string[] | undefined>>
+  | Record<string, string | string[] | undefined>
+  | undefined;
+
+async function resolveSearchParams(params: SearchParams) {
+  return (await params) ?? {};
+}
+
 export default async function WeeklyReportPage({
   searchParams,
-}: WeeklyReportPageProps) {
-  const matchIdParam = searchParams?.matchId;
+}: {
+  searchParams?: SearchParams;
+}) {
+  const resolved = await resolveSearchParams(searchParams);
+  const matchIdParam = resolved.matchId;
   const matchId = Array.isArray(matchIdParam)
     ? matchIdParam[0] ?? ''
     : matchIdParam ?? '';
