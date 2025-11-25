@@ -16,7 +16,7 @@ public class WeeklyReportScheduler {
     @Value("${report.weekly.scheduler-enabled:true}")
     private boolean schedulerEnabled;
 
-    @Scheduled(cron = "0 0 10 * * MON", zone = "${report.weekly.cron-zone:Asia/Seoul}")
+    @Scheduled(cron = "${report.weekly.cron:0 0 10 * * MON}", zone = "${report.weekly.cron-zone:Asia/Seoul}")
     public void runWeeklyGeneration() {
         if (!schedulerEnabled) {
             return;
