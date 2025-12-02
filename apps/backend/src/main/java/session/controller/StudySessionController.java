@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import session.domain.SelfFeedback;
 import session.domain.StudySession;
+import session.dto.DistractionDetectionRequest;
+import session.dto.StudyLogRequest;
 import session.dto.StudySessionDTO;
 import session.service.StudySessionService;
-import session.dto.DistractionDetectionRequest;
 import jakarta.validation.Valid;
 
 @Tag(name = "StudySession API", description = "학습 세션 관련 API")
@@ -71,9 +72,8 @@ public class StudySessionController {
     @Operation(summary = "학습 내용 입력", description = "세션 진행 동안 학습한 내용 입력")
     @PostMapping("/{sessionId}/studyLogs")
     public ApiResponse<StudySession> addStudyLog(@PathVariable String sessionId,
-                                                 @RequestParam String content,
-                                                 Authentication auth) {
-        return ApiResponse.ok(studyService.addStudyLog(sessionId, content));
+                                                 @RequestBody @Valid StudyLogRequest request) {
+        return ApiResponse.ok(studyService.addStudyLog(sessionId, request.content()));
     }
 
     @Operation(summary = "질문 내용 입력", description = "세션 진행 중 궁금한 내용을 입력")

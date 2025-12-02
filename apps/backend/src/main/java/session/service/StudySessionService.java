@@ -158,6 +158,9 @@ public class StudySessionService {
     // 학습 내용 추가
     @Transactional
     public StudySession addStudyLog(String sessionId, String content) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("학습 내용이 비어 있습니다.");
+        }
         StudySession session = studyRepo.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("세션 없음"));
         session.getStudyLogs().add(
