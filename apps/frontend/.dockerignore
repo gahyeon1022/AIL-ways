@@ -1,0 +1,8 @@
+node_modules/
+.next/
+coverage/
+.idea/
+.DS_Store
+.env.local
+.env.production
+npm-debug.log*

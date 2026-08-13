@@ -14,7 +14,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
-[서비스 바로가기](https://ail-ways.vercel.app) · [API 문서](#api-문서) · [로컬 실행](#로컬-실행)
+[서비스 바로가기](https://ail-ways.vercel.app) · [Docker 실행](#docker-compose로-실행) · [API 문서](#api-문서) · [로컬 실행](#docker-없이-로컬-실행)
 
 </div>
 
@@ -129,7 +129,100 @@ AIL-ways/
 
 Backend는 기능 단위 패키지(`auth`, `user`, `match`, `board`, `session`, `report`)로 나뉘며, 각 패키지는 역할에 따라 `controller`, `service`, `repository`, `domain`, `dto` 계층을 갖습니다.
 
-## 로컬 실행
+## Docker Compose로 실행
+
+Docker Compose는 Frontend, Backend, MongoDB, Redis, Vision AI, Summary AI를 하나의 네트워크에서 같이 실행합니다. 팀원은 Java·Node.js·Python·MongoDB·Redis를 각각 설치하지 않고 Docker Desktop만으로 동일한 개발 환경을 재현할 수 있습니다.
+
+### 1. 사전 준비
+
+- Docker Desktop
+- OpenAI API key
+- Gmail 앱 비밀번호와 Kakao REST API key는 해당 기능을 사용할 때 필요
+
+Apple Silicon Mac에서 Vision AI는 MediaPipe 호환성을 위해 `linux/amd64` 이미지로 실행되므로 첫 빌드가 오래 걸릴 수 있습니다.
+
+### 2. 환경변수 설정
+
+루트의 예제 파일을 복사한 뒤 각 값을 설정합니다.
+
+```bash
+cp .env.example .env
+```
+
+```dotenv
+OPENAI_API_KEY=your-openai-api-key
+JWT_PW=a-random-secret-at-least-32-bytes-long
+APP_PW=your-gmail-app-password
+KAKAO_PW=your-kakao-rest-api-key
+```
+
+`.env`는 Git에 커밋하지 않습니다. 메일과 Kakao 로그인을 테스트하지 않는 로컬 실습에서는 `APP_PW`, `KAKAO_PW`에 임시 문자열을 사용할 수 있지만 해당 기능은 동작하지 않습니다.
+
+### 3. 전체 서비스 실행
+
+```bash
+docker compose config --services
+docker compose up -d --build
+docker compose ps
+```
+
+정상 실행 시 6개 서비스가 `Up` 또는 `healthy`로 표시됩니다.
+
+| Service | Host URL / port | Container role |
+| --- | --- | --- |
+| Frontend | <http://localhost:3000> | Next.js UI와 Server Actions |
+| Backend | <http://localhost:8080> | Spring Boot REST API |
+| Vision AI | <http://localhost:8000/docs> | YOLOv8·MediaPipe 프레임 분석 |
+| Summary AI | <http://localhost:8001/docs> | OpenAI 학습 요약 |
+| MongoDB | `localhost:27017` | 영구 데이터 저장 |
+| Redis | `localhost:6379` | Refresh token·JWT 블랙리스트 |
+
+컨테이너 간 통신은 `localhost`가 아닌 Compose 서비스 이름을 사용합니다.
+
+```text
+frontend -> backend:8080
+backend  -> mongodb:27017
+backend  -> redis:6379
+backend  -> vision-ai:8000
+backend  -> summary-ai:8001
+```
+
+### 4. 상태와 로그 확인
+
+```bash
+docker compose ps
+docker compose logs --tail=100 backend
+docker compose logs --tail=100 frontend
+docker compose logs --tail=100 summary-ai
+docker compose logs --tail=100 vision-ai
+```
+
+### 5. 변경사항 반영
+
+현재 Dockerfile은 production build를 실행하므로 소스를 수정한 서비스는 이미지를 다시 빌드합니다.
+
+```bash
+# 특정 서비스만 재빌드
+docker compose up -d --build backend
+docker compose up -d --build frontend
+
+# 전체 재빌드
+docker compose up -d --build
+```
+
+### 6. 종료와 초기화
+
+```bash
+# 컨테이너를 종료하되 MongoDB·Redis 볼륨은 유지
+docker compose down
+
+# 볼륨까지 삭제하여 데이터 초기화
+docker compose down -v
+```
+
+> `docker compose down -v`는 로컬 MongoDB와 Redis 데이터를 삭제합니다.
+
+## Docker 없이 로컬 실행
 
 ### 1. 사전 준비
 

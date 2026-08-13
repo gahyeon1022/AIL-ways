@@ -1,0 +1,102 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: ailways-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: ailways-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  summary-ai:
+    build:
+      context: ./apps/ai
+      dockerfile: Dockerfile.summary
+    container_name: ailways-summary-ai
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY in the root .env file}
+    ports:
+      - "8001:8001"
+
+  vision-ai:
+    platform: linux/amd64
+    build:
+      context: ./apps/ai
+      dockerfile: Dockerfile.vision
+    container_name: ailways-vision-ai
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: ailways-backend
+    restart: unless-stopped
+    environment:
+      MONGO_DB_URI: mongodb://mongodb:27017/alpha
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+
+      JWT_PW: ${JWT_PW:?Set JWT_PW in the root .env file}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY in the root .env file}
+      APP_PW: ${APP_PW:?Set APP_PW in the root .env file}
+      KAKAO_PW: ${KAKAO_PW:?Set KAKAO_PW in the root .env file}
+
+      AI_API_URL: http://summary-ai:8001
+      AI_WEEKLY_API_URL: http://summary-ai:8001
+      AI_VISION_BASE_URL: http://vision-ai:8000
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      summary-ai:
+        condition: service_started
+      vision-ai:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+      args:
+        BE_URL: http://backend:8080
+        NEXT_PUBLIC_API_BASE: http://localhost:8080
+    container_name: ailways-frontend
+    restart: unless-stopped
+    environment:
+      BE_URL: http://backend:8080
+      ADMIN_BE_URL: http://backend:8080
+      NEXT_PUBLIC_API_BASE: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  mongodb-data:
+  redis-data:
